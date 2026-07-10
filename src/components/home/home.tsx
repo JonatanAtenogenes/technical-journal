@@ -1,9 +1,13 @@
 import Header from '@components/layout/header';
+import Hero from '@components/home/hero';
 
 export default function Home() {
   return (
-    <div>
+    <>
       <Header />
-    </div>
+      <main>
+        <Hero />
+      </main>
+    </>
   );
 }
