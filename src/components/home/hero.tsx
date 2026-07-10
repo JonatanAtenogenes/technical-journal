@@ -2,7 +2,7 @@ import TechStackRow from '@components/shared/tech-stack-row';
 
 export default function Hero() {
   return (
-    <section className="container mx-auto px-4 py-16 md:py-20">
+    <section className="container mx-auto px-4 pt-14 md:pt-16">
       <div className="max-w-3xl">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
           Technical Journal
