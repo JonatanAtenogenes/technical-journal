@@ -19,13 +19,31 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
-  // Placeholder content — just enough to confirm the route resolves
-  // correctly for a real project and 404s for an unknown one.
-  // Hero, table of contents, reading progress, and real content come next.
   return (
-    <main className="container mx-auto px-4 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">{project.title}</h1>
-      <p className="mt-4 text-muted-foreground">{project.description}</p>
+    <main>
+      {/* Hero: title, description, tags — built in the next step */}
+      <div className="border-b">
+        <div className="container mx-auto px-4 py-16 md:py-20">
+          {/* <CaseStudyHero project={project} /> */}
+        </div>
+      </div>
+
+      <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
+        {/* Main content — mock sections come in step 6, real MDX in step 8 */}
+        <article className="max-w-3xl">
+          {/* Case study content goes here */}
+        </article>
+
+        {/* Table of contents — always visible on desktop, hidden on mobile
+            (mobile gets the reading progress line instead, step 5) */}
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-20">{/* <TableOfContents /> */}</div>
+        </aside>
+      </div>
+
+      {/* Reading progress — desktop: fixed footer, mobile: thin line under header. Step 5. */}
+      {/* <ReadingProgress /> */}
     </main>
   );
 }
