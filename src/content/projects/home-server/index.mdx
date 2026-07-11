@@ -1,103 +1,209 @@
 # Overview
 
-The Home Server project documents the design and implementation of a self-hosted development environment built to centralize personal projects, services, and deployment workflows.
+The Home Server project documents the process of transforming a standard desktop computer into a centralized development platform capable of hosting applications, databases, monitoring tools, and internal services. Rather than relying exclusively on cloud providers, the objective was to build an environment that could support personal software development while also serving as a long-term learning platform for infrastructure, networking, Linux administration, and containerized deployments.
 
-Rather than depending exclusively on cloud platforms, the objective was to build an infrastructure capable of hosting applications, databases, monitoring tools, and development services inside a local network while remaining extensible for future expansion.
+Unlike many projects that focus on a single technology, this one evolved organically. Every improvement introduced new concepts, making the server itself a continuously growing project rather than a finished product. The infrastructure was intentionally designed to be flexible enough to support future experiments while remaining stable for daily development.
 
-The project evolved incrementally, with each iteration introducing new technologies and improving the overall architecture.
+This case study documents the architectural decisions, technologies, challenges, and lessons learned throughout the different stages of the project.
 
-# Project Goals
+## Objectives
 
-Several objectives guided the development of the Home Server.
+The project was created with several long-term objectives in mind.
 
-The infrastructure needed to provide a stable development environment while remaining lightweight enough to run on consumer hardware.
+Rather than simply hosting applications, the server should become a complete development ecosystem capable of supporting multiple independent projects simultaneously.
 
-Key goals included:
+Some of the primary goals included:
 
-- Self-hosting applications.
-- Centralizing project deployments.
-- Learning infrastructure concepts.
-- Experimenting with containerization.
+- Learning Linux administration through practical experience.
+- Deploying personal applications without external cloud providers.
+- Understanding networking fundamentals.
 - Building reusable deployment workflows.
+- Hosting multiple databases independently.
+- Experimenting with containerized architectures.
+- Creating a reliable environment for future software projects.
 
-The project also became a practical environment for learning Linux administration and networking.
+Each new feature added to the server was intended to solve a real development problem while introducing new technical concepts.
 
-# Infrastructure
+# Hardware
 
-The initial hardware consisted of a repurposed desktop computer.
+The project began with an older desktop computer that was no longer being used as a daily workstation. Instead of purchasing dedicated server hardware, existing components were reused in order to maximize learning while minimizing costs.
 
-Although modest compared to enterprise servers, it provided sufficient resources for multiple containers, databases, and development environments.
+Although the specifications were modest compared to enterprise environments, they were more than sufficient for hosting development services, Docker containers, databases, and internal tooling.
 
-The infrastructure includes:
+Running services locally also provided complete control over storage, operating system configuration, networking, and deployment processes.
 
-- Linux operating system
-- Docker
-- Docker Compose
-- Reverse proxy
-- SSH access
-- Local DNS
-- Static IP configuration
+## Hardware Selection
 
-Each service was isolated whenever possible to simplify maintenance and reduce dependencies.
+Several factors influenced the hardware selection.
+
+The server needed enough memory to run multiple containers simultaneously while maintaining low power consumption.
+
+Storage capacity was also important because Docker images, databases, backups, and source code repositories would gradually increase over time.
+
+Instead of optimizing purely for performance, the objective was to build an environment representative of what many developers already have available at home.
+
+This made the project easier to reproduce while encouraging experimentation without expensive hardware investments.
+
+# Operating System
+
+Choosing the operating system represented one of the first architectural decisions.
+
+Several Linux distributions were considered before selecting Fedora as the primary operating system for the server.
+
+The decision was motivated by package availability, modern tooling, excellent documentation, and familiarity gained during previous development projects.
+
+The operating system became the foundation upon which every other service was deployed.
+
+## System Configuration
+
+After installation, several configuration tasks were completed before deploying any applications.
+
+These included:
+
+- Creating administrative users.
+- Configuring SSH access.
+- Disabling unnecessary services.
+- Updating installed packages.
+- Configuring automatic updates.
+- Setting the system hostname.
+- Preparing storage locations for Docker volumes.
+
+Completing these steps early simplified future maintenance and reduced unnecessary configuration changes later in the project.
 
 # Networking
 
-Networking became one of the most educational aspects of the project.
+Networking became one of the most educational aspects of the entire project.
 
-Several concepts were explored during implementation:
+Unlike application development, infrastructure projects require understanding how devices communicate within a local network.
 
-- Static IP addresses
-- Local DNS resolution
-- Hostname configuration
-- SSH authentication
-- Port forwarding
-- Firewall configuration
+This project introduced practical experience with concepts that are often only discussed theoretically.
 
-Special attention was given to creating a development environment that could be accessed consistently across multiple devices within the local network.
+## Local Network
+
+The server was assigned a static IP address to ensure every service remained accessible regardless of router restarts.
+
+Hostname resolution was also configured so applications could connect using readable names instead of remembering numerical IP addresses.
+
+Additional networking topics explored included:
+
+- Local DNS.
+- Hostname configuration.
+- SSH connectivity.
+- Firewall management.
+- Network discovery.
+- Port forwarding.
+
+Each configuration change improved both usability and maintainability.
+
+## Remote Access
+
+Secure remote access was essential because the server would not always be connected to a monitor or keyboard.
+
+SSH became the primary management interface.
+
+Authentication was configured using SSH keys instead of passwords whenever possible.
+
+This not only improved security but also simplified development workflows by allowing quick administration directly from development machines.
 
 # Containerization
 
-Docker became the foundation of the deployment strategy.
+Containerization quickly became the preferred deployment strategy.
 
-Instead of installing software directly on the operating system, applications were isolated into containers.
+Rather than installing software directly on the operating system, every application was isolated inside Docker containers.
 
-This approach simplified upgrades, backups, and experimentation.
+This greatly simplified dependency management while reducing conflicts between unrelated projects.
 
-Multiple Compose files were created to organize related services and improve maintainability.
+The resulting infrastructure became significantly easier to maintain.
 
-# Development Workflow
+## Docker
 
-One of the main goals was reducing the friction between development and deployment.
+Docker provided several important advantages.
 
-Applications could be developed locally, committed to Git, and deployed inside the Home Server environment with minimal configuration changes.
+Applications could be started, stopped, rebuilt, and replaced without affecting the rest of the server.
 
-The workflow encouraged consistency across projects and made experimentation significantly easier.
+Each service maintained its own environment, dependencies, and configuration files.
 
-Over time, reusable deployment templates were created for different types of applications.
+Persistent data was stored using Docker volumes, ensuring containers could be recreated without losing information.
+
+## Docker Compose
+
+As additional services were introduced, Docker Compose became essential.
+
+Instead of manually managing containers one by one, complete application stacks could be described declaratively.
+
+A single command became sufficient to deploy multiple interconnected services simultaneously.
+
+Compose files also served as documentation, clearly describing how every service related to the rest of the infrastructure.
+
+# Development Environment
+
+One of the primary goals was reducing friction between writing software and deploying it.
+
+Applications developed on local workstations should be deployable with minimal configuration changes.
+
+This encouraged experimentation while maintaining consistency across projects.
+
+## Project Isolation
+
+Every application was designed to remain independent whenever possible.
+
+Different databases, containers, and storage volumes were separated according to project boundaries.
+
+This prevented changes in one application from accidentally affecting another.
+
+The same organizational principles were later applied to backups and deployment workflows.
+
+## Development Workflow
+
+The typical workflow gradually evolved into a repeatable process.
+
+A project would be developed locally, committed to Git, and then deployed inside the Home Server using Docker Compose.
+
+Configuration remained consistent across environments, reducing deployment errors while making experimentation significantly easier.
+
+# Monitoring
+
+As the number of deployed services increased, monitoring became increasingly important.
+
+Rather than waiting for problems to occur, the objective shifted toward observing resource usage and application health continuously.
+
+Monitoring also provided valuable insight into how different services behaved under varying workloads.
+
+## Resource Usage
+
+CPU utilization, memory consumption, storage growth, and container status became useful indicators of infrastructure health.
+
+Tracking these metrics helped identify inefficient services while also improving capacity planning for future expansions.
+
+Monitoring transformed the server from a collection of independent containers into a coherent infrastructure platform.
 
 # Lessons Learned
 
-Although the technical implementation was valuable, the most important outcomes were the architectural lessons learned throughout the project.
+Although the technical implementation was valuable, the most significant outcome was the practical understanding gained throughout the project.
 
-Working with infrastructure introduced practical considerations rarely encountered during application development alone.
+Concepts such as networking, Linux administration, storage management, process isolation, container orchestration, and deployment automation became considerably clearer after implementing them in a real environment.
 
-Topics such as networking, service discovery, storage management, and deployment automation became significantly clearer after implementing them in a real environment.
+The project also demonstrated the importance of incremental development.
 
-The project continues to evolve, serving both as a development platform and as an ongoing learning experience.
+Rather than attempting to build a perfect infrastructure from the beginning, the server evolved gradually as new requirements appeared.
 
-# Future Improvements
+Each iteration improved both the architecture and the understanding of the technologies involved.
 
-Several improvements are planned for future iterations.
+## Future Improvements
 
-Potential additions include:
+The Home Server remains an active project.
 
-- Automated deployments.
+Several improvements are planned for future iterations, including:
+
+- Automated deployment pipelines.
 - Continuous Integration.
 - Reverse proxy improvements.
+- HTTPS certificates for internal services.
+- Centralized authentication.
+- Automated backup strategies.
 - Monitoring dashboards.
-- Centralized logging.
-- Backup automation.
-- High availability experiments.
-- Container orchestration.
+- Log aggregation.
+- Container orchestration experiments.
+- Infrastructure as Code.
 
-Because the project is intentionally iterative, each improvement will become its own documented case study describing both the implementation and the reasoning behind the architectural decisions.
+Each future enhancement will become its own documented case study, continuing the philosophy of treating the Home Server not as a finished product, but as a long-term engineering journal documenting architectural decisions, implementation details, challenges, and lessons learned over time.

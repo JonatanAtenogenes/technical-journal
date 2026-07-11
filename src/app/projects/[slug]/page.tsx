@@ -1,37 +1,17 @@
 import CaseStudyHeader from '@/components/case-study/case-study-header';
 import CaseStudyHero from '@/components/case-study/case-study-hero';
-import TableOfContents, {
-  TableOfContentsItem,
-} from '@/components/case-study/table-of-contents';
+import TableOfContents from '@/components/case-study/table-of-contents';
 import { getProjectContent } from '@/lib/get-project-content';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
+import { getTableOfContents } from '@/lib/get-table-of-contents';
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
 };
-
-// Temporary mock — replaced in a later step by headings generated
-// automatically from the MDX content.
-const mockTableOfContents: TableOfContentsItem[] = [
-  { id: 'introduction', title: 'Introduction' },
-  { id: 'business-understanding', title: 'Business Understanding' },
-  {
-    id: 'data-understanding',
-    title: 'Data Understanding',
-    subitems: [
-      { id: 'dataset-overview', title: 'Dataset Overview' },
-      { id: 'data-quality', title: 'Data Quality' },
-    ],
-  },
-  { id: 'data-preparation', title: 'Data Preparation' },
-  { id: 'exploratory-data-analysis', title: 'Exploratory Data Analysis' },
-  { id: 'key-findings', title: 'Key Findings' },
-  { id: 'conclusions', title: 'Conclusions' },
-];
 
 // Pre-renders one static route per registered project at build time —
 // consistent with the "fully static" architecture from the project vision.
@@ -53,6 +33,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
+  const tableOfContents = getTableOfContents(content);
+
   return (
     <>
       <CaseStudyHeader />
@@ -65,8 +47,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
           <aside className="lg:order-last">
-            <div className="lg:sticky lg:top-20">
-              <TableOfContents items={mockTableOfContents} />
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+              <TableOfContents items={tableOfContents} />
             </div>
           </aside>
 
