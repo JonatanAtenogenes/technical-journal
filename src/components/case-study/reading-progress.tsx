@@ -68,6 +68,15 @@ export default function ReadingProgress({ items }: ReadingProgressProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, [sections]);
 
+  // Single source of truth for hash syncing — fires whenever activeId
+  // changes, whether that change came from scrolling or from picking an
+  // item in the dropdown below.
+  useEffect(() => {
+    if (activeId) {
+      window.history.replaceState(null, '', `#${activeId}`);
+    }
+  }, [activeId]);
+
   const activeTitle =
     sections.find((section) => section.id === activeId)?.title ?? '';
 
@@ -86,9 +95,17 @@ export default function ReadingProgress({ items }: ReadingProgressProps) {
             <ChevronUpIcon className="size-3" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" side="top">
-            {sections.map((sections) => (
-              <DropdownMenuItem key={sections.id}>
-                <a href={`#${sections.id}`}>{sections.id}</a>
+            {sections.map((section) => (
+              <DropdownMenuItem
+                key={section.id}
+                onClick={() => {
+                  document.getElementById(section.id)?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  });
+                }}
+              >
+                {section.title}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

@@ -1,0 +1,173 @@
+# Overview
+
+Technical Journal is a documentation platform built to showcase software engineering, infrastructure, and data projects as technical case studies.
+
+Instead of presenting projects as isolated demos or GitHub repositories, every entry documents the complete engineering process: the original problem, business context, architecture, implementation, technical decisions, trade-offs, iterations, and final outcomes.
+
+The goal is to bridge the gap between a traditional portfolio and real engineering work. Rather than asking _"What have you built?"_, the platform answers _"How did you build it, and why?"_
+
+Every project is treated as living documentation that can evolve over time as new features, improvements, and lessons are added.
+
+# Why Build This
+
+Traditional portfolios are excellent at demonstrating technologies, but they rarely communicate the reasoning behind a project.
+
+A recruiter may see React, .NET, SQL, Docker, or Python, yet never understand how those technologies were selected, what problems they solved, or what compromises were made during development.
+
+Technical Journal was created to document those decisions.
+
+The portfolio acts as the entry point, providing a concise overview of each project, while Technical Journal serves as the complete technical documentation behind it.
+
+This separation allows the portfolio to remain clean and approachable without sacrificing the depth expected from engineering case studies.
+
+# Design Principles
+
+Several principles guide the design of the platform.
+
+- Documentation first.
+- Content should remain independent from presentation.
+- Every project should follow a consistent structure.
+- Writing should require as little boilerplate as possible.
+- The platform should remain completely static.
+- New projects should require minimal configuration.
+- Reading long technical articles should remain comfortable on both desktop and mobile.
+
+Rather than functioning as a blogging platform, the application is intentionally designed as a technical journal.
+
+# Content Model
+
+Each project is stored inside its own directory under the content folder.
+
+Every project is divided into two files with clearly separated responsibilities.
+
+- `metadata.ts` stores structured information used throughout the application, including titles, descriptions, tags, technologies, publication status, cover images, and future SEO metadata.
+- `index.mdx` contains the actual article. It focuses exclusively on technical writing without including presentation logic, routing, or navigation concerns.
+
+This separation keeps the content model predictable while allowing the interface to evolve independently from the documentation itself.
+
+# Architecture
+
+The application is built with Next.js using the App Router and React Server Components.
+
+Project content is read directly from the filesystem instead of relying on external APIs or a content management system.
+
+MDX files are rendered on demand, allowing documentation to remain close to the source code while preserving a clean authoring experience.
+
+Because the project is entirely static, deployment remains simple while maintaining excellent performance.
+
+# User Experience
+
+The reading experience is one of the central design goals of the project.
+
+Each case study is structured around several interface elements designed to improve navigation through long technical articles.
+
+These include:
+
+- A dedicated project hero summarizing the case study.
+- Automatically generated navigation.
+- Reading progress indicators.
+- Sticky navigation on desktop.
+- Responsive layouts designed mobile-first.
+- Technology tags.
+- Light and dark themes.
+
+Rather than overwhelming readers with large blocks of text, the interface continuously provides visual context regarding their current position inside the document.
+
+# Development Philosophy
+
+The platform follows an iterative development process.
+
+Instead of designing every feature before implementation, the project evolves through small, independently valuable iterations.
+
+Each iteration begins with a minimum viable implementation before introducing additional abstractions or automation.
+
+This approach reduces unnecessary complexity while allowing architectural decisions to emerge naturally from real usage.
+
+## Building the Interface First
+
+Before introducing MDX, metadata, or dynamic content loading, the complete user interface was built using mock data.
+
+This made it possible to validate spacing, navigation, responsive layouts, typography, and reading flow without introducing additional complexity.
+
+Once the interface proved stable, the underlying data model could be designed around actual requirements instead of assumptions.
+
+## Introducing Real Content
+
+After validating the layout, the application began reading real project metadata and MDX files.
+
+The existing interface required almost no structural changes because the data model had already been shaped by the earlier prototypes.
+
+This incremental transition significantly simplified the implementation.
+
+# Technical Decisions
+
+## Static Content Instead of a CMS
+
+The platform intentionally avoids databases and content management systems.
+
+Every article lives alongside the project's source code, making version control, reviews, and long-term maintenance considerably simpler.
+
+Documentation evolves through Git in the same way as application code.
+
+## Automatic Table of Contents
+
+Navigation is generated directly from the headings inside each MDX document.
+
+Rather than maintaining a separate navigation structure, the application parses the document, extracts every heading, generates matching anchor IDs, and builds the table of contents automatically.
+
+This guarantees that navigation always reflects the actual content.
+
+## Progressive Enhancement
+
+Automation is only introduced after a manual workflow has proven valuable.
+
+Rather than designing highly configurable systems from the beginning, features are first implemented in their simplest useful form before being generalized.
+
+This philosophy influences both the codebase and the documentation workflow.
+
+# Current Features
+
+The current implementation already supports:
+
+- Static project discovery.
+- MDX-based documentation.
+- Metadata-driven project pages.
+- Automatically generated table of contents.
+- Reading progress indicators.
+- Responsive layouts.
+- Light and dark themes.
+- Mobile-first navigation.
+- Technology tags.
+- Individual project pages.
+
+The application already functions as a complete documentation platform while remaining intentionally lightweight.
+
+# Future Improvements
+
+Several improvements are planned as the project grows.
+
+These include:
+
+- Automatic project registration.
+- Search functionality.
+- Project series.
+- Internationalization.
+- Estimated reading time.
+- Related case studies.
+- Code block enhancements.
+- Image galleries.
+- Diagrams.
+- SEO improvements.
+- RSS support.
+
+Every new feature will follow the same iterative development philosophy adopted throughout the project.
+
+# Lessons Learned
+
+One of the most valuable outcomes of the project has been validating architecture through implementation rather than speculation.
+
+Building the interface before the content, and the content before the automation, produced a significantly cleaner data model than attempting to design every abstraction upfront.
+
+The project also reinforced the importance of separating structured metadata from narrative documentation.
+
+By treating technical writing as a first-class component of software engineering rather than an afterthought, Technical Journal becomes more than a portfolio extension—it becomes a long-term engineering notebook documenting not only what was built, but how engineering decisions evolved over time.
