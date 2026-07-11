@@ -1,7 +1,7 @@
 import { Project } from '@/lib/types/project';
-import { AspectRatio } from '@components/ui/aspect-ratio';
-import { Badge } from '@components/ui/badge';
-import { Button } from '@components/ui/button';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';

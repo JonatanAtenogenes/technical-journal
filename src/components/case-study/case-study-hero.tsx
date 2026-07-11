@@ -1,6 +1,6 @@
 import { formatProjectYears, projectStatusLabels } from '@/lib/project-status';
 import { Project } from '@/lib/types/project';
-import { Badge } from '@components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 export default function CaseStudyHero({ project }: { project: Project }) {
   return (

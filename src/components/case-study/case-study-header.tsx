@@ -1,6 +1,6 @@
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
-import ThemeToggle from '../shared/theme-toggle';
+import ThemeToggle from '@/components/shared/theme-toggle';
 
 export default function CaseStudyHeader() {
   return (

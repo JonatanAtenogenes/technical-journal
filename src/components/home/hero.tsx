@@ -1,4 +1,4 @@
-import TechStackRow from '@components/shared/tech-stack-row';
+import TechStackRow from '@/components/shared/tech-stack-row';
 
 export default function Hero() {
   return (

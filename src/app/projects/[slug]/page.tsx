@@ -1,5 +1,5 @@
-import CaseStudyHeader from '@components/case-study/case-study-header';
-import CaseStudyHero from '@components/case-study/case-study-hero';
+import CaseStudyHeader from '@/components/case-study/case-study-header';
+import CaseStudyHero from '@/components/case-study/case-study-hero';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 

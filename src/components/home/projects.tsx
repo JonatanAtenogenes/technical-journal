@@ -1,5 +1,5 @@
 import { getProjects } from '@/lib/projects';
-import ProjectCard from '@components/home/project-card';
+import ProjectCard from '@/components/home/project-card';
 
 export default function Projects() {
   const projects = getProjects();
