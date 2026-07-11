@@ -1,0 +1,158 @@
+# Introduction
+
+Computer networking was one of the first areas where I realized that writing
+software could directly improve the way I learned. During networking courses,
+manual IPv4 subnetting required solving the same calculations repeatedly,
+making it difficult to distinguish conceptual mistakes from arithmetic ones.
+
+Rather than replacing the learning process, I built a small web application
+that could validate my answers. Every subnet was still calculated manually;
+the application simply confirmed whether the result was correct before moving
+to the next exercise.
+
+The project became both a subnetting calculator and one of my earliest
+experiences building complete web applications with vanilla JavaScript.
+
+# Project Goals
+
+The application was designed with three objectives in mind:
+
+- Verify manual subnetting exercises.
+- Practice JavaScript without relying on frameworks.
+- Learn how responsive web applications are structured.
+
+Although simple, these goals made the project an opportunity to combine
+networking concepts with frontend development.
+
+# Understanding the Problem
+
+## Manual Subnetting
+
+Subnetting is a fundamental networking skill that requires understanding IP
+addressing, binary arithmetic, subnet masks, broadcast addresses, and host
+ranges.
+
+Learning these concepts means solving dozens of exercises by hand.
+
+Unfortunately, when a calculation is wrong, it is often difficult to identify
+which intermediate step caused the mistake.
+
+## Why a Validation Tool?
+
+Most available subnetting calculators immediately provide the answer.
+
+While useful, they do little to reinforce the reasoning behind the solution.
+
+The objective of this project was different.
+
+Instead of replacing manual work, it was intended to verify completed
+calculations and provide immediate feedback.
+
+# Application Features
+
+## Complete IPv4 Calculations
+
+The calculator receives an IPv4 address together with the required number of
+hosts and generates the complete subnet information.
+
+It calculates:
+
+- Network ID
+- Broadcast address
+- First usable host
+- Last usable host
+- Subnet mask
+- Wildcard mask
+- CIDR prefix
+- Number of usable hosts
+
+## Fast Iteration
+
+The interface was intentionally lightweight so multiple exercises could be
+validated quickly without navigating through several pages.
+
+# Architecture
+
+## Vanilla JavaScript
+
+The project was intentionally developed without frameworks.
+
+Using plain JavaScript made it easier to understand:
+
+- DOM manipulation
+- Event handling
+- Form validation
+- Modular functions
+- Separation between business logic and presentation
+
+## Responsive Layout
+
+Although the application was relatively small, it became an opportunity to
+practice responsive design principles.
+
+The interface adapts to desktop and mobile devices while maintaining the same
+workflow.
+
+# Testing
+
+## Unit Tests
+
+One objective of the project was ensuring the calculation logic remained
+correct as the application evolved.
+
+Core subnetting functions were validated using unit tests covering common
+network configurations and edge cases.
+
+Although the test suite was intentionally small, it introduced the practice of
+testing pure functions independently from the user interface.
+
+# Challenges
+
+## Binary Arithmetic
+
+Translating subnetting rules into deterministic JavaScript functions required
+carefully handling binary operations and network boundaries.
+
+## User Input Validation
+
+The calculator also needed to reject invalid IPv4 addresses and unsupported
+host values before attempting any calculations.
+
+# Results
+
+The application became part of my networking study workflow.
+
+Instead of spending time checking calculations manually, I could immediately
+verify each exercise and focus on understanding why mistakes happened.
+
+Beyond networking, the project strengthened my understanding of frontend
+development fundamentals before moving to larger frameworks such as React.
+
+# Lessons Learned
+
+## Software Can Support Learning
+
+One of the biggest takeaways from this project was discovering that software
+does not always need to solve a business problem.
+
+Sometimes the best project is one that improves the way you learn.
+
+## Strong Fundamentals Matter
+
+Working without frameworks forced me to understand how browsers work,
+how JavaScript manipulates the DOM, and how responsive layouts are built from
+first principles.
+
+Those fundamentals later made learning modern frontend frameworks much easier.
+
+# Future Improvements
+
+Possible future improvements include:
+
+- IPv6 support.
+- Variable Length Subnet Mask (VLSM) calculations.
+- CIDR visualization.
+- Binary conversion visualizations.
+- Interactive subnetting exercises.
+- Automatic generation of practice problems.
+- Exporting calculation reports.
