@@ -1,0 +1,103 @@
+# Overview
+
+The Home Server project documents the design and implementation of a self-hosted development environment built to centralize personal projects, services, and deployment workflows.
+
+Rather than depending exclusively on cloud platforms, the objective was to build an infrastructure capable of hosting applications, databases, monitoring tools, and development services inside a local network while remaining extensible for future expansion.
+
+The project evolved incrementally, with each iteration introducing new technologies and improving the overall architecture.
+
+# Project Goals
+
+Several objectives guided the development of the Home Server.
+
+The infrastructure needed to provide a stable development environment while remaining lightweight enough to run on consumer hardware.
+
+Key goals included:
+
+- Self-hosting applications.
+- Centralizing project deployments.
+- Learning infrastructure concepts.
+- Experimenting with containerization.
+- Building reusable deployment workflows.
+
+The project also became a practical environment for learning Linux administration and networking.
+
+# Infrastructure
+
+The initial hardware consisted of a repurposed desktop computer.
+
+Although modest compared to enterprise servers, it provided sufficient resources for multiple containers, databases, and development environments.
+
+The infrastructure includes:
+
+- Linux operating system
+- Docker
+- Docker Compose
+- Reverse proxy
+- SSH access
+- Local DNS
+- Static IP configuration
+
+Each service was isolated whenever possible to simplify maintenance and reduce dependencies.
+
+# Networking
+
+Networking became one of the most educational aspects of the project.
+
+Several concepts were explored during implementation:
+
+- Static IP addresses
+- Local DNS resolution
+- Hostname configuration
+- SSH authentication
+- Port forwarding
+- Firewall configuration
+
+Special attention was given to creating a development environment that could be accessed consistently across multiple devices within the local network.
+
+# Containerization
+
+Docker became the foundation of the deployment strategy.
+
+Instead of installing software directly on the operating system, applications were isolated into containers.
+
+This approach simplified upgrades, backups, and experimentation.
+
+Multiple Compose files were created to organize related services and improve maintainability.
+
+# Development Workflow
+
+One of the main goals was reducing the friction between development and deployment.
+
+Applications could be developed locally, committed to Git, and deployed inside the Home Server environment with minimal configuration changes.
+
+The workflow encouraged consistency across projects and made experimentation significantly easier.
+
+Over time, reusable deployment templates were created for different types of applications.
+
+# Lessons Learned
+
+Although the technical implementation was valuable, the most important outcomes were the architectural lessons learned throughout the project.
+
+Working with infrastructure introduced practical considerations rarely encountered during application development alone.
+
+Topics such as networking, service discovery, storage management, and deployment automation became significantly clearer after implementing them in a real environment.
+
+The project continues to evolve, serving both as a development platform and as an ongoing learning experience.
+
+# Future Improvements
+
+Several improvements are planned for future iterations.
+
+Potential additions include:
+
+- Automated deployments.
+- Continuous Integration.
+- Reverse proxy improvements.
+- Monitoring dashboards.
+- Centralized logging.
+- Backup automation.
+- High availability experiments.
+- Container orchestration.
+
+Because the project is intentionally iterative, each improvement will become its own documented case study describing both the implementation and the reasoning behind the architectural decisions.

@@ -3,8 +3,12 @@ import CaseStudyHero from '@/components/case-study/case-study-hero';
 import TableOfContents, {
   TableOfContentsItem,
 } from '@/components/case-study/table-of-contents';
+import { getProjectContent } from '@/lib/get-project-content';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
+import rehypeSlug from 'rehype-slug';
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -43,6 +47,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     notFound();
   }
 
+  const content = await getProjectContent(slug);
+
+  if (!content) {
+    notFound();
+  }
+
   return (
     <>
       <CaseStudyHeader />
@@ -53,21 +63,24 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </div>
 
-        <aside className="lg:block">
-          <div className="lg:sticky lg:top-20">
-            <TableOfContents items={mockTableOfContents} />
-          </div>
-        </aside>
-
         <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
-          {/* Main content — mock sections come in step 6, real MDX in step 8 */}
-          <article className="max-w-3xl">
-            {/* Case study content goes here */}
-          </article>
-
-          <aside className="hidden lg:block">
-            <div className="sticky top-20">{/* <TableOfContents /> */}</div>
+          <aside className="lg:order-last">
+            <div className="lg:sticky lg:top-20">
+              <TableOfContents items={mockTableOfContents} />
+            </div>
           </aside>
+
+          <article className="prose dark:prose-invert max-w-3xl">
+            <MDXRemote
+              source={content}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                  rehypePlugins: [rehypeSlug],
+                },
+              }}
+            />
+          </article>
         </div>
 
         {/* Reading progress — desktop: fixed footer, mobile: thin line under header. Step 5. */}
