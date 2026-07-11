@@ -6,7 +6,7 @@ export const metadata: Project = {
   category: 'Personal Tooling',
   description:
     'A personal technical library documenting software and data projects as in-depth case studies — the platform you are reading this on.',
-  cover: '/projects/technical-journal/cover.png',
+  cover: '/projects/technical-journal/cover.webp',
   tags: ['Next.js', 'TypeScript', 'Tailwind CSS', 'MDX', 'Shadcn'],
   status: 'in-progress',
   startYear: 2026,

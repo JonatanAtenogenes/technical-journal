@@ -6,7 +6,7 @@ export const metadata: Project = {
   category: 'Home Infraestructure',
   description:
     'Self-hosted infrastructure project covering backend, frontend and system architecture.',
-  cover: '/projects/home-server/cover.png',
+  cover: '/projects/home-server/cover.webp',
   tags: ['Rust', 'React', '.NET'],
   status: 'in-progress',
   startYear: 2026,

@@ -18,6 +18,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             src={project.cover}
             alt={project.title}
             fill
+            preload
             sizes="(min-width: 768px) 256px, 100vw"
             className="object-cover"
           />
