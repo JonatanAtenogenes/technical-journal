@@ -1,209 +1,684 @@
-# Overview
+# Introduction
 
-The Home Server project documents the process of transforming a standard desktop computer into a centralized development platform capable of hosting applications, databases, monitoring tools, and internal services. Rather than relying exclusively on cloud providers, the objective was to build an environment that could support personal software development while also serving as a long-term learning platform for infrastructure, networking, Linux administration, and containerized deployments.
+Home Server is an ongoing engineering project built to explore software
+architecture, systems programming, networking, and self-hosted
+infrastructure through a single evolving platform.
 
-Unlike many projects that focus on a single technology, this one evolved organically. Every improvement introduced new concepts, making the server itself a continuously growing project rather than a finished product. The infrastructure was intentionally designed to be flexible enough to support future experiments while remaining stable for daily development.
+Rather than creating isolated projects for every technology, the objective
+is to build an ecosystem where every new service solves a real problem while
+also introducing an opportunity to learn something new.
 
-This case study documents the architectural decisions, technologies, challenges, and lessons learned throughout the different stages of the project.
+The project is intentionally developed in small iterations. Every new
+component expands the platform without replacing previous work, allowing the
+architecture to mature over time instead of being designed all at once.
 
-## Objectives
+Although the project currently focuses on infrastructure and backend
+development, its long-term goal is much broader: to provide a complete
+platform that can be managed from desktop and mobile devices through a
+consistent user experience.
 
-The project was created with several long-term objectives in mind.
+At the time of writing, the networking foundation has been established, the
+initial Rust architecture is under active development, and the first shared
+libraries are beginning to define the conventions that future services will
+follow.
 
-Rather than simply hosting applications, the server should become a complete development ecosystem capable of supporting multiple independent projects simultaneously.
+# Why Build a Home Server?
 
-Some of the primary goals included:
+Many software projects exist only to demonstrate a technology.
 
-- Learning Linux administration through practical experience.
-- Deploying personal applications without external cloud providers.
-- Understanding networking fundamentals.
-- Building reusable deployment workflows.
-- Hosting multiple databases independently.
-- Experimenting with containerized architectures.
-- Creating a reliable environment for future software projects.
+Home Server was created for a different reason.
 
-Each new feature added to the server was intended to solve a real development problem while introducing new technical concepts.
+The objective is not to build a web server, a dashboard, or an API in
+isolation. Instead, the goal is to create a real environment where every
+technology contributes to a larger system.
 
-# Hardware
+Learning Rust becomes more meaningful when the language powers real
+services.
 
-The project began with an older desktop computer that was no longer being used as a daily workstation. Instead of purchasing dedicated server hardware, existing components were reused in order to maximize learning while minimizing costs.
+Learning Linux becomes more valuable when the operating system hosts those
+services.
 
-Although the specifications were modest compared to enterprise environments, they were more than sufficient for hosting development services, Docker containers, databases, and internal tooling.
+Learning networking becomes practical when the server itself must be
+accessible and reliable.
 
-Running services locally also provided complete control over storage, operating system configuration, networking, and deployment processes.
+Instead of treating every technology as an independent tutorial, Home Server
+connects them into a single engineering project.
 
-## Hardware Selection
+# Project Vision
 
-Several factors influenced the hardware selection.
+The long-term vision is to transform a single physical computer into a
+personal platform capable of hosting multiple services that communicate
+through shared libraries and common architectural conventions.
 
-The server needed enough memory to run multiple containers simultaneously while maintaining low power consumption.
+The server itself is only one part of the system.
 
-Storage capacity was also important because Docker images, databases, backups, and source code repositories would gradually increase over time.
+Around it, several layers are expected to evolve independently while sharing
+the same infrastructure.
 
-Instead of optimizing purely for performance, the objective was to build an environment representative of what many developers already have available at home.
+```text
+                    React Dashboard
+                           │
+               Native Android App (Future)
+                           │
+                   ASP.NET Communication
+                           │
+─────────────────────────────────────────────────────
+                Shared Rust Infrastructure
+─────────────────────────────────────────────────────
+ Logging • Configuration • Responses • Utilities
+─────────────────────────────────────────────────────
+ Docker • Linux • Networking • Storage • Monitoring
+─────────────────────────────────────────────────────
+                  Physical Home Server
+```
 
-This made the project easier to reproduce while encouraging experimentation without expensive hardware investments.
+Each layer has a clearly defined responsibility.
 
-# Operating System
+The infrastructure provides the environment.
 
-Choosing the operating system represented one of the first architectural decisions.
+Rust implements reusable platform services.
 
-Several Linux distributions were considered before selecting Fedora as the primary operating system for the server.
+.NET exposes communication endpoints.
 
-The decision was motivated by package availability, modern tooling, excellent documentation, and familiarity gained during previous development projects.
+React becomes the primary administration interface.
 
-The operating system became the foundation upon which every other service was deployed.
+A native Android application is planned for future iterations, providing a
+mobile experience optimized for monitoring and lightweight administrative
+tasks.
 
-## System Configuration
+Although several of these layers are still under development, defining their
+responsibilities early has influenced many architectural decisions already
+present in the project.
 
-After installation, several configuration tasks were completed before deploying any applications.
+# Current Status
 
-These included:
+Home Server should not be considered a finished platform.
 
-- Creating administrative users.
-- Configuring SSH access.
-- Disabling unnecessary services.
-- Updating installed packages.
-- Configuring automatic updates.
-- Setting the system hostname.
-- Preparing storage locations for Docker volumes.
+At this stage, most effort has been invested in building the foundation
+required for future services rather than implementing user-facing features.
 
-Completing these steps early simplified future maintenance and reduced unnecessary configuration changes later in the project.
+Current progress includes:
 
-# Networking
+- Initial Linux server configuration.
+- Static network configuration.
+- Remote administration through SSH.
+- Initial Rust project architecture.
+- Shared infrastructure modules.
+- Logging abstraction.
+- Standardized API response models.
 
-Networking became one of the most educational aspects of the entire project.
+Future work will gradually introduce additional backend services, web
+interfaces and mobile applications without requiring major architectural
+changes.
 
-Unlike application development, infrastructure projects require understanding how devices communicate within a local network.
+# Infrastructure
 
-This project introduced practical experience with concepts that are often only discussed theoretically.
+Before writing application code, the server itself needed to become a stable
+development environment.
 
-## Local Network
+This first phase focused entirely on preparing the operating system,
+networking configuration and remote administration.
 
-The server was assigned a static IP address to ensure every service remained accessible regardless of router restarts.
+Although these tasks do not produce visible features, they establish the
+foundation upon which every future service depends.
 
-Hostname resolution was also configured so applications could connect using readable names instead of remembering numerical IP addresses.
+# Network Configuration
 
-Additional networking topics explored included:
+One of the earliest goals was ensuring that the server could always be
+reached from other devices on the local network.
 
-- Local DNS.
-- Hostname configuration.
-- SSH connectivity.
-- Firewall management.
-- Network discovery.
-- Port forwarding.
+Using dynamically assigned IP addresses would eventually introduce
+unnecessary friction during development, as the server's address could change
+after a reboot or router lease renewal.
 
-Each configuration change improved both usability and maintainability.
+Instead, the server was configured with a static IP address, allowing every
+future application and development environment to communicate with a stable
+network endpoint.
 
-## Remote Access
+While simple, this decision removes an entire category of operational
+problems before additional services are introduced.
 
-Secure remote access was essential because the server would not always be connected to a monitor or keyboard.
+# Remote Administration
 
-SSH became the primary management interface.
+A server should not require physical access every time a configuration
+changes.
 
-Authentication was configured using SSH keys instead of passwords whenever possible.
+For that reason, SSH became the primary administration mechanism from the
+very beginning.
 
-This not only improved security but also simplified development workflows by allowing quick administration directly from development machines.
+Once configured, the server could be managed directly from another computer,
+making software development, maintenance and experimentation significantly
+more practical.
 
-# Containerization
+This workflow closely resembles real production environments, where servers
+are rarely administered through a directly connected monitor.
 
-Containerization quickly became the preferred deployment strategy.
+# Infrastructure Philosophy
 
-Rather than installing software directly on the operating system, every application was isolated inside Docker containers.
+One recurring design principle throughout the project is to build reusable
+infrastructure before building individual features.
 
-This greatly simplified dependency management while reducing conflicts between unrelated projects.
+Rather than allowing every future application to implement its own logging,
+configuration management or communication models, common functionality is
+being extracted into shared libraries from the beginning.
 
-The resulting infrastructure became significantly easier to maintain.
+Although this approach requires more work initially, it significantly
+reduces duplication as the platform grows.
 
-## Docker
+The goal is not to optimize for today's requirements, but to create an
+architecture capable of supporting years of incremental development.
 
-Docker provided several important advantages.
+# Looking Ahead
 
-Applications could be started, stopped, rebuilt, and replaced without affecting the rest of the server.
+With the networking foundation established and the development environment in
+place, attention shifts toward the software platform itself.
 
-Each service maintained its own environment, dependencies, and configuration files.
+The next phase introduces the Rust core responsible for providing shared
+infrastructure across the platform, beginning with one of the most important
+cross-cutting concerns in any distributed system: logging.
 
-Persistent data was stored using Docker volumes, ensuring containers could be recreated without losing information.
+# Building the Platform Core
 
-## Docker Compose
+With the server infrastructure in place, development shifted toward the
+software architecture itself.
 
-As additional services were introduced, Docker Compose became essential.
+Rather than implementing complete services immediately, the first objective
+was to define the common building blocks that every future component would
+share.
 
-Instead of manually managing containers one by one, complete application stacks could be described declaratively.
+Logging, configuration, response models and reusable utilities are examples
+of concerns that should not be reimplemented by every service.
 
-A single command became sufficient to deploy multiple interconnected services simultaneously.
+Instead, they belong to the platform itself.
 
-Compose files also served as documentation, clearly describing how every service related to the rest of the infrastructure.
+This philosophy has influenced the project from its earliest stages.
 
-# Development Environment
+# Why Rust?
 
-One of the primary goals was reducing friction between writing software and deploying it.
+Rust was selected primarily as a learning objective.
 
-Applications developed on local workstations should be deployable with minimal configuration changes.
+Although languages like C# would have allowed faster initial development,
+Rust introduces concepts that encourage thinking differently about software
+design: ownership, borrowing, explicit lifetimes and stronger guarantees
+around memory safety.
 
-This encouraged experimentation while maintaining consistency across projects.
+More importantly, the language fits naturally within the long-term vision of
+the project.
 
-## Project Isolation
+Backend services running continuously benefit from predictable performance,
+low memory usage and compile-time guarantees, making Rust an excellent
+candidate for platform infrastructure.
 
-Every application was designed to remain independent whenever possible.
+Learning these concepts within a real project provides much stronger
+motivation than isolated exercises.
 
-Different databases, containers, and storage volumes were separated according to project boundaries.
+# Project Organization
 
-This prevented changes in one application from accidentally affecting another.
+Even though the codebase is still relatively small, the project is already
+organized around reusable modules rather than individual applications.
 
-The same organizational principles were later applied to backups and deployment workflows.
+Current structure:
 
-## Development Workflow
+```text
+src
+├── crates
+│   ├── common
+│   │   ├── config
+│   │   ├── errors
+│   │   ├── logging
+│   │   │   ├── adapters
+│   │   │   ├── engines
+│   │   │   ├── builder.rs
+│   │   │   ├── config.rs
+│   │   │   ├── engine.rs
+│   │   │   ├── level.rs
+│   │   │   ├── logger.rs
+│   │   │   └── macros.rs
+│   │   ├── response
+│   │   └── utils
+│   └── mod.rs
+└── main.rs
+```
 
-The typical workflow gradually evolved into a repeatable process.
+Rather than allowing every future service to define its own utilities, the
+project separates reusable infrastructure into shared crates from the
+beginning.
 
-A project would be developed locally, committed to Git, and then deployed inside the Home Server using Docker Compose.
+Although this may seem excessive for a small codebase, the organization is
+expected to scale naturally as additional services are introduced.
 
-Configuration remained consistent across environments, reducing deployment errors while making experimentation significantly easier.
+# Shared Infrastructure
 
-# Monitoring
+Several modules already exist even before any business logic has been
+implemented.
 
-As the number of deployed services increased, monitoring became increasingly important.
+These modules define conventions rather than functionality.
 
-Rather than waiting for problems to occur, the objective shifted toward observing resource usage and application health continuously.
+Instead of solving individual application problems, they provide common
+behavior shared across the entire platform.
 
-Monitoring also provided valuable insight into how different services behaved under varying workloads.
+Current shared modules include:
 
-## Resource Usage
+- Logging
+- Error definitions
+- Configuration
+- API response models
+- Utility functions
 
-CPU utilization, memory consumption, storage growth, and container status became useful indicators of infrastructure health.
+The expectation is that future services will import these modules rather
+than creating independent implementations.
 
-Tracking these metrics helped identify inefficient services while also improving capacity planning for future expansions.
+# Designing the Logging System
 
-Monitoring transformed the server from a collection of independent containers into a coherent infrastructure platform.
+Logging is one of the first cross-cutting concerns introduced into the
+project.
+
+Instead of calling the tracing library directly throughout the codebase,
+the objective is to isolate that implementation behind an internal API.
+
+This provides two important advantages.
+
+First, application code does not depend directly on a specific logging
+library.
+
+Second, replacing or extending the logging engine becomes significantly
+easier in the future.
+
+The application knows that logging exists.
+
+It does not need to know how logging is implemented.
+
+# Builder Pattern
+
+Configuration is performed through a builder rather than constructing
+configuration objects manually.
+
+```rust
+let config = LoggingBuilder::new()
+    .level(LogLevel::Debug)
+    .timestamp(true)
+    .colors(true)
+    .build();
+```
+
+This approach makes configuration expressive while preventing partially
+initialized objects from appearing throughout the application.
+
+Additional options can be introduced later without affecting existing code.
+
+# Separating Configuration
+
+Instead of embedding logging options directly inside the logger itself,
+configuration lives independently.
+
+```rust
+pub struct LoggingConfig {
+    pub level: LogLevel,
+    pub timestamp: bool,
+    pub colors: bool,
+}
+```
+
+Keeping configuration separate improves readability while making future
+serialization or configuration-file support much easier to introduce.
+
+The logger becomes responsible for behavior.
+
+The configuration object becomes responsible for state.
+
+# Abstracting the Logging Engine
+
+Internally, the current implementation relies on the `tracing` ecosystem.
+
+However, this dependency is intentionally hidden behind conversion layers and
+internal abstractions.
+
+One small example is the conversion between the project's own logging levels
+and the levels expected by `tracing`.
+
+```rust
+impl From<LogLevel> for Level {
+    fn from(level: LogLevel) -> Self {
+        match level {
+            LogLevel::Error => Level::ERROR,
+            LogLevel::Warn => Level::WARN,
+            LogLevel::Info => Level::INFO,
+            LogLevel::Debug => Level::DEBUG,
+            LogLevel::Trace => Level::TRACE,
+        }
+    }
+}
+```
+
+Although relatively simple, this separation ensures that the rest of the
+application depends only on platform types rather than external libraries.
+
+# Error Handling
+
+Initialization failures are represented using explicit error types.
+
+```rust
+pub enum LoggingError {
+    AlreadyInitialized,
+    InvalidConfiguration,
+    InitializeFailed,
+}
+```
+
+Rather than exposing generic strings, these error types communicate the
+expected failure modes directly through the type system.
+
+As additional infrastructure components are introduced, they are expected to
+follow the same pattern.
+
+# Shared Response Models
+
+Another piece of infrastructure already exists despite there being few API
+endpoints today.
+
+Instead of allowing every controller or service to define independent
+response structures, standardized response envelopes have been introduced.
+
+Successful responses follow a common structure.
+
+```rust
+pub struct ApiResponse<T> {
+    success: bool,
+    timestamp: DateTime<Utc>,
+    data: T,
+}
+```
+
+Errors follow the same philosophy.
+
+```rust
+pub struct ApiError {
+    success: bool,
+    timestamp: DateTime<Utc>,
+    error: ErrorResponse,
+}
+```
+
+Even simple endpoints, such as future health checks, will benefit from these
+shared models.
+
+```rust
+pub struct HealthResponse {
+    pub status: String,
+}
+```
+
+Although these abstractions appear small, they establish consistency before
+multiple services begin exposing APIs.
+
+# Architecture Before Features
+
+At this stage, the project intentionally contains more infrastructure than
+business functionality.
+
+That balance is expected.
+
+Rather than building several independent services and attempting to unify
+them later, the project establishes shared conventions first.
+
+As new services appear, they inherit those conventions automatically instead
+of introducing their own implementations.
+
+This approach slows down early development slightly but significantly
+reduces architectural fragmentation as the platform grows.
+
+# Looking Ahead
+
+With the shared infrastructure beginning to stabilize, the next step is to
+connect these components to actual applications.
+
+The following phase introduces the communication layer, web interface and
+future mobile client that will allow the platform to be managed without
+direct interaction with the server itself.
+
+# The Communication Layer
+
+Although the Rust core is responsible for the platform's internal
+infrastructure, it is not intended to communicate directly with user
+interfaces.
+
+A dedicated .NET service is planned to act as the communication layer
+between clients and the backend.
+
+Rather than exposing internal implementation details, this layer will
+provide a stable API capable of serving multiple clients simultaneously.
+
+```text
+ React Dashboard
+        │
+ Android Application
+        │
+────────▼────────
+ ASP.NET Core API
+────────▼────────
+ Rust Services
+```
+
+Separating communication from the platform core keeps responsibilities
+well-defined.
+
+Rust focuses on platform services.
+
+.NET focuses on exposing those services through HTTP APIs.
+
+The two layers evolve independently while communicating through clearly
+defined contracts.
+
+# Why .NET?
+
+The decision to introduce .NET is based both on familiarity and on the role
+it already plays in my professional work.
+
+Using ASP.NET Core allows new APIs to be developed quickly while taking
+advantage of a mature ecosystem for authentication, routing, dependency
+injection and API documentation.
+
+Rather than replacing Rust, .NET complements it.
+
+Each technology is used where it provides the greatest value.
+
+# React Dashboard
+
+Managing infrastructure through SSH works well during development, but it
+does not scale as the platform grows.
+
+One of the project's primary goals is to make administration accessible
+through a modern web interface.
+
+The React dashboard is intended to become the central control panel for the
+entire platform.
+
+Rather than exposing isolated pages for each service, the dashboard should
+present the server as a single system.
+
+Potential features include:
+
+- Service monitoring
+- Configuration management
+- Log visualization
+- Health monitoring
+- Performance metrics
+- Container administration
+- Future services added to the platform
+
+Because every backend service follows shared conventions, the dashboard can
+provide a consistent experience regardless of which component it is
+interacting with.
+
+# Mobile Administration
+
+Although the React dashboard is expected to work well across desktop and
+mobile browsers, a dedicated Android application is planned for future
+iterations.
+
+The intention is not to wrap the website inside a WebView.
+
+Instead, the application will be developed natively using Kotlin.
+
+A native application provides better integration with Android features such
+as notifications, widgets and background services while offering an
+interface specifically designed for quick administrative tasks.
+
+Examples include:
+
+- Checking server health.
+- Viewing recent logs.
+- Restarting services.
+- Receiving alerts.
+- Monitoring resource usage.
+
+This application is considered a long-term objective and has not yet entered
+active development.
+
+# Development Philosophy
+
+Home Server is intentionally developed through small, incremental
+iterations.
+
+Instead of attempting to design every service before writing code, each new
+component introduces only the infrastructure required for the next step.
+
+This approach produces continuous progress while allowing architectural
+decisions to evolve naturally as new requirements appear.
+
+The current logging infrastructure is an example of this philosophy.
+
+It exists not because logging was urgently required, but because every
+future service will eventually depend on it.
+
+Building that shared foundation early prevents duplicated work later.
+
+# Current Roadmap
+
+The immediate focus remains on strengthening the platform core before adding
+user-facing functionality.
+
+Current priorities include:
+
+- Completing the logging infrastructure.
+- Expanding shared utility crates.
+- Defining configuration management.
+- Implementing the first backend services.
+- Designing the .NET communication layer.
+- Beginning development of the React dashboard.
+
+Longer-term goals include:
+
+- Native Android client.
+- Authentication and authorization.
+- Docker-based service management.
+- File management services.
+- Monitoring and metrics.
+- Automated deployment.
+- Additional self-hosted applications.
+
+Rather than treating these as isolated milestones, every new capability is
+expected to build upon the architecture established in earlier iterations.
 
 # Lessons Learned
 
-Although the technical implementation was valuable, the most significant outcome was the practical understanding gained throughout the project.
+Even in its current state, Home Server has already influenced the way I
+approach software architecture.
 
-Concepts such as networking, Linux administration, storage management, process isolation, container orchestration, and deployment automation became considerably clearer after implementing them in a real environment.
+One of the most important lessons has been recognizing the value of building
+shared infrastructure before individual features.
 
-The project also demonstrated the importance of incremental development.
+While this often delays visible progress, it dramatically simplifies future
+development by encouraging consistency across the entire platform.
 
-Rather than attempting to build a perfect infrastructure from the beginning, the server evolved gradually as new requirements appeared.
+The project has also reinforced the importance of clearly separating
+responsibilities.
 
-Each iteration improved both the architecture and the understanding of the technologies involved.
+Networking, infrastructure, backend services, communication APIs and user
+interfaces each solve different problems.
 
-## Future Improvements
+Treating them as independent layers makes the overall system easier to
+understand, maintain and extend.
 
-The Home Server remains an active project.
+Finally, working on a long-term project has highlighted the importance of
+designing for evolution rather than completion.
 
-Several improvements are planned for future iterations, including:
+The objective is not to finish the platform as quickly as possible.
 
-- Automated deployment pipelines.
-- Continuous Integration.
-- Reverse proxy improvements.
-- HTTPS certificates for internal services.
-- Centralized authentication.
-- Automated backup strategies.
-- Monitoring dashboards.
-- Log aggregation.
-- Container orchestration experiments.
-- Infrastructure as Code.
+The objective is to create an environment where new ideas can be introduced
+without requiring the architecture to be redesigned every few months.
 
-Each future enhancement will become its own documented case study, continuing the philosophy of treating the Home Server not as a finished product, but as a long-term engineering journal documenting architectural decisions, implementation details, challenges, and lessons learned over time.
+# Architecture Snapshot
+
+The project is still in its early stages, but its direction is already well
+defined.
+
+```text
+Infrastructure
+██████████
+
+Networking
+██████████
+
+Remote Administration (SSH)
+██████████
+
+Rust Platform Core
+██████░░░░
+
+Logging Infrastructure
+██████░░░░
+
+Shared Response Models
+███████░░░
+
+Configuration System
+███░░░░░░░
+
+.NET Communication Layer
+█░░░░░░░░░
+
+React Dashboard
+█░░░░░░░░░
+
+Native Android Client
+░░░░░░░░░░
+
+Monitoring
+░░░░░░░░░░
+
+Container Management
+░░░░░░░░░░
+```
+
+This snapshot is intentionally approximate.
+
+Rather than measuring completion, it captures the current state of the
+project at the time this case study was written.
+
+Future revisions of this document will evolve alongside the platform,
+documenting not only what was built, but also how the architecture changed
+over time.
+
+# Conclusion
+
+Home Server is more than a collection of technologies.
+
+It is an ongoing engineering exercise in designing systems that can evolve
+without losing coherence.
+
+Every decision—from configuring a static IP address to abstracting the
+logging implementation—contributes to the same objective: building a
+platform where infrastructure, backend services and user interfaces work
+together through clear architectural boundaries.
+
+The project is still far from complete, and that is intentional.
+
+Rather than pursuing rapid feature development, the focus remains on
+building a foundation that can support years of experimentation and gradual
+growth.
+
+As the platform expands, this case study will evolve alongside it, serving
+not only as documentation of what was built, but as a record of the
+engineering decisions, trade-offs and lessons learned throughout its
+development.
