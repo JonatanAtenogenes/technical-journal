@@ -8,6 +8,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import { getTableOfContents } from '@/lib/get-table-of-contents';
+import ReadingProgress from '@/components/case-study/reading-progress';
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
@@ -65,8 +66,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </article>
         </div>
 
-        {/* Reading progress — desktop: fixed footer, mobile: thin line under header. Step 5. */}
-        {/* <ReadingProgress /> */}
+        <ReadingProgress items={tableOfContents} />
       </main>
     </>
   );
