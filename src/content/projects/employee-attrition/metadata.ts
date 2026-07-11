@@ -5,9 +5,18 @@ export const metadata: Project = {
   title: 'Employee Attrition Analysis',
   category: 'HR Data Analytics',
   description:
-    'HR analytics project analyzing employee attrition patterns and identifying key factors related to turnover, job satisfaction, and workforce characteristics.',
+    'An end-to-end HR analytics project exploring employee attrition through a complete analytical workflow—from business understanding and data preparation to SQL analysis, exploratory data analysis, and actionable business insights.',
   cover: '/projects/employee-attrition/cover.webp',
-  tags: ['Python', 'SQL', 'Power Bi'],
+  tags: [
+    'Python',
+    'Pandas',
+    'SQL',
+    'SQLite',
+    'SQLAlchemy',
+    'Matplotlib',
+    'Plotly',
+    'Jupyter',
+  ],
   status: 'in-progress',
   startYear: 2026,
 };

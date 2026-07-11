@@ -1,142 +1,814 @@
-# Introduction
+# IBM HR Analytics — Employee Attrition Analysis
 
-Employee attrition is one of the most relevant topics in human resources analytics because employee turnover has a direct impact on organizational costs, productivity, and knowledge retention. Replacing experienced employees requires time, financial resources, and additional training, making it essential for organizations to understand the factors associated with employees leaving the company.
+## Introduction
 
-This case study documents an exploratory data analysis project based on the IBM HR Analytics Employee Attrition dataset. Rather than building a predictive machine learning model, the objective was to understand the dataset, identify meaningful patterns, and communicate insights that could support HR decision-making.
+Employee attrition is one of the most common challenges faced by Human Resources departments. Losing experienced employees affects productivity, increases recruitment costs, and often reveals deeper organizational issues that are not immediately visible.
 
-Throughout the project, the complete data analysis process is presented, including business understanding, data exploration, data preparation, exploratory analysis, and the final conclusions derived from the findings.
+This project explores the IBM HR Analytics Employee Attrition dataset with the objective of identifying patterns associated with employee turnover through a structured data analysis workflow.
 
-The goal of this case study is not only to present the final visualizations but also to document the reasoning behind each analytical decision.
+Rather than focusing only on producing visualizations, the project is designed to demonstrate the complete analytical process—from understanding the business problem to communicating actionable findings. Every stage is documented as part of this case study, allowing the reader to follow both the technical implementation and the reasoning behind each decision.
 
-The analysis was performed using Python and common data analysis libraries, while SQL concepts were incorporated as part of the data exploration process.
+The project also serves as a practical exercise in combining software engineering practices with data analysis. Instead of relying on a single notebook containing every step, reusable functionality is separated into Python modules while notebooks remain focused on business questions and analytical reasoning.
 
-# Business Understanding
+---
 
-Employee turnover represents a significant challenge for organizations of all sizes. High attrition rates often translate into increased recruitment costs, reduced team productivity, and the loss of organizational knowledge.
+# Business Context
 
-Understanding why employees leave requires looking beyond a single variable. Factors such as job satisfaction, overtime, work-life balance, compensation, career progression, and departmental differences may all contribute to employee decisions.
+A company's Human Resources department has observed a growing number of employees voluntarily leaving the organization. Although demographic information, job characteristics and employee satisfaction metrics are available, there is no clear understanding of which factors are most strongly associated with attrition.
 
-The primary objective of this project was to explore these relationships through descriptive analytics rather than predictive modeling.
+Without this knowledge, decisions regarding employee retention become reactive rather than proactive.
 
-More specifically, the project aimed to answer questions such as:
+The purpose of this analysis is not to build a predictive machine learning model, but to understand the existing data, identify meaningful relationships between variables, and communicate findings that could support future business decisions.
 
-- Which employee groups experience the highest attrition?
-- Does overtime influence turnover?
-- Is job satisfaction related to employee retention?
-- Which departments are more affected?
-- Are demographic variables associated with attrition?
+This case study approaches the problem from the perspective of a Data Analyst working within an organization, where understanding the business problem is just as important as writing code.
 
-By answering these questions, the project demonstrates how data analysis can support evidence-based HR decisions.
+---
 
-# Data Understanding
+# Business Questions
 
-## Dataset Overview
+The project begins with a series of questions provided by the business rather than with technical requirements.
 
-The project uses the IBM HR Analytics Employee Attrition dataset, a widely used dataset for educational purposes.
+Among the questions explored are:
 
-The dataset contains demographic information, employment characteristics, performance indicators, and employee satisfaction metrics.
+- What is the overall employee attrition rate?
+- Which departments experience the highest employee turnover?
+- Which job roles are more frequently associated with attrition?
+- Does overtime appear to increase the likelihood of employees leaving?
+- Is salary related to employee retention?
+- Does job satisfaction influence attrition?
+- What characteristics describe employees who are most likely to resign?
 
-Examples of available variables include:
+These questions guide every subsequent stage of the project, from data preparation to SQL analysis and exploratory visualizations.
 
-- Age
-- Department
-- Business Travel
-- Education
-- Environment Satisfaction
-- Job Satisfaction
-- Monthly Income
-- Overtime
-- Years at Company
-- Years Since Last Promotion
-- Attrition
+Rather than exploring the dataset without direction, every notebook is designed to answer one or more of these business questions.
 
-The target variable, Attrition, indicates whether an employee left the company.
+---
 
-Although the dataset is relatively clean, understanding each variable before analysis is essential.
+# Project Objectives
 
-Several variables represent categorical information, while others are numerical measurements describing employee characteristics and career progression.
+## General Objective
 
-## Data Quality
+Develop a complete analytical workflow capable of transforming a raw CSV dataset into meaningful business insights through data preparation, SQL analysis and exploratory data analysis.
 
-The first step consisted of evaluating the overall quality of the dataset.
+The objective is not simply to generate charts, but to demonstrate the process followed by a Data Analyst when working with business data.
 
-Several aspects were reviewed:
+## Specific Objectives
 
-- Missing values
-- Duplicate records
-- Data types
-- Numerical distributions
-- Category consistency
+Throughout the project, several technical and analytical goals are pursued.
 
-Fortunately, the IBM dataset contains very few missing values, making preprocessing relatively straightforward.
+These include:
 
-Even when data appears clean, validating assumptions remains an important step in every analytical workflow.
+- Understanding the structure and quality of the dataset.
+- Preparing a clean dataset suitable for analysis.
+- Persisting the processed data inside a relational database.
+- Answering business questions using SQL queries.
+- Complementing SQL results through Python-based exploratory analysis.
+- Communicating findings through clear visualizations and written interpretations.
+- Building a project that reflects a realistic analytical workflow rather than an isolated notebook.
 
-Variable distributions were also inspected to identify skewed numerical features and highly imbalanced categorical variables.
+---
 
-# Data Preparation
+# Technical Stack
 
-Although extensive cleaning was not required, several preprocessing tasks were completed before starting the analysis.
+The project combines several technologies, each selected for a specific purpose within the workflow.
 
-These included:
+| Technology          | Purpose                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| Python              | Core programming language used throughout the project.         |
+| Pandas              | Data loading, transformation and exploratory analysis.         |
+| SQLite              | Local relational database used to store the processed dataset. |
+| SQLAlchemy          | Database connection and data persistence.                      |
+| SQL                 | Business-oriented analytical queries.                          |
+| Matplotlib / Plotly | Data visualization.                                            |
+| Jupyter Notebook    | Documentation of the analytical process.                       |
 
-- Reviewing categorical variables.
-- Verifying numerical ranges.
-- Standardizing data types.
-- Creating derived metrics where appropriate.
-- Organizing variables for visualization.
+SQLite was intentionally selected for the first iteration because it allows the analytical workflow to be developed without introducing the operational complexity of a database server.
 
-Preparing the dataset before analysis improves reproducibility and reduces the likelihood of introducing inconsistencies later in the project.
+The project architecture has been designed so that migrating to PostgreSQL in future iterations requires minimal changes to the analysis itself.
 
-Additional exploratory transformations were performed during visualization when grouping employees by department, age range, and years at the company.
+---
 
-# Exploratory Data Analysis
+# Project Workflow
 
-The exploratory analysis focused on identifying relationships between employee characteristics and attrition.
+The analysis follows a sequential workflow inspired by the way data projects are commonly developed in professional environments.
 
-Several visualizations were created to compare employees who left the company against those who remained.
+```text
+                Raw CSV
+                   │
+                   ▼
+       Business Understanding
+                   │
+                   ▼
+        Data Understanding
+                   │
+                   ▼
+         Data Preparation
+                   │
+                   ▼
+        Load into SQLite
+                   │
+                   ▼
+           SQL Analysis
+                   │
+                   ▼
+ Exploratory Data Analysis
+                   │
+                   ▼
+        Business Insights
+                   │
+                   ▼
+      Conclusions & Recommendations
+```
 
-The analysis included:
+One design decision worth highlighting is that SQL analysis precedes the exploratory analysis performed in Python.
 
-- Attrition distribution
-- Department comparisons
-- Monthly income analysis
-- Overtime analysis
-- Job satisfaction distribution
-- Work-life balance comparison
-- Age distribution
-- Years at company
+Although many educational projects immediately begin manipulating pandas DataFrames, real business environments frequently require analysts to retrieve and summarize information directly from relational databases before moving into deeper statistical exploration.
 
-Each visualization was interpreted individually before combining findings into broader conclusions.
+For that reason, SQL occupies a central role within the workflow rather than serving as an afterthought.
 
-Special attention was given to variables commonly referenced in HR literature, such as overtime and job satisfaction.
+---
 
-While some relationships appeared visually strong, others suggested only weak associations, reinforcing the importance of interpreting descriptive statistics carefully.
+# Project Organization
 
-# Key Findings
+The repository intentionally separates reusable application logic from the notebooks used during analysis.
 
-Several recurring patterns emerged throughout the analysis.
+```text
+ibm-hr-analytics/
+│
+├── data/
+│
+├── notebooks/
+│   ├── 01_data_understanding.ipynb
+│   ├── 02_data_preparation.ipynb
+│   ├── 03_sql_analysis.ipynb
+│   ├── 04_exploratory_analysis.ipynb
+│   └── 05_conclusions.ipynb
+│
+├── src/
+│   ├── data.py
+│   ├── cleaning.py
+│   ├── validation.py
+│   ├── database.py
+│   └── visualization.py
+│
+└── README.md
+```
 
-Employees working overtime appeared more likely to leave the organization.
+This separation serves two purposes.
 
-Departments exhibited different attrition rates, suggesting that organizational context may influence employee retention.
+First, notebooks remain focused on explaining the analytical reasoning rather than containing implementation details unrelated to the analysis itself.
 
-Employees with lower job satisfaction generally showed higher turnover proportions.
+Second, reusable operations such as loading datasets, validating information or interacting with the database can be shared across multiple notebooks without duplicating code.
 
-Years at the company also appeared related to attrition, particularly among relatively new employees.
+As the project grows, this organization also improves maintainability by encouraging modular design instead of treating notebooks as self-contained applications.
 
-It is important to emphasize that these observations describe associations rather than causal relationships.
+---
 
-The project intentionally focuses on descriptive analytics and avoids drawing unsupported causal conclusions.
+# Development Philosophy
 
-# Conclusions
+This project is built around the idea that a data analysis notebook should communicate decisions rather than simply execute code.
 
-This case study demonstrates how exploratory data analysis can generate meaningful business insights without relying on complex predictive models.
+Instead of documenting every pandas function that was called, each notebook is structured around a business objective.
 
-Even relatively clean datasets require structured exploration to understand relationships between variables and identify potential business concerns.
+Every stage follows the same general approach:
 
-The findings highlight several factors that HR professionals may investigate further, including overtime practices, employee satisfaction, departmental differences, and career progression.
+- Define the business objective.
+- Explain why the analysis is necessary.
+- Execute only the code required to answer the question.
+- Interpret the results.
+- Connect the findings back to the business context.
 
-Beyond the specific conclusions, this project also serves as an example of a structured analytics workflow, documenting each stage of the process from business understanding to final interpretation.
+This philosophy produces documentation that is easier to understand for both technical and non-technical readers while more accurately reflecting how analytical work is performed in professional environments.
 
-Future work could extend this analysis by incorporating predictive models, feature engineering techniques, or additional HR datasets to validate the observed patterns.
+The project also incorporates software engineering practices by separating reusable functionality into dedicated Python modules, allowing notebooks to remain concise, readable and focused on the analytical process.
+
+---
+
+# Current Status
+
+At the time this case study was written, the project is actively under development.
+
+The initial planning and data understanding stages have already been completed, establishing a solid foundation for the remaining analysis.
+
+Current progress can be summarized as follows:
+
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| Business Understanding    | Completed   |
+| Data Understanding        | Completed   |
+| Data Preparation          | In Progress |
+| SQLite Integration        | Planned     |
+| SQL Analysis              | Planned     |
+| Exploratory Data Analysis | Planned     |
+| Business Conclusions      | Planned     |
+
+Future iterations of this case study will document each stage as it is completed, allowing the project documentation to evolve alongside the implementation itself rather than being written only after development has finished.
+
+The goal is to create a living technical document that records not only the final results, but also the reasoning, decisions and lessons learned throughout the entire analytical process.
+
+# Stage 1 — Business Understanding
+
+## Objective
+
+Every data analysis project begins with a business problem rather than a
+dataset.
+
+Although the IBM HR Analytics dataset is already structured and ready for
+analysis, approaching it from a business perspective establishes the
+questions the project aims to answer and provides direction for every
+subsequent stage.
+
+Instead of exploring the data without a clear objective, the analysis is
+organized around understanding employee attrition and identifying factors
+that may contribute to employees leaving the company.
+
+This stage defines those objectives before any data is inspected.
+
+---
+
+## Understanding the Problem
+
+Employee attrition represents a significant challenge for organizations.
+
+Replacing experienced employees requires recruitment, onboarding and
+training, all of which increase operational costs while reducing
+productivity during the transition period.
+
+The Human Resources department has access to demographic information,
+employment history and employee satisfaction metrics, but these data alone
+do not explain why employees leave.
+
+The objective of this project is therefore to explore those variables and
+identify meaningful relationships that could support future business
+decisions.
+
+Rather than searching for a single cause, the analysis attempts to determine
+which factors appear to be associated with higher levels of attrition.
+
+---
+
+## Defining the Business Questions
+
+The analysis is driven by questions provided from a business perspective
+rather than technical curiosity.
+
+These questions determine both the order of the notebooks and the analyses
+performed throughout the project.
+
+The primary questions include:
+
+- What is the overall employee attrition rate?
+- Which departments experience the highest turnover?
+- Which job roles appear most affected?
+- Does overtime correlate with employee attrition?
+- Is employee satisfaction associated with retention?
+- Does salary appear to influence attrition?
+- What characteristics describe employees most likely to leave?
+
+Each notebook contributes toward answering one or more of these questions.
+
+Rather than producing isolated charts, every visualization and SQL query is
+intended to support a specific business objective.
+
+---
+
+## Analytical Strategy
+
+Before exploring relationships between variables, it is essential to verify
+that the dataset itself can be trusted.
+
+For that reason, the project follows a staged workflow.
+
+The first objective is understanding the data.
+
+Only after validating the dataset does the project proceed with cleaning,
+SQL analysis and exploratory visualizations.
+
+This approach reduces the likelihood of reaching conclusions based on
+incorrect assumptions or poor data quality.
+
+---
+
+## Expected Deliverables
+
+By the end of the project, the analysis should provide:
+
+- A validated dataset suitable for analysis.
+- A relational database containing the processed information.
+- SQL queries answering the initial business questions.
+- Visualizations supporting those findings.
+- Written interpretations connecting technical results with business
+  decisions.
+- A documented analytical workflow that can be reproduced in future
+  projects.
+
+Rather than producing isolated notebooks, the objective is to build a
+complete analytical pipeline.
+
+---
+
+## Stage Summary
+
+The Business Understanding stage establishes the foundation for the entire
+project.
+
+Instead of immediately loading the dataset into Python, it identifies the
+questions that justify every subsequent analysis.
+
+With those objectives clearly defined, the next stage focuses on examining
+the dataset itself to determine whether the available information is capable
+of answering those questions.
+
+---
+
+# Stage 2 — Data Understanding
+
+## Objective
+
+With the business objectives clearly defined, the next step is understanding
+the data itself.
+
+Before cleaning, transforming or querying the dataset, it is important to
+verify its structure, identify potential quality issues and determine
+whether the available variables can realistically answer the business
+questions established during the previous stage.
+
+No modifications are performed during this notebook.
+
+Its purpose is purely observational.
+
+---
+
+## Loading the Dataset
+
+The analysis begins by loading the raw CSV file into a pandas DataFrame.
+
+Rather than reading the file directly inside the notebook, the loading logic
+is encapsulated within a reusable Python module located inside the `src`
+package.
+
+This keeps the notebook focused on analysis while making the loading process
+reusable across future notebooks.
+
+```python
+from src.data import load_raw_data
+
+df = load_raw_data()
+```
+
+The loading function itself remains intentionally simple.
+
+```python
+def load_raw_data() -> pd.DataFrame:
+    return pd.read_csv(
+        Path(__file__)
+        .parent.parent
+        .joinpath("data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv")
+    )
+```
+
+Separating reusable functionality from analytical notebooks is a recurring
+design decision throughout the project.
+
+---
+
+## First Look at the Dataset
+
+Before calculating statistics, it is useful to inspect a few records
+manually.
+
+This simple inspection verifies that the dataset was loaded correctly while
+providing an intuitive understanding of the available information.
+
+```python
+df.head()
+
+df.sample(5, random_state=42)
+```
+
+The preview confirms that each row represents an individual employee, while
+columns describe demographic information, employment conditions,
+compensation and employee satisfaction.
+
+No obvious formatting issues are observed during this initial inspection.
+
+---
+
+## Measuring the Dataset
+
+Understanding the size of the dataset provides context for the analyses that
+follow.
+
+```python
+rows, columns = df.shape
+
+print(f"Rows: {rows}")
+print(f"Columns: {columns}")
+```
+
+Output:
+
+```text
+Rows: 1470
+Columns: 35
+```
+
+The dataset contains 1,470 employee records distributed across 35
+variables.
+
+Although relatively small, the dataset is sufficiently large to identify
+patterns between different employee groups while remaining easy to explore
+interactively.
+
+---
+
+## Inspecting the Dataset Structure
+
+The next step is verifying data types and identifying potential quality
+issues.
+
+```python
+df.info()
+```
+
+This inspection provides several useful observations.
+
+- Every column contains the expected number of values.
+- No missing values are immediately visible.
+- Numerical and categorical variables are clearly separated.
+- Memory usage remains small enough to allow in-memory analysis.
+
+Understanding these characteristics early simplifies later stages of the
+project.
+
+---
+
+## Classifying Variables
+
+Different types of variables require different analytical techniques.
+
+For that reason, variables are separated according to their data types.
+
+```python
+numeric_columns = df.select_dtypes(include="number").columns.tolist()
+
+string_columns = df.select_dtypes(include="str").columns.tolist()
+```
+
+This classification will later determine which statistical summaries,
+visualizations and SQL aggregations are most appropriate for each variable.
+
+---
+
+## Descriptive Statistics
+
+Before searching for relationships between variables, descriptive statistics
+provide an overview of the dataset.
+
+```python
+df.describe()
+
+df.describe(include=["str"])
+```
+
+These summaries allow unusually distributed variables and potential outliers
+to be identified before deeper analysis begins.
+
+At this stage, the objective is not interpretation, but familiarity with the
+dataset.
+
+---
+
+## Verifying Missing Values
+
+Missing values frequently represent one of the largest sources of analytical
+error.
+
+For that reason, they are explicitly verified before any transformation is
+performed.
+
+```python
+missing_values = (
+    df.isnull()
+      .sum()
+      .sort_values(ascending=False)
+)
+
+missing_values = missing_values[missing_values > 0]
+```
+
+The dataset contains no missing values.
+
+Because no imputation is required, later preprocessing stages can focus on
+simplifying the dataset rather than repairing incomplete information.
+
+---
+
+## Searching for Duplicate Records
+
+Duplicate employee records could bias subsequent analyses.
+
+Verification is therefore performed before any calculations are made.
+
+```python
+df.duplicated().sum()
+```
+
+No duplicated records are detected.
+
+This indicates that every row represents a unique employee observation.
+
+---
+
+## Identifying Constant Variables
+
+Not every variable contributes useful information.
+
+Some columns contain exactly the same value for every employee and therefore
+cannot explain differences in attrition.
+
+```python
+unique_values = (
+    df.nunique()
+      .sort_values()
+)
+
+unique_values
+```
+
+Several variables contain only a single unique value.
+
+These variables are identified during this stage and will be removed during
+Data Preparation to simplify the dataset without losing analytical value.
+
+---
+
+## Stage Assessment
+
+The Data Understanding stage confirms that the dataset is well suited for
+analysis.
+
+Several important observations emerge:
+
+- No missing values were detected.
+- No duplicate records were found.
+- Data types are consistent.
+- The dataset combines numerical and categorical information.
+- Some variables remain constant across every employee and can safely be
+  removed during preprocessing.
+
+Although little cleaning is required, this stage establishes confidence that
+the data accurately represents the information available for analysis.
+
+With the dataset now understood, the next stage focuses on transforming it
+into a cleaner structure before loading it into a relational database for
+SQL-based analysis.
+
+# Stage 3 — Data Preparation _(Planned)_
+
+## Objective
+
+Once the structure and quality of the dataset have been verified, the next
+step is preparing the data for analysis.
+
+Although the IBM HR Analytics dataset is already clean compared to many
+real-world datasets, a preparation stage is still necessary to simplify the
+data model, improve readability and ensure consistency before loading the
+information into a relational database.
+
+Rather than modifying the raw dataset directly, every transformation is
+performed programmatically, making the entire preprocessing pipeline
+reproducible.
+
+---
+
+## Planned Transformations
+
+The preparation stage will focus on improving the analytical usability of
+the dataset rather than correcting major quality issues.
+
+Planned tasks include:
+
+- Removing variables that contain a single constant value.
+- Renaming columns where appropriate to improve readability.
+- Verifying data types before persistence.
+- Validating the integrity of the transformed dataset.
+- Exporting the cleaned dataset to SQLite.
+
+The original CSV file will always remain unchanged.
+
+This ensures that every preprocessing step can be reproduced from the raw
+data at any time.
+
+---
+
+## Why SQLite?
+
+Instead of performing the entire analysis directly in pandas, the processed
+dataset is loaded into a relational database.
+
+Although SQLite is significantly simpler than production database systems
+such as PostgreSQL, it allows the project to simulate a realistic analytical
+workflow without introducing unnecessary infrastructure.
+
+Using SQLite also provides an opportunity to demonstrate SQL as a primary
+analytical tool rather than treating it as an optional addition.
+
+The database therefore becomes an intermediate layer between data
+preparation and exploratory analysis.
+
+---
+
+# Stage 4 — SQL Analysis _(Planned)_
+
+## Objective
+
+Before creating visualizations, the project intentionally answers the
+initial business questions using SQL.
+
+In many organizations, analysts spend a considerable portion of their time
+working directly with relational databases.
+
+Developing analytical queries is therefore considered a fundamental skill,
+and this project reflects that reality by placing SQL at the center of the
+workflow.
+
+---
+
+## Business Questions
+
+Among the first SQL analyses planned are:
+
+- Overall employee attrition rate.
+- Attrition by department.
+- Attrition by job role.
+- Average salary by department.
+- Average age of employees who left the company.
+- Relationship between overtime and attrition.
+- Relationship between job satisfaction and attrition.
+
+Each query will be documented alongside its corresponding business question,
+allowing technical implementation and business reasoning to remain closely
+connected.
+
+Rather than presenting isolated SQL statements, every query will be followed
+by an interpretation explaining what the results mean from a Human Resources
+perspective.
+
+---
+
+# Stage 5 — Exploratory Data Analysis _(Planned)_
+
+## Objective
+
+SQL provides answers to structured business questions.
+
+Exploratory Data Analysis extends those findings through visualizations,
+descriptive statistics and comparisons between employee groups.
+
+The purpose of this stage is not to search randomly for interesting
+patterns, but to validate and expand the conclusions already obtained
+through SQL.
+
+Python becomes the primary analytical tool during this stage.
+
+---
+
+## Planned Analyses
+
+Several exploratory analyses are planned, including:
+
+- Distribution of employee ages.
+- Monthly income by department.
+- Attrition across different job roles.
+- Overtime versus employee attrition.
+- Job satisfaction versus attrition.
+- Work-life balance versus attrition.
+- Correlation between numerical variables.
+- Comparison of employees who stayed and employees who left.
+
+Whenever possible, statistical summaries will be complemented with
+visualizations that make the findings easier to interpret.
+
+---
+
+## Visualization Strategy
+
+Visualizations are intended to communicate business insights rather than
+simply demonstrate plotting libraries.
+
+Each figure included in this project will answer a specific business
+question.
+
+The workflow followed throughout this stage will remain consistent.
+
+Business Question
+
+↓
+
+Python Analysis
+
+↓
+
+Visualization
+
+↓
+
+Interpretation
+
+↓
+
+Business Insight
+
+Maintaining this structure helps ensure that every chart contributes
+directly to the objectives established during Business Understanding.
+
+---
+
+# Stage 6 — Conclusions _(Planned)_
+
+## Objective
+
+The final stage synthesizes the results obtained throughout the analysis and
+translates them into recommendations that can be understood by stakeholders
+outside the technical team.
+
+Rather than repeating statistics or visualizations, the conclusion focuses
+on answering the original business questions.
+
+Topics expected to be addressed include:
+
+- Which variables appear most strongly associated with employee attrition.
+- Which findings may require further investigation.
+- Limitations of the available dataset.
+- Recommendations for future analyses.
+- Potential business actions suggested by the results.
+
+The objective is to transform analytical findings into practical knowledge
+that supports decision making.
+
+---
+
+# Lessons Learned
+
+Although the project is still under active development, several important
+lessons have already emerged.
+
+One of the most valuable has been recognizing the importance of separating
+analytical reasoning from implementation details.
+
+Instead of placing every function inside a notebook, reusable logic is
+organized into dedicated Python modules while notebooks remain focused on
+business questions and interpretation.
+
+This organization improves readability while making the analytical workflow
+easier to maintain as the project grows.
+
+The project has also reinforced the value of approaching data analysis from
+a business perspective.
+
+Rather than beginning with visualizations or statistical techniques, every
+stage starts by asking what business problem needs to be solved.
+
+This approach naturally guides both SQL queries and exploratory analysis,
+resulting in findings that are easier to communicate and more relevant to
+decision makers.
+
+---
+
+# Future Improvements
+
+Although the current objective is completing the analytical workflow using
+SQLite, the project has been designed to support future iterations.
+
+Potential improvements include:
+
+- Migrating from SQLite to PostgreSQL.
+- Expanding the SQL analysis with more advanced queries.
+- Introducing statistical hypothesis testing.
+- Building interactive dashboards using Power BI.
+- Comparing SQL and pandas approaches for selected analyses.
+- Exploring predictive models after completing the descriptive analysis.
+- Publishing reusable notebooks for educational purposes.
+
+The current focus, however, remains on completing a robust descriptive
+analysis before introducing more advanced analytical techniques.
+
+---
+
+# Conclusion
+
+This project is intended to demonstrate considerably more than proficiency
+with pandas.
+
+It documents the complete analytical process followed by a Data Analyst,
+beginning with a business problem and ending with actionable insights.
+
+By combining structured project organization, reusable Python modules,
+relational databases, SQL analysis and exploratory visualization, the case
+study reflects a workflow that more closely resembles professional data
+analysis than a traditional standalone notebook.
+
+As additional stages are completed, this document will evolve alongside the
+project, recording not only the technical implementation but also the
+decisions, trade-offs and lessons learned throughout its development.
