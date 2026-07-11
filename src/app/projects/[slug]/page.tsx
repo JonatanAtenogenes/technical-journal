@@ -1,4 +1,5 @@
-import CaseStudyHeader from '@components/case-studies/case-study-header';
+import CaseStudyHeader from '@components/case-study/case-study-header';
+import CaseStudyHero from '@components/case-study/case-study-hero';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 
@@ -27,7 +28,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         {/* Hero: title, description, tags — built in the next step */}
         <div className="border-b">
           <div className="container mx-auto px-4 py-16 md:py-20">
-            {/* <CaseStudyHero project={project} /> */}
+            <CaseStudyHero project={project} />
           </div>
         </div>
 
