@@ -3,11 +3,19 @@ import type { Project } from '@/lib/types/project';
 export const metadata: Project = {
   slug: 'technical-journal',
   title: 'Technical Journal',
-  category: 'Personal Tooling',
+  category: 'Developer Tooling',
   description:
-    'A personal technical library documenting software and data projects as in-depth case studies — the platform you are reading this on.',
+    'A static documentation platform built with Next.js and MDX to transform software and data projects into structured, searchable case studies focused on architecture, decisions, and lessons learned.',
   cover: '/projects/technical-journal/cover.webp',
-  tags: ['Next.js', 'TypeScript', 'Tailwind CSS', 'MDX', 'Shadcn'],
+  tags: [
+    'Next.js',
+    'TypeScript',
+    'MDX',
+    'Tailwind CSS',
+    'Base UI',
+    'Shadcn',
+    'Content Collections',
+  ],
   status: 'in-progress',
   startYear: 2026,
 };
