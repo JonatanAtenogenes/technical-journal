@@ -1,3 +1,4 @@
+import CaseStudyHeader from '@components/case-studies/case-study-header';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 
@@ -20,30 +21,33 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   return (
-    <main>
-      {/* Hero: title, description, tags — built in the next step */}
-      <div className="border-b">
-        <div className="container mx-auto px-4 py-16 md:py-20">
-          {/* <CaseStudyHero project={project} /> */}
+    <>
+      <CaseStudyHeader />
+      <main>
+        {/* Hero: title, description, tags — built in the next step */}
+        <div className="border-b">
+          <div className="container mx-auto px-4 py-16 md:py-20">
+            {/* <CaseStudyHero project={project} /> */}
+          </div>
         </div>
-      </div>
 
-      <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
-        {/* Main content — mock sections come in step 6, real MDX in step 8 */}
-        <article className="max-w-3xl">
-          {/* Case study content goes here */}
-        </article>
+        <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
+          {/* Main content — mock sections come in step 6, real MDX in step 8 */}
+          <article className="max-w-3xl">
+            {/* Case study content goes here */}
+          </article>
 
-        {/* Table of contents — always visible on desktop, hidden on mobile
+          {/* Table of contents — always visible on desktop, hidden on mobile
             (mobile gets the reading progress line instead, step 5) */}
 
-        <aside className="hidden lg:block">
-          <div className="sticky top-20">{/* <TableOfContents /> */}</div>
-        </aside>
-      </div>
+          <aside className="hidden lg:block">
+            <div className="sticky top-20">{/* <TableOfContents /> */}</div>
+          </aside>
+        </div>
 
-      {/* Reading progress — desktop: fixed footer, mobile: thin line under header. Step 5. */}
-      {/* <ReadingProgress /> */}
-    </main>
+        {/* Reading progress — desktop: fixed footer, mobile: thin line under header. Step 5. */}
+        {/* <ReadingProgress /> */}
+      </main>
+    </>
   );
 }
