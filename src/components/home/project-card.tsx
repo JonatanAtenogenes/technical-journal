@@ -5,8 +5,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowRightIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export default function ProjectCard({ project }: { project: Project }) {
+  const t = useTranslations('projectCard');
+
   return (
     <article className="flex flex-col gap-4 border-b pb-8 last:border-b-0 last:pb-0 md:flex-row md:gap-8">
       <div className="md:w-64 md:shrink-0">
@@ -49,7 +52,7 @@ export default function ProjectCard({ project }: { project: Project }) {
             href={`/projects/${project.slug}`}
             className="flex justify-center items-center gap-4"
           >
-            Read Case Study
+            {t('readCaseStudy')}
             <ArrowRightIcon className="size-4" />
           </Link>
         </Button>

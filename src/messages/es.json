@@ -1,10 +1,18 @@
 {
-  "nav": {
-    "home": "Inicio",
-    "projects": "Proyectos"
+  "header": {
+    "brand": "Technical Journal",
+    "github": "Github",
+    "portfolio": "Portafolio"
   },
   "hero": {
-    "title": "Diario Técnico",
-    "subtitle": "Casos de estudio detallados sobre proyectos de software y datos"
+    "title": "Technical Journal",
+    "tagline": "Casos de estudio de ingeniería de software y datos que documentan arquitectura, implementación y aprendizajes.",
+    "description": "Explora proyectos reales que cubren backend, frontend, ingeniería de datos y diseño de sistemas. Cada caso de estudio explica el problema, las decisiones de diseño, la implementación y las conclusiones clave."
+  },
+  "projects": {
+    "sectionTitle": "Proyectos"
+  },
+  "projectCard": {
+    "readCaseStudy": "Leer caso de estudio"
   }
 }

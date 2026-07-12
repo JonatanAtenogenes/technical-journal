@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import ThemeToggle from '@/components/shared/theme-toggle';
+import { useTranslations } from 'next-intl';
 
 export default function Header() {
+  const t = useTranslations('header');
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto flex flex-col gap-3 py-4 md:h-16 md:flex-row md:items-center md:justify-between md:py-0">
@@ -9,7 +12,7 @@ export default function Header() {
           href={'/'}
           className="text-xl font-semibold tracking-tight transition-colors hover:text-primary"
         >
-          Technical Journal
+          {t('brand')}
         </Link>
 
         <nav>
@@ -21,7 +24,7 @@ export default function Header() {
                 rel="noopener noreferrer"
                 className="rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                Github
+                {t('github')}
               </Link>
             </li>
             <li>
@@ -31,7 +34,7 @@ export default function Header() {
                 rel="noopener noreferrer"
                 className="rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                Portafolio
+                {t('portfolio')}
               </Link>
             </li>
             <li className="ml-1 border-l pl-2">

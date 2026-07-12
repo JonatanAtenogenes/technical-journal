@@ -1,10 +1,18 @@
 {
-  "nav": {
-    "home": "Home",
-    "projects": "Projects"
+  "header": {
+    "brand": "Technical Journal",
+    "github": "Github",
+    "portfolio": "Portfolio"
   },
   "hero": {
     "title": "Technical Journal",
-    "subtitle": "In-depth case studies on software and data projects"
+    "tagline": "Software engineering and data case studies documenting architecture, implementation, and lessons learned.",
+    "description": "Explore real-world projects covering backend, frontend, data engineering and system design. Each case study explains the problem, design decisions, implementation and key takeaways."
+  },  
+    "Projects": {
+    "sectionTitle": "Projects"
+  },
+    "ProjectCard": {
+    "readCaseStudy": "Read Case Study"
   }
 }
