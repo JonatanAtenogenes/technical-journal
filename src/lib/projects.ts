@@ -14,22 +14,25 @@ import { metadata as employeeAttritionEs } from '@/content/projects/employee-att
 import { meta as technicalJournalMeta } from '@/content/projects/technical-journal/meta';
 import { metadata as technicalJournalEn } from '@/content/projects/technical-journal/en/metadata';
 import { metadata as technicalJournalEs } from '@/content/projects/technical-journal/es/metadata';
-/*
 import { meta as networkSubnettingMeta } from '@/content/projects/network-subnetting/meta';
 import { metadata as networkSubnettingEn } from '@/content/projects/network-subnetting/en/metadata';
 import { metadata as networkSubnettingEs } from '@/content/projects/network-subnetting/es/metadata';
-*/
 
 // Structural data: one entry per project, locale-independent.
-const projectMetas: ProjectMeta[] = [technicalJournalMeta];
+const projectMetas: ProjectMeta[] = [
+  technicalJournalMeta,
+  networkSubnettingMeta,
+];
 
 // Translations: keyed by locale, then by slug.
 const translations: Record<Locale, Record<string, ProjectTranslation>> = {
   en: {
     'technical-journal': technicalJournalEn,
+    'network-subnetting': networkSubnettingEn,
   },
   es: {
     'technical-journal': technicalJournalEs,
+    'network-subnetting': networkSubnettingEs,
   },
 };
 

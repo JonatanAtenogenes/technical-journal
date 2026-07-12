@@ -1,0 +1,132 @@
+# Introducción
+
+Las redes de computadoras fueron una de las primeras áreas donde me di cuenta de que escribir software podía mejorar directamente la forma en que aprendía. Durante los cursos de redes, el subneteo manual de IPv4 requería resolver los mismos cálculos una y otra vez, dificultando distinguir entre errores conceptuales y errores de aritmética.
+
+En lugar de reemplazar el proceso de aprendizaje, construí una pequeña aplicación web que pudiera validar mis respuestas. Cada subred se seguía calculando a mano; la aplicación solo confirmaba si el resultado era correcto antes de pasar al siguiente ejercicio.
+
+El proyecto se convirtió tanto en una calculadora de subneteo como en una de mis primeras experiencias construyendo aplicaciones web completas con JavaScript puro.
+
+# Objetivos del Proyecto
+
+La aplicación se diseñó con tres objetivos en mente:
+
+- Verificar ejercicios manuales de subneteo.
+- Practicar JavaScript sin depender de frameworks.
+- Aprender cómo se estructuran las aplicaciones web responsivas.
+
+Aunque simples, estos objetivos convirtieron al proyecto en una oportunidad para combinar conceptos de redes con desarrollo frontend.
+
+# Entendiendo el Problema
+
+## Subneteo Manual
+
+El subneteo es una habilidad fundamental de redes que requiere entender direccionamiento IP, aritmética binaria, máscaras de subred, direcciones de broadcast y rangos de hosts.
+
+Aprender estos conceptos implica resolver decenas de ejercicios a mano.
+
+Desafortunadamente, cuando un cálculo está mal, suele ser difícil identificar qué paso intermedio causó el error.
+
+## ¿Por Qué una Herramienta de Validación?
+
+La mayoría de las calculadoras de subneteo disponibles dan la respuesta de inmediato.
+
+Aunque útiles, hacen poco por reforzar el razonamiento detrás de la solución.
+
+El objetivo de este proyecto era distinto.
+
+En lugar de reemplazar el trabajo manual, buscaba verificar cálculos ya realizados y dar retroalimentación inmediata.
+
+# Funcionalidades de la Aplicación
+
+## Cálculos Completos de IPv4
+
+La calculadora recibe una dirección IPv4 junto con el número de hosts requeridos y genera la información completa de la subred.
+
+Calcula:
+
+- ID de red
+- Dirección de broadcast
+- Primer host utilizable
+- Último host utilizable
+- Máscara de subred
+- Máscara wildcard
+- Prefijo CIDR
+- Número de hosts utilizables
+
+## Iteración Rápida
+
+La interfaz se diseñó intencionalmente ligera para poder validar varios ejercicios rápidamente sin navegar por múltiples páginas.
+
+# Arquitectura
+
+## JavaScript Puro
+
+El proyecto se desarrolló intencionalmente sin frameworks.
+
+Usar JavaScript puro facilitó entender:
+
+- Manipulación del DOM
+- Manejo de eventos
+- Validación de formularios
+- Funciones modulares
+- Separación entre lógica de negocio y presentación
+
+## Layout Responsivo
+
+Aunque la aplicación era relativamente pequeña, se convirtió en una oportunidad para practicar principios de diseño responsivo.
+
+La interfaz se adapta a dispositivos de escritorio y móviles manteniendo el mismo flujo de trabajo.
+
+# Pruebas
+
+## Pruebas Unitarias
+
+Uno de los objetivos del proyecto era asegurar que la lógica de cálculo se mantuviera correcta conforme la aplicación evolucionaba.
+
+Las funciones principales de subneteo se validaron con pruebas unitarias que cubrían configuraciones de red comunes y casos límite.
+
+Aunque el conjunto de pruebas era intencionalmente pequeño, introdujo la práctica de probar funciones puras de forma independiente a la interfaz de usuario.
+
+# Retos
+
+## Aritmética Binaria
+
+Traducir las reglas de subneteo a funciones determinísticas de JavaScript requirió manejar cuidadosamente operaciones binarias y límites de red.
+
+## Validación de Entrada del Usuario
+
+La calculadora también necesitaba rechazar direcciones IPv4 inválidas y valores de host no soportados antes de intentar cualquier cálculo.
+
+# Resultados
+
+La aplicación se volvió parte de mi flujo de estudio de redes.
+
+En lugar de pasar tiempo revisando cálculos manualmente, podía verificar cada ejercicio de inmediato y enfocarme en entender por qué ocurrían los errores.
+
+Más allá de redes, el proyecto reforzó mi comprensión de los fundamentos de desarrollo frontend antes de pasar a frameworks más grandes como React.
+
+# Aprendizajes
+
+## El Software Puede Apoyar el Aprendizaje
+
+Uno de los mayores aprendizajes de este proyecto fue descubrir que el software no siempre necesita resolver un problema de negocio.
+
+A veces el mejor proyecto es uno que mejora la forma en que aprendes.
+
+## Los Fundamentos Sólidos Importan
+
+Trabajar sin frameworks me obligó a entender cómo funcionan los navegadores, cómo JavaScript manipula el DOM, y cómo se construyen layouts responsivos desde los principios básicos.
+
+Esos fundamentos hicieron mucho más fácil aprender frameworks modernos de frontend más adelante.
+
+# Mejoras Futuras
+
+Posibles mejoras futuras incluyen:
+
+- Soporte para IPv6.
+- Cálculos de máscara de subred de longitud variable (VLSM).
+- Visualización de CIDR.
+- Visualizaciones de conversión binaria.
+- Ejercicios interactivos de subneteo.
+- Generación automática de problemas de práctica.
+- Exportación de reportes de cálculo.
