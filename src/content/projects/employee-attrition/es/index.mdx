@@ -502,4 +502,205 @@ Emergen varias observaciones importantes:
 - El dataset combina información numérica y categórica.
 - Algunas variables permanecen constantes para todos los empleados y pueden eliminarse de forma segura durante el preprocesamiento.
 
-Aun
+Aunque se requiere poca limpieza, esta etapa establece la confianza de que los datos representan con precisión la información disponible para el análisis.
+
+Con el dataset ya entendido, la siguiente etapa se enfoca en transformarlo en una estructura más limpia antes de cargarlo en una base de datos relacional para el análisis basado en SQL.
+
+# Etapa 3 — Preparación de Datos _(Planeado)_
+
+## Objetivo
+
+Una vez verificadas la estructura y calidad del dataset, el siguiente paso es preparar los datos para el análisis.
+
+Aunque el dataset de IBM HR Analytics ya está limpio en comparación con muchos datasets del mundo real, aún es necesaria una etapa de preparación para simplificar el modelo de datos, mejorar la legibilidad y asegurar consistencia antes de cargar la información en una base de datos relacional.
+
+En lugar de modificar el dataset crudo directamente, cada transformación se realiza de forma programática, haciendo que todo el pipeline de preprocesamiento sea reproducible.
+
+---
+
+## Transformaciones Planeadas
+
+La etapa de preparación se enfocará en mejorar la usabilidad analítica del dataset, en lugar de corregir problemas de calidad mayores.
+
+Las tareas planeadas incluyen:
+
+- Eliminar variables que contengan un único valor constante.
+- Renombrar columnas donde sea apropiado para mejorar la legibilidad.
+- Verificar los tipos de datos antes de la persistencia.
+- Validar la integridad del dataset transformado.
+- Exportar el dataset limpio a SQLite.
+
+El archivo CSV original siempre permanecerá sin cambios.
+
+Esto asegura que cada paso de preprocesamiento pueda reproducirse desde los datos crudos en cualquier momento.
+
+---
+
+## ¿Por Qué SQLite?
+
+En lugar de realizar todo el análisis directamente en pandas, el dataset procesado se carga en una base de datos relacional.
+
+Aunque SQLite es significativamente más simple que sistemas de bases de datos de producción como PostgreSQL, permite al proyecto simular un flujo de trabajo analítico realista sin introducir infraestructura innecesaria.
+
+Usar SQLite también ofrece la oportunidad de demostrar SQL como una herramienta analítica principal, en lugar de tratarla como una adición opcional.
+
+La base de datos se convierte, por lo tanto, en una capa intermedia entre la preparación de datos y el análisis exploratorio.
+
+---
+
+# Etapa 4 — Análisis en SQL _(Planeado)_
+
+## Objetivo
+
+Antes de crear visualizaciones, el proyecto responde intencionalmente las preguntas de negocio iniciales usando SQL.
+
+En muchas organizaciones, los analistas dedican una parte considerable de su tiempo a trabajar directamente con bases de datos relacionales.
+
+Desarrollar consultas analíticas se considera, por lo tanto, una habilidad fundamental, y este proyecto refleja esa realidad al colocar a SQL en el centro del flujo de trabajo.
+
+---
+
+## Preguntas de Negocio
+
+Entre los primeros análisis SQL planeados están:
+
+- Tasa general de rotación de empleados.
+- Rotación por departamento.
+- Rotación por puesto de trabajo.
+- Salario promedio por departamento.
+- Edad promedio de los empleados que dejaron la empresa.
+- Relación entre tiempo extra y rotación.
+- Relación entre satisfacción laboral y rotación.
+
+Cada consulta se documentará junto a su pregunta de negocio correspondiente, permitiendo que la implementación técnica y el razonamiento de negocio permanezcan estrechamente conectados.
+
+En lugar de presentar sentencias SQL aisladas, cada consulta irá seguida de una interpretación que explique qué significan los resultados desde una perspectiva de Recursos Humanos.
+
+---
+
+# Etapa 5 — Análisis Exploratorio de Datos _(Planeado)_
+
+## Objetivo
+
+SQL provee respuestas a preguntas de negocio estructuradas.
+
+El Análisis Exploratorio de Datos extiende esos hallazgos a través de visualizaciones, estadísticas descriptivas y comparaciones entre grupos de empleados.
+
+El propósito de esta etapa no es buscar patrones interesantes al azar, sino validar y expandir las conclusiones ya obtenidas a través de SQL.
+
+Python se convierte en la herramienta analítica principal durante esta etapa.
+
+---
+
+## Análisis Planeados
+
+Se planean varios análisis exploratorios, incluyendo:
+
+- Distribución de las edades de los empleados.
+- Ingreso mensual por departamento.
+- Rotación a través de diferentes puestos de trabajo.
+- Tiempo extra versus rotación de empleados.
+- Satisfacción laboral versus rotación.
+- Balance vida-trabajo versus rotación.
+- Correlación entre variables numéricas.
+- Comparación de empleados que se quedaron y empleados que se fueron.
+
+Siempre que sea posible, los resúmenes estadísticos se complementarán con visualizaciones que faciliten la interpretación de los hallazgos.
+
+---
+
+## Estrategia de Visualización
+
+Las visualizaciones están pensadas para comunicar hallazgos de negocio, no simplemente para demostrar el uso de bibliotecas de graficación.
+
+Cada figura incluida en este proyecto responderá una pregunta de negocio específica.
+
+El flujo de trabajo seguido a lo largo de esta etapa se mantendrá consistente.
+
+Pregunta de Negocio
+
+↓
+
+Análisis en Python
+
+↓
+
+Visualización
+
+↓
+
+Interpretación
+
+↓
+
+Hallazgo de Negocio
+
+Mantener esta estructura ayuda a asegurar que cada gráfica contribuya directamente a los objetivos establecidos durante el Entendimiento del Negocio.
+
+---
+
+# Etapa 6 — Conclusiones _(Planeado)_
+
+## Objetivo
+
+La etapa final sintetiza los resultados obtenidos a lo largo del análisis y los traduce en recomendaciones que puedan ser entendidas por interesados fuera del equipo técnico.
+
+En lugar de repetir estadísticas o visualizaciones, la conclusión se enfoca en responder las preguntas de negocio originales.
+
+Los temas que se espera abordar incluyen:
+
+- Qué variables parecen estar más fuertemente asociadas con la rotación de empleados.
+- Qué hallazgos pueden requerir mayor investigación.
+- Limitaciones del dataset disponible.
+- Recomendaciones para futuros análisis.
+- Posibles acciones de negocio sugeridas por los resultados.
+
+El objetivo es transformar los hallazgos analíticos en conocimiento práctico que apoye la toma de decisiones.
+
+---
+
+# Aprendizajes
+
+Aunque el proyecto todavía está en desarrollo activo, ya han surgido varios aprendizajes importantes.
+
+Uno de los más valiosos ha sido reconocer la importancia de separar el razonamiento analítico de los detalles de implementación.
+
+En lugar de colocar cada función dentro de un notebook, la lógica reutilizable se organiza en módulos de Python dedicados, mientras los notebooks se mantienen enfocados en las preguntas de negocio y la interpretación.
+
+Esta organización mejora la legibilidad, a la vez que hace que el flujo analítico sea más fácil de mantener conforme el proyecto crece.
+
+El proyecto también ha reforzado el valor de abordar el análisis de datos desde una perspectiva de negocio.
+
+En lugar de comenzar con visualizaciones o técnicas estadísticas, cada etapa inicia preguntando qué problema de negocio necesita resolverse.
+
+Este enfoque guía naturalmente tanto las consultas SQL como el análisis exploratorio, resultando en hallazgos que son más fáciles de comunicar y más relevantes para quienes toman decisiones.
+
+---
+
+# Mejoras Futuras
+
+Aunque el objetivo actual es completar el flujo analítico usando SQLite, el proyecto se ha diseñado para soportar futuras iteraciones.
+
+Las posibles mejoras incluyen:
+
+- Migrar de SQLite a PostgreSQL.
+- Expandir el análisis en SQL con consultas más avanzadas.
+- Introducir pruebas de hipótesis estadísticas.
+- Construir dashboards interactivos usando Power BI.
+- Comparar los enfoques de SQL y pandas para análisis seleccionados.
+- Explorar modelos predictivos después de completar el análisis descriptivo.
+- Publicar notebooks reutilizables con fines educativos.
+
+El enfoque actual, sin embargo, sigue siendo completar un análisis descriptivo robusto antes de introducir técnicas analíticas más avanzadas.
+
+---
+
+# Conclusión
+
+Este proyecto busca demostrar considerablemente más que dominio de pandas.
+
+Documenta el proceso analítico completo que sigue un Data Analyst, comenzando con un problema de negocio y terminando con hallazgos accionables.
+
+Al combinar una organización estructurada del proyecto, módulos de Python reutilizables, bases de datos relacionales, análisis en SQL y visualización exploratoria, el caso de estudio refleja un flujo de trabajo que se asemeja mucho más al análisis de datos profesional que a un notebook tradicional aislado.
+
+Conforme se completen etapas adicionales, este documento evolucionará junto con el proyecto, registrando no solo la implementación técnica, sino también las decisiones, los trade-offs y los aprendizajes a lo largo de su desarrollo.
