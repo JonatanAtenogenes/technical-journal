@@ -17,7 +17,10 @@ type FlatSection = { id: string; title: string };
 function flattenSections(items: TableOfContentsItem[]): FlatSection[] {
   return items.flatMap((item) => [
     { id: item.id, title: item.title },
-    ...(item.subitems ?? []),
+    ...(item.subitems ?? []).flatMap((subItem) => [
+      { id: subItem.id, title: subItem.title },
+      ...(subItem.subitems ?? []),
+    ]),
   ]);
 }
 
