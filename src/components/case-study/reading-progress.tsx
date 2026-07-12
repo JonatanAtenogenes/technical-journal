@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ChevronUpIcon } from 'lucide-react';
+import { HEADING_INDEX } from '@/lib/constants/secret-keys';
 
 type FlatSection = { id: string; title: string };
 
@@ -25,7 +26,10 @@ type ReadingProgressProps = {
 };
 
 export default function ReadingProgress({ items }: ReadingProgressProps) {
+  // Memoized so the reference only changes when `items` actually
+  // changes — prevents the effect below from re-running on every render.
   const sections = useMemo(() => flattenSections(items), [items]);
+
   const [progress, setProgress] = useState(0);
   const [activeId, setActiveId] = useState(sections[0]?.id);
 
@@ -76,6 +80,28 @@ export default function ReadingProgress({ items }: ReadingProgressProps) {
       window.history.replaceState(null, '', `#${activeId}`);
     }
   }, [activeId]);
+
+  // Restores reading position after a locale switch. LocaleSwitcher
+  // stores the active heading's index in sessionStorage right before
+  // navigating; here we read it once on mount, jump to the matching
+  // heading in the newly rendered (translated) article, and clear it.
+  useEffect(() => {
+    const saved = sessionStorage.getItem(HEADING_INDEX);
+
+    if (saved === null) return;
+
+    const index = Number(saved);
+    const target = sections[index];
+
+    if (target) {
+      const el = document.getElementById(target.id);
+      el?.scrollIntoView({ behavior: 'instant', block: 'start' });
+      setActiveId(target.id);
+    }
+
+    sessionStorage.removeItem(HEADING_INDEX);
+    // Intentionally run once on mount only.
+  }, []);
 
   const activeTitle =
     sections.find((section) => section.id === activeId)?.title ?? '';
