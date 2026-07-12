@@ -34,7 +34,6 @@ const translations: Record<Locale, Record<string, ProjectTranslation>> = {
 };
 
 export function getProjects(locale: Locale): Project[] {
-  console.log(locale);
   return projectMetas.map((meta) => ({
     ...meta,
     ...translations[locale][meta.slug],

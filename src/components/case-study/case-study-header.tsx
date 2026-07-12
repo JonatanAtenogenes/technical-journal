@@ -1,7 +1,8 @@
 import { ArrowLeftIcon } from 'lucide-react';
 import Link from 'next/link';
 import ThemeToggle from '@/components/shared/theme-toggle';
-import { useTranslations } from "next-intl"
+import { useTranslations } from 'next-intl';
+import LocaleSwitcher from '@/components/shared/locale-switcher';
 
 export default function CaseStudyHeader() {
   const t = useTranslations('caseStudyHeader');
@@ -16,7 +17,10 @@ export default function CaseStudyHeader() {
           {t('caseStudies')}
         </Link>
 
-        <ThemeToggle />
+        <div className={'flex items-center ml-1 border-l pl-2'}>
+          <LocaleSwitcher />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import ThemeToggle from '@/components/shared/theme-toggle';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { portfolioUrls } from '@/lib/config/portfolio';
+import LocaleSwitcher from '@/components/shared/locale-switcher';
 
 export default function Header() {
   const t = useTranslations('header');
+  const locale = useLocale();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
@@ -29,7 +32,7 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href={'https://jonatan-portfolio.onrender.com/'}
+                href={portfolioUrls[locale]}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -37,7 +40,8 @@ export default function Header() {
                 {t('portfolio')}
               </Link>
             </li>
-            <li className="ml-1 border-l pl-2">
+            <li className="flex items-center ml-1 border-l pl-2">
+              <LocaleSwitcher />
               <ThemeToggle />
             </li>
           </ul>
