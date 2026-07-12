@@ -1,5 +1,11 @@
 export type ProjectStatus = 'completed' | 'in-progress' | 'paused' | 'archived';
 
+export type ProjectLink = {
+  label: string;
+  url: string;
+  icon?: 'github' | 'external-link' | 'globe';
+}
+
 export type ProjectMeta = {
   slug: string;
   cover: string;
@@ -7,6 +13,7 @@ export type ProjectMeta = {
   status: ProjectStatus;
   startYear: number;
   endYear?: number;
+  links?: ProjectLink[];
 };
 
 export type ProjectTranslation = {

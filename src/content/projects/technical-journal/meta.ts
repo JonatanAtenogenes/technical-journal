@@ -1,4 +1,5 @@
 import type { ProjectMeta } from '@/lib/types/project';
+import { LINKS } from '@/lib/constants/secret-keys';
 
 export const meta: ProjectMeta = {
   slug: 'technical-journal',
@@ -14,4 +15,16 @@ export const meta: ProjectMeta = {
   ],
   status: 'in-progress',
   startYear: 2026,
+  links: [
+    {
+      label: LINKS.repository,
+      url: 'https://github.com/JonatanAtenogenes/technical-journal',
+      icon: 'github',
+    },
+    {
+      label: LINKS.demo,
+      url: 'https://technical-journal.onrender.com',
+      icon: 'globe',
+    },
+  ],
 };
