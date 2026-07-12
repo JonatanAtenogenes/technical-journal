@@ -131,7 +131,11 @@ export default function ReadingProgress({ items }: ReadingProgressProps) {
             {activeTitle}
             <ChevronUpIcon className="size-3" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="top">
+          <DropdownMenuContent
+            className={'bg-popover/95 before:backdrop-blur-none'}
+            align="start"
+            side="top"
+          >
             {sections.map((section) => (
               <DropdownMenuItem
                 key={section.id}
