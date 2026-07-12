@@ -196,7 +196,7 @@ The platform adopted locale-prefixed routing using **next-intl**.
 English remains the default language, while Spanish is served under its own URL hierarchy.
 
 ```text
-/
+/en
 ```
 
 ```text
@@ -358,6 +358,50 @@ Because metadata, articles, and application logic already had clearly defined re
 
 More broadly, this iteration reinforced a recurring lesson throughout the project: significant architectural changes become much easier to implement when the underlying system has already been designed around clear boundaries and incremental evolution.
 
+---
+
+# Iteration 3 — Professional Code Block Rendering
+
+As the number of case studies grew, plain code blocks became a visible gap between Technical Journal and the documentation platforms that inspired it. Multi-file walkthroughs, terminal commands, and diffs all looked identical, with no syntax highlighting, no file context, and no way to distinguish added or removed lines.
+
+This iteration focused on closing that gap without compromising the platform's static-first architecture or introducing a dependency that would fight the existing design system.
+
+## Why Add This
+
+A documentation platform inspired by Vercel Docs, GitHub Docs, and Stripe Docs cannot rely on unstyled code blocks. Code is not incidental to a case study—it is frequently the most important part of the explanation, and it deserves the same level of visual care as the surrounding typography.
+
+Beyond aesthetics, several practical needs had accumulated across existing articles: distinguishing which file a snippet belonged to, highlighting specific lines being discussed, and making long code samples easier to scan without leaving the reading flow.
+
+## Choosing Expressive Code
+
+Expressive Code was selected over lighter alternatives such as `rehype-pretty-code` because it provides these capabilities out of the box rather than requiring them to be built manually: file name frames, line numbers, diff highlighting, collapsible sections, and terminal-style windows.
+
+Although Expressive Code originates from the Astro ecosystem, it ships a framework-agnostic integration, `rehype-expressive-code`, built specifically for any rehype-based pipeline—including the one already powering this platform's MDX rendering.
+
+## Integrating Through rehype, Not next.config
+
+Most documentation for `rehype-expressive-code` assumes an integration through `@next/mdx`, registering the plugin inside `next.config.js`. Technical Journal does not use `@next/mdx`; MDX is compiled at request time through `next-mdx-remote/rsc`, directly inside the Server Component that renders each case study.
+
+The plugin was registered instead in the `rehypePlugins` array passed to `MDXRemote`, alongside the existing `remark-gfm` and `rehype-slug` plugins. Because this compilation happens in regular Node.js execution rather than through Turbopack's Rust-based MDX loader, passing a plugin function directly introduced none of the serialization restrictions that apply to the `next.config.js` approach.
+
+This distinction mattered: it meant the existing MDX pipeline could be extended without introducing a second, config-based compilation path alongside it.
+
+## Matching the Existing Design System
+
+The main risk of adopting a third-party code rendering library was visual inconsistency—code blocks that looked like an embedded widget rather than part of the site.
+
+Two configuration decisions addressed this directly.
+
+Theme switching was tied to the platform's existing dark mode implementation. Expressive Code defaults to a `prefers-color-scheme` media query, which would have ignored the manual toggle already built with `next-themes`. Disabling `useDarkModeMediaQuery` and configuring `themeCssSelector` to match the site's `.dark` class strategy made code blocks switch themes in sync with the rest of the interface, rather than following the operating system independently.
+
+Style overrides were mapped to the project's own CSS custom properties—border radius, border color, and font family—instead of Expressive Code's defaults. This kept code blocks visually anchored to the same design tokens used throughout every other component.
+
+## Lessons Learned
+
+This iteration required no changes to the content model or the MDX authoring workflow. Existing fenced code blocks across every case study, in both languages, gained syntax highlighting, file name frames, and line numbers automatically the next time they were rendered—no article needed to be rewritten.
+
+It also reinforced a pattern already established during internationalization: because the MDX rendering pipeline had a single, well-defined entry point, extending it with a new capability meant adding one plugin to one array, rather than touching every place where content is rendered.
+
 # Technical Decisions
 
 Although the platform has evolved through multiple iterations, several architectural decisions have remained consistent since the beginning. These choices continue to shape both the implementation and the workflow used to create new case studies.
@@ -428,6 +472,7 @@ At the time of writing, Technical Journal supports:
 * Reading position preservation when switching languages.
 * Technology tags.
 * Component-based translation dictionaries.
+* Enhanced code block rendering with syntax highlighting.
 
 The platform already functions as a complete technical documentation system while remaining intentionally lightweight and easy to maintain.
 
