@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl';
+
 export type TableOfContentsItem = {
   id: string;
   title: string;
@@ -9,9 +11,11 @@ type TableOfContentsProps = {
 };
 
 export default function TableOfContents({ items }: TableOfContentsProps) {
+  const t = useTranslations('tableOfContents');
+
   return (
-    <nav aria-label="Table of contents">
-      <p className="mt-4 space-y-4">Contents</p>
+    <nav aria-label={t('ariaLabel')}>
+      <p className="mt-4 space-y-4">{t('title')}</p>
 
       <ol className="mt-4 space-y-4">
         {items.map((item, index) => (

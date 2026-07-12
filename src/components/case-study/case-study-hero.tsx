@@ -1,8 +1,11 @@
-import { formatProjectYears, projectStatusLabels } from '@/lib/project-status';
+import { formatProjectYears } from '@/lib/project-status';
 import { Project } from '@/lib/types/project';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 
 export default function CaseStudyHero({ project }: { project: Project }) {
+  const t = useTranslations('projectStatus');
+
   return (
     <div>
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
@@ -22,7 +25,7 @@ export default function CaseStudyHero({ project }: { project: Project }) {
         ))}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">
-        {projectStatusLabels[project.status]} .{' '}
+        {t(project.status)} .{' '}
         {formatProjectYears(project.startYear, project.endYear)}
       </p>
     </div>

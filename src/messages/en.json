@@ -8,11 +8,24 @@
     "title": "Technical Journal",
     "tagline": "Software engineering and data case studies documenting architecture, implementation, and lessons learned.",
     "description": "Explore real-world projects covering backend, frontend, data engineering and system design. Each case study explains the problem, design decisions, implementation and key takeaways."
-  },  
-    "Projects": {
+  },
+  "projects": {
     "sectionTitle": "Projects"
   },
-    "ProjectCard": {
+   "projectCard": {
     "readCaseStudy": "Read Case Study"
+  },
+  "caseStudyHeader": {
+    "caseStudies": "Case Studies"
+  },
+  "tableOfContents": {
+    "title": "Contents",
+    "ariaLabel": "Table of contents"
+  },
+  "projectStatus": {
+    "completed": "Completed",
+    "in-progress": "In Progress",
+    "paused": "Paused",
+    "archived": "Archived"
   }
 }

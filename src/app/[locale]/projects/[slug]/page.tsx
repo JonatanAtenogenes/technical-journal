@@ -9,26 +9,34 @@ import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import { getTableOfContents } from '@/lib/get-table-of-contents';
 import ReadingProgress from '@/components/case-study/reading-progress';
+import type { Locale } from 'next-intl';
+import { routing } from '@/i18n/routing';
 
 type ProjectPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: Locale; slug: string }>;
 };
 
-// Pre-renders one static route per registered project at build time —
-// consistent with the "fully static" architecture from the project vision.
+// Pre-renders one static route per locale × registered project at build
+// time — consistent with the "fully static" architecture from the
+// project vision, now extended across both languages.
 export function generateStaticParams() {
-  return getProjects().map((project) => ({ slug: project.slug }));
+  return routing.locales.flatMap((locale) =>
+    getProjects(locale).map((project) => ({
+      locale,
+      slug: project.slug,
+    })),
+  );
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const { locale, slug } = await params;
+  const project = getProjectBySlug(locale, slug);
 
   if (!project) {
     notFound();
   }
 
-  const content = await getProjectContent(slug);
+  const content = await getProjectContent(locale, slug);
 
   if (!content) {
     notFound();

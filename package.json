@@ -33,6 +33,7 @@
     "mdast-util-to-string": "^4.0.0",
     "next-intl": "^4.13.2",
     "next-mdx-remote": "^6.0.0",
+    "prettier": "^3.9.5",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",

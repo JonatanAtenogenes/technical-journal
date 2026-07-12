@@ -14,5 +14,18 @@
   },
   "projectCard": {
     "readCaseStudy": "Leer caso de estudio"
+  },
+  "caseStudyHeader": {
+    "caseStudies": "Casos de Estudio"
+  },
+  "tableOfContents": {
+    "title": "Contenido",
+    "ariaLabel": "Tabla de contenidos"
+  },
+  "projectStatus": {
+    "completed": "Completado",
+    "in-progress": "En progreso",
+    "paused": "Pausado",
+    "archived": "Archivado"
   }
 }
