@@ -14,7 +14,4 @@ export const expressiveCodeOptions: RehypeExpressiveCodeOptions = {
       shadowColor: 'transparent',
     },
   },
-  defaultProps: {
-    showLineNumbers: false,
-  },
 };
