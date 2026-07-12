@@ -1,173 +1,490 @@
-# Descripción General
+# Resumen
 
-Technical Journal es una plataforma de documentación construida para presentar proyectos de ingeniería de software, infraestructura y datos como casos de estudio técnicos.
+Technical Journal es una plataforma de documentación diseñada para presentar proyectos de ingeniería de software, infraestructura y análisis de datos como casos de estudio técnicos.
 
-En lugar de mostrar los proyectos como demos aislados o simples repositorios de GitHub, cada entrada documenta el proceso de ingeniería completo: el problema original, el contexto de negocio, la arquitectura, la implementación, las decisiones técnicas, los trade-offs, las iteraciones y los resultados finales.
+En lugar de mostrar proyectos como simples demostraciones o repositorios de GitHub, cada entrada documenta el proceso completo de ingeniería detrás de su desarrollo: el problema original, el contexto de negocio, la arquitectura, la implementación, las decisiones técnicas, los compromisos asumidos, las distintas iteraciones y las lecciones aprendidas.
 
-El objetivo es cerrar la brecha entre un portafolio tradicional y el trabajo de ingeniería real. En lugar de responder a la pregunta _"¿Qué has construido?"_, la plataforma responde _"¿Cómo lo construiste, y por qué?"_
+La plataforma busca cerrar la brecha entre un portafolio tradicional y el trabajo real de un ingeniero. Mientras un portafolio responde a la pregunta *«¿Qué has construido?»*, Technical Journal intenta responder otra igualmente importante: *«¿Cómo lo construiste y por qué tomaste esas decisiones?»*
 
-Cada proyecto se trata como documentación viva que puede evolucionar con el tiempo conforme se agregan nuevas funcionalidades, mejoras y aprendizajes.
+Cada proyecto se trata como documentación viva. Los casos de estudio evolucionan junto con el software que describen, permitiendo incorporar nuevas funcionalidades, cambios de arquitectura y aprendizajes a medida que el proyecto continúa creciendo, en lugar de quedar congelados en el momento de su primera versión.
 
-# Por Qué Construir Esto
+En última instancia, el objetivo es que el journal se convierta en un cuaderno de ingeniería a largo plazo, más que en una simple colección de proyectos terminados.
 
-Los portafolios tradicionales son excelentes para demostrar qué tecnologías se usaron, pero rara vez comunican el razonamiento detrás de un proyecto.
+# ¿Por Qué Construirlo?
 
-Un reclutador puede ver React, .NET, SQL, Docker o Python, pero nunca entender cómo se eligieron esas tecnologías, qué problemas resolvieron, o qué compromisos se hicieron durante el desarrollo.
+Los portafolios tradicionales son excelentes para mostrar tecnologías y proyectos terminados, pero rara vez consiguen transmitir el razonamiento que hay detrás de una solución técnica.
 
-Technical Journal nació para documentar esas decisiones.
+Un reclutador puede identificar React, .NET, Docker, SQL o Python dentro de un proyecto y, aun así, no comprender por qué se eligieron esas tecnologías, qué alternativas se evaluaron, qué restricciones influyeron en la arquitectura o cómo evolucionó la implementación conforme aparecieron nuevos requisitos.
 
-El portafolio funciona como punto de entrada, ofreciendo un resumen conciso de cada proyecto, mientras que Technical Journal es la documentación técnica completa detrás de él.
+Con frecuencia, esas decisiones representan la parte más valiosa de un proyecto, pero difícilmente caben dentro de una tarjeta de portafolio o en un README.
 
-Esta separación permite que el portafolio se mantenga limpio y accesible sin sacrificar la profundidad que se espera de un caso de estudio de ingeniería.
+Technical Journal nació precisamente para documentar ese contexto que normalmente se pierde.
+
+El portafolio funciona como el punto de entrada, ofreciendo una visión general de cada proyecto y facilitando su descubrimiento. Technical Journal lo complementa actuando como la documentación técnica detrás de cada uno, donde es posible profundizar en la implementación, las decisiones arquitectónicas y la evolución del desarrollo sin comprometer la simplicidad del portafolio.
+
+Separar ambas responsabilidades permite que cada plataforma cumpla mejor su propósito. El portafolio permanece limpio, accesible y orientado a una primera impresión, mientras que el journal ofrece el nivel de profundidad técnica esperado en un caso de estudio de ingeniería.
 
 # Principios de Diseño
 
-Varios principios guían el diseño de la plataforma.
+Diversos principios guían cada decisión de arquitectura e implementación dentro de la plataforma.
 
-- La documentación es lo primero.
-- El contenido debe permanecer independiente de la presentación.
-- Cada proyecto debe seguir una estructura consistente.
-- Escribir debe requerir el menor boilerplate posible.
-- La plataforma debe permanecer completamente estática.
-- Agregar nuevos proyectos debe requerir configuración mínima.
-- Leer artículos técnicos largos debe ser cómodo tanto en desktop como en mobile.
+## La Documentación Como Prioridad
 
-En lugar de funcionar como una plataforma de blogging, la aplicación está diseñada intencionalmente como un diario técnico (technical journal).
+La documentación se considera un producto principal del desarrollo, no una tarea que se realiza una vez terminado el código.
 
-# Modelo de Contenido
+La aplicación existe para facilitar la escritura y lectura de documentación técnica. Cada nueva funcionalidad se evalúa en función de si mejora el proceso de documentar proyectos de ingeniería o la experiencia de quienes los leen.
 
-Cada proyecto se almacena en su propio directorio dentro de la carpeta de contenido.
+## Separación de Responsabilidades
 
-Cada proyecto se divide en dos archivos con responsabilidades claramente separadas.
+El contenido, la presentación, el enrutamiento y los metadatos permanecen intencionalmente separados.
 
-- `metadata.ts` guarda la información estructurada usada a lo largo de la aplicación: títulos, descripciones, tags, tecnologías, estado de publicación, imágenes de portada y metadata de SEO a futuro.
-- `index.mdx` contiene el artículo en sí. Se enfoca exclusivamente en la escritura técnica, sin incluir lógica de presentación, ruteo o navegación.
+La documentación técnica nunca debería contener lógica de presentación, y los componentes de la interfaz no deberían conocer la estructura interna de un artículo. Esta separación permite que tanto el modelo de contenido como la interfaz evolucionen de manera independiente.
 
-Esta separación mantiene el modelo de contenido predecible, permitiendo que la interfaz evolucione de forma independiente a la documentación.
+## Estático Por Defecto
+
+Siempre que es posible, el contenido se genera durante el proceso de compilación.
+
+Evitar bases de datos y APIs en tiempo de ejecución simplifica el despliegue, mejora la confiabilidad y permite aprovechar las ventajas de rendimiento de los sitios estáticos sin sacrificar flexibilidad para la escritura técnica.
+
+## Arquitectura Incremental
+
+Las funcionalidades se incorporan mediante pequeñas iteraciones independientes en lugar de grandes abstracciones diseñadas desde el inicio.
+
+En vez de intentar anticipar todos los requisitos futuros, la plataforma evoluciona conforme aparecen necesidades reales. Las abstracciones solo se introducen cuando un flujo de trabajo manual demuestra que resuelven un problema existente.
+
+Esta filosofía mantiene la complejidad bajo control y permite que la arquitectura crezca de forma natural.
+
+## Consistencia Antes Que Flexibilidad
+
+Todos los casos de estudio siguen una estructura común.
+
+Aunque cada proyecto sea diferente, mantener una organización consistente hace que la documentación sea más sencilla de escribir y mucho más fácil de leer. El lector siempre sabe dónde encontrar las decisiones de arquitectura, los detalles de implementación y las lecciones aprendidas, independientemente del proyecto que esté consultando.
+
+## Lectura Cómoda Para Documentación Extensa
+
+La plataforma está diseñada para leer artículos técnicos largos, no para consumir publicaciones breves como las de un blog.
+
+La navegación, la tipografía, los espacios, el indicador de progreso y el diseño responsivo están pensados para reducir la fricción durante sesiones de lectura prolongadas tanto en computadoras como en dispositivos móviles.
 
 # Arquitectura
 
-La aplicación está construida con Next.js usando el App Router y React Server Components.
+Technical Journal está construido con Next.js utilizando App Router y React Server Components.
 
-El contenido de los proyectos se lee directamente del sistema de archivos, en lugar de depender de APIs externas o un CMS.
+La aplicación fue concebida como una plataforma completamente estática. Cada proyecto se descubre directamente desde el sistema de archivos durante la compilación, eliminando la necesidad de bases de datos, APIs o un sistema de gestión de contenido, mientras se mantiene un proceso de despliegue simple.
 
-Los archivos MDX se renderizan bajo demanda, permitiendo que la documentación se mantenga cerca del código fuente sin sacrificar una experiencia de escritura limpia.
+Cada caso de estudio combina metadatos estructurados con documentos MDX, permitiendo que la documentación permanezca junto al código fuente sin perder una experiencia de escritura limpia y cómoda. Al vivir dentro del mismo repositorio, la documentación evoluciona mediante el mismo flujo de trabajo basado en Git que el resto del software.
 
-Al ser un proyecto completamente estático, el deployment se mantiene simple sin comprometer el rendimiento.
+La mayor parte del renderizado se realiza mediante React Server Components, reduciendo al mínimo el JavaScript enviado al cliente. Las funcionalidades interactivas —como el indicador de progreso de lectura, la navegación, el cambio de tema y otros comportamientos de la interfaz— permanecen aisladas en componentes de cliente específicos.
+
+Esta arquitectura prioriza la simplicidad, la mantenibilidad y el rendimiento, al mismo tiempo que proporciona una base suficientemente flexible para que la plataforma continúe creciendo sin requerir cambios estructurales importantes.
+
+# Modelo de Contenido
+
+Cada proyecto documentado reside dentro de su propio directorio en la carpeta de contenido.
+
+En lugar de almacenar toda la información en un único archivo, las responsabilidades se dividen según el tipo de información que representan.
+
+* `metadata.ts` contiene la información estructurada utilizada por la aplicación, incluyendo títulos, descripciones, estado de publicación, tecnologías, etiquetas, imágenes de portada, fechas y futuros metadatos para SEO.
+* `index.mdx` contiene el artículo técnico propiamente dicho. Su contenido se centra exclusivamente en la documentación, sin incluir lógica de presentación, navegación o comportamiento específico de la aplicación.
+
+Esta separación permite que la interfaz consuma información estructurada mientras la documentación permanece completamente independiente de la implementación de la plataforma.
+
+Conforme el proyecto evolucione, esta organización facilitará la incorporación de nuevos campos de metadatos o mejoras en la interfaz sin necesidad de modificar los artículos existentes.
 
 # Experiencia de Usuario
 
-La experiencia de lectura es uno de los objetivos centrales del diseño del proyecto.
+La experiencia de lectura es uno de los principales objetivos del proyecto.
 
-Cada caso de estudio está estructurado alrededor de varios elementos de interfaz pensados para mejorar la navegación en artículos técnicos largos.
+En lugar de presentar la documentación técnica como grandes bloques de texto, la interfaz proporciona continuamente información contextual que ayuda al lector a navegar artículos extensos sin perder su ubicación.
 
-Estos incluyen:
+Actualmente, la plataforma incluye:
 
-- Un hero dedicado que resume el caso de estudio.
-- Navegación generada automáticamente.
-- Indicadores de progreso de lectura.
-- Navegación fija (sticky) en desktop.
-- Layouts responsivos diseñados mobile-first.
-- Tags de tecnología.
-- Temas claro y oscuro.
+* Un encabezado dedicado para cada caso de estudio.
+* Una tabla de contenidos generada automáticamente.
+* Indicadores de progreso de lectura.
+* Navegación fija en escritorio.
+* Diseños responsivos con enfoque *mobile-first*.
+* Etiquetas de tecnologías.
+* Temas claro y oscuro.
 
-En lugar de abrumar al lector con bloques largos de texto, la interfaz ofrece contexto visual constante sobre su posición actual dentro del documento.
+Estos elementos trabajan en conjunto para reducir la carga cognitiva durante la lectura de documentación extensa. En lugar de obligar al lector a buscar manualmente una sección específica, la interfaz comunica constantemente dónde se encuentra, cuánto contenido queda por recorrer y cómo está organizado el documento.
+
+El resultado es una experiencia más cercana a la lectura de documentación técnica profesional que a la de un blog tradicional.
 
 # Filosofía de Desarrollo
 
 La plataforma sigue un proceso de desarrollo iterativo.
 
-En lugar de diseñar cada funcionalidad antes de implementarla, el proyecto evoluciona a través de iteraciones pequeñas e independientemente valiosas.
+En lugar de diseñar todos los sistemas antes de escribir una sola línea de código, cada funcionalidad comienza con la implementación más sencilla capaz de aportar valor. Las abstracciones, automatizaciones y mejoras arquitectónicas se introducen únicamente cuando la experiencia práctica demuestra que realmente son necesarias.
 
-Cada iteración comienza con una implementación mínima viable, antes de introducir abstracciones o automatización adicionales.
+Este enfoque reduce la complejidad innecesaria y permite que las decisiones de arquitectura surjan como consecuencia del uso real de la aplicación, y no de suposiciones.
 
-Este enfoque reduce la complejidad innecesaria, permitiendo que las decisiones arquitectónicas surjan de forma natural a partir del uso real.
+## Construyendo Primero la Interfaz
 
-## Construyendo la Interfaz Primero
+Antes de incorporar MDX, modelos de metadatos, carga de contenido desde el sistema de archivos o descubrimiento automático de proyectos, toda la interfaz fue desarrollada utilizando datos simulados.
 
-Antes de introducir MDX, metadata o carga dinámica de contenido, la interfaz completa se construyó usando datos ficticios (mock data).
+Esto permitió validar el espaciado, la tipografía, los diseños responsivos, los patrones de navegación y el flujo general de lectura sin tener que resolver simultáneamente problemas relacionados con el modelo de datos.
 
-Esto permitió validar espaciado, navegación, layouts responsivos, tipografía y flujo de lectura sin agregar complejidad adicional.
+Al separar el diseño de la interfaz de la implementación del contenido, el modelo de datos pudo diseñarse posteriormente sobre necesidades reales en lugar de hipótesis.
 
-Una vez que la interfaz demostró ser estable, el modelo de datos subyacente pudo diseñarse alrededor de requerimientos reales en lugar de suposiciones.
+## Incorporando Contenido Real
 
-## Introduciendo Contenido Real
+Una vez que la interfaz demostró ser estable, la aplicación comenzó a consumir metadatos reales y documentos MDX.
 
-Después de validar el layout, la aplicación comenzó a leer metadata real de los proyectos y archivos MDX.
+Como la capa de presentación ya había sido validada, la transición desde datos simulados requirió muy pocos cambios estructurales. Los componentes existentes se adaptaron de forma natural a las nuevas fuentes de información, confirmando que las decisiones iniciales de arquitectura habían producido una base flexible.
 
-La interfaz existente requirió casi ningún cambio estructural, porque el modelo de datos ya había sido moldeado por los prototipos anteriores.
+Esta transición incremental redujo considerablemente la complejidad de la implementación y reforzó uno de los principios fundamentales del proyecto: resolver un problema a la vez, validar la solución y solo entonces avanzar hacia la siguiente capa de abstracción.
 
-Esta transición incremental simplificó considerablemente la implementación.
+# Evolución del Proyecto
+
+Uno de los objetivos originales de Technical Journal fue documentar el trabajo de ingeniería conforme evoluciona, en lugar de describir únicamente el resultado final.
+
+Por esa razón, este caso de estudio sigue la misma filosofía que la propia plataforma. En lugar de permanecer estático después de la primera versión, crece junto con la aplicación, documentando los cambios importantes de arquitectura, los detalles de implementación, los compromisos asumidos y las lecciones aprendidas conforme se incorporan nuevas funcionalidades.
+
+Cada iteración importante se trata como un hito de ingeniería independiente.
+
+---
+
+# Iteración 1 — Construyendo la Base
+
+La primera iteración estuvo enfocada en validar la idea central de la plataforma: reemplazar las páginas tradicionales de proyectos por casos de estudio técnicos.
+
+En esta etapa, la prioridad no era añadir funcionalidades, sino establecer una arquitectura capaz de soportar documentación técnica extensa sin dejar de ser lo suficientemente sencilla para mantenerla a largo plazo.
+
+Desde el principio se tomaron varias decisiones fundamentales.
+
+El contenido de los proyectos viviría directamente dentro del repositorio en lugar de almacenarse en una base de datos.
+
+Los artículos se escribirían utilizando MDX para mantener la documentación cerca del código fuente sin renunciar a una experiencia de escritura limpia.
+
+Los metadatos estructurados permanecerían separados del contenido del artículo para que la aplicación pudiera consumir información de los proyectos sin acoplarse a la documentación escrita.
+
+La navegación se generaría automáticamente a partir de los encabezados del documento, eliminando la necesidad de mantener una estructura de navegación independiente.
+
+Finalmente, toda la plataforma sería completamente estática, evitando infraestructura innecesaria y maximizando tanto el rendimiento como la simplicidad del despliegue.
+
+Aunque estas decisiones parecían relativamente pequeñas, terminaron definiendo prácticamente todas las funcionalidades implementadas posteriormente.
+
+En lugar de intentar anticipar necesidades futuras, la arquitectura inicial se limitó a resolver los problemas que realmente existían en ese momento.
+
+Esto permitió construir una base limpia que las siguientes iteraciones pudieron extender sin requerir reescrituras importantes.
+
+---
+
+# Iteración 2 — Internacionalización
+
+Conforme la plataforma fue madurando, el soporte para múltiples idiomas se convirtió en la primera gran evolución arquitectónica del proyecto.
+
+A diferencia de añadir una funcionalidad aislada, la internacionalización afectó prácticamente todas las capas de la aplicación: el sistema de rutas, la organización del contenido, los metadatos, la navegación e incluso algunos aspectos de la experiencia de lectura.
+
+En lugar de tratar la traducción como una característica añadida al final del desarrollo, el objetivo fue convertir el soporte para múltiples idiomas en una parte fundamental de la arquitectura.
+
+## ¿Por Qué Agregar Internacionalización?
+
+La audiencia de la plataforma no se limita a desarrolladores que hablan inglés.
+
+Si el propósito de Technical Journal es explicar decisiones de ingeniería, esas explicaciones deberían estar disponibles en el idioma con el que el lector se sienta más cómodo.
+
+Una simple opción para cambiar el idioma desde el cliente habría permitido traducir la interfaz visible, pero no habría generado URLs independientes por idioma, páginas indexables por separado ni metadatos localizados.
+
+Por ello, la implementación se diseñó para que cada idioma fuera una versión completa de la aplicación y no simplemente una traducción aplicada sobre la interfaz existente.
+
+## Enrutamiento Dependiente del Idioma
+
+La plataforma adoptó un sistema de rutas localizadas utilizando **next-intl**.
+
+El inglés permanece como idioma principal, mientras que el español se publica bajo su propio prefijo de URL.
+
+```text
+/
+```
+
+```text
+/es
+```
+
+Todas las páginas —la página principal, el listado de proyectos y cada caso de estudio— están disponibles mediante su propia ruta localizada.
+
+Este enfoque aporta varias ventajas.
+
+Cada idioma puede ser indexado de forma independiente por los motores de búsqueda.
+
+Las páginas pueden compartirse directamente en un idioma específico.
+
+Los React Server Components reciben el idioma activo durante el renderizado sin necesidad de sincronización adicional desde el cliente.
+
+Como la aplicación ya era completamente estática, la internacionalización simplemente amplió el proceso de generación existente.
+
+`generateStaticParams` ahora produce todas las combinaciones posibles entre proyectos e idiomas soportados, permitiendo que cada versión localizada continúe generándose durante la compilación.
+
+## Un Modelo de Contenido Bilingüe
+
+La incorporación de múltiples idiomas obligó a replantear la organización del contenido.
+
+Originalmente, cada proyecto estaba compuesto únicamente por un archivo de metadatos y un documento MDX.
+
+Con la internacionalización, parte de esa información necesitaba traducirse mientras que otra permanecía exactamente igual sin importar el idioma.
+
+En lugar de duplicar completamente la definición de cada proyecto, el modelo de contenido se dividió en tres capas independientes.
+
+```text
+project/
+├── meta.ts
+├── en/
+│   ├── metadata.ts
+│   └── index.mdx
+└── es/
+    ├── metadata.ts
+    └── index.mdx
+```
+
+Cada una de ellas tiene una responsabilidad claramente definida.
+
+* `meta.ts` almacena la información independiente del idioma, como el estado de publicación, las tecnologías, las imágenes de portada, las etiquetas y los años.
+* `metadata.ts` contiene únicamente los campos traducibles, como el título, la categoría y la descripción.
+* `index.mdx` contiene el artículo correspondiente a cada idioma.
+
+Separar la información estructural del contenido traducible eliminó duplicación innecesaria y simplificó considerablemente el mantenimiento.
+
+Agregar un nuevo idioma ya no implica copiar grandes objetos de metadatos, sino únicamente traducir la información que realmente cambia.
+
+## Localizando la Interfaz
+
+La internacionalización va más allá del contenido de los artículos.
+
+Los textos de navegación, botones, encabezados de sección, etiquetas y demás elementos de la interfaz fueron extraídos a diccionarios de traducción.
+
+En lugar de organizar las traducciones por página, estos diccionarios siguen la misma estructura que los componentes de la aplicación.
+
+Un componente compartido, como el encabezado, mantiene sus propias traducciones, mientras que los componentes específicos de una página contienen únicamente los textos que utilizan.
+
+Esta organización refleja directamente la arquitectura del proyecto y facilita localizar cada cadena de texto conforme la aplicación continúa creciendo.
+
+## Navegación al Portafolio Según el Idioma
+
+Technical Journal y el portafolio fueron concebidos como dos plataformas complementarias.
+
+Antes de implementar la internacionalización, el enlace hacia el portafolio apuntaba siempre al mismo sitio, independientemente del idioma desde el cual navegara el usuario.
+
+Ahora ese enlace se resuelve dinámicamente.
+
+Un visitante que navega el journal en inglés es dirigido automáticamente a la versión en inglés del portafolio, mientras que un lector en español accede directamente a la versión localizada.
+
+Aunque se trata de un cambio relativamente pequeño, elimina cambios innecesarios de contexto y mantiene una experiencia consistente entre ambas plataformas.
+
+## Conservando la Posición de Lectura
+
+Durante la implementación apareció un problema inesperado relacionado con la experiencia de usuario.
+
+Al cambiar de idioma mientras se leía un artículo, la página traducida siempre comenzaba desde el inicio del documento.
+
+Inicialmente parecía suficiente conservar el fragmento (`#hash`) de la URL.
+
+Sin embargo, los encabezados traducidos generan identificadores distintos, haciendo que los enlaces internos dejen de coincidir entre idiomas.
+
+La solución consistió en registrar la posición del lector utilizando el índice del encabezado dentro de la tabla de contenidos generada automáticamente.
+
+Justo antes de navegar, se almacena el índice del encabezado actualmente visible.
+
+Una vez que la versión traducida termina de renderizarse, el componente encargado del progreso de lectura recupera ese índice y desplaza automáticamente la página hasta el encabezado equivalente.
+
+Este enfoque asume que ambas traducciones mantienen la misma estructura y el mismo orden de secciones, una restricción perfectamente razonable considerando que ambas versiones buscan comunicar exactamente el mismo contenido técnico.
+
+El resultado es un cambio de idioma prácticamente transparente, permitiendo continuar la lectura desde el mismo punto donde se encontraba el usuario.
+
+## Problemas Encontrados
+
+Durante la implementación aparecieron varios inconvenientes cuya solución no resultó evidente únicamente consultando la documentación.
+
+### Conflicto con el Root Layout
+
+Como el idioma activo determina el atributo `lang` del documento HTML, ya no era posible mantener un layout raíz independiente por encima de las rutas localizadas.
+
+La solución consistió en integrar el layout principal dentro del layout específico de cada idioma para poder resolver el locale antes de renderizar el elemento `<html>`.
+
+### Middleware Renombrado a Proxy
+
+Mientras se desarrollaba esta funcionalidad, Next.js 16 reemplazó la convención `middleware.ts` por `proxy.ts`.
+
+Aunque el comportamiento del sistema de rutas permaneció exactamente igual, fue necesario actualizar tanto el nombre del archivo como el nombre de la función exportada.
+
+Fue un cambio relativamente pequeño, pero ilustró cómo la evolución del framework puede afectar una implementación incluso cuando la lógica de negocio permanece intacta.
+
+### Un Hook Sin Invocar
+
+Uno de los errores más sutiles apareció al pasar una referencia al hook en lugar de invocarlo.
+
+En vez de utilizar `usePathname()`, accidentalmente se pasó `usePathname`.
+
+Como consecuencia, el router serializó la propia función dentro de la URL de destino, generando rutas completamente inválidas a pesar de que el código compilaba correctamente.
+
+La corrección fue sencilla una vez identificado el problema, pero recordó que no todos los errores de ejecución vienen acompañados de mensajes claros del compilador.
+
+### Re-renderizados Infinitos
+
+Otro inconveniente surgió durante la implementación de la restauración de la posición de lectura.
+
+Un arreglo derivado se recalculaba en cada render y era utilizado como dependencia dentro de un `useEffect`, provocando un ciclo infinito de renderizados.
+
+Las asignaciones repetidas terminaron agotando la memoria disponible para Node durante el desarrollo.
+
+La solución consistió en memorizar el cálculo mediante `useMemo`, estabilizando las dependencias y eliminando el ciclo.
+
+### Caché Obsoleta de Turbopack
+
+Después de varios cambios estructurales —como reorganizar las rutas bajo un segmento `[locale]` y modificar la estructura de los layouts— el servidor de desarrollo comenzó a comportarse de forma inconsistente.
+
+Eliminar el directorio `.next` obligó a Turbopack a reconstruir completamente su caché, resolviendo inmediatamente el problema.
+
+Aunque simple, esta terminó convirtiéndose en una de las primeras acciones de diagnóstico después de realizar refactorizaciones importantes.
+
+### Inconsistencia en las Claves de Almacenamiento
+
+La restauración de la posición de lectura dejó de funcionar porque se utilizaban claves distintas al escribir y leer datos desde `sessionStorage`.
+
+Más allá de corregir el error puntual, todas las claves fueron centralizadas en un único archivo de constantes compartidas.
+
+De esta forma, futuras inconsistencias pasarían a detectarse como errores de TypeScript en lugar de convertirse en fallos silenciosos en tiempo de ejecución.
+
+## Lecciones Aprendidas
+
+La internacionalización terminó siendo mucho más que un sistema de traducción.
+
+Su implementación obligó a replantear el sistema de rutas, la organización del contenido, la navegación, la responsabilidad de los metadatos e incluso algunos aspectos de la experiencia de usuario.
+
+Quizá el aprendizaje más importante fue confirmar el valor de separar claramente la información estructural del contenido traducible.
+
+Gracias a que los metadatos, los artículos y la lógica de la aplicación ya tenían responsabilidades bien definidas, la incorporación de múltiples idiomas consistió principalmente en extender la arquitectura existente en lugar de reemplazarla.
+
+Más allá de la internacionalización, esta iteración reforzó una idea que ha acompañado al proyecto desde sus primeras versiones: los cambios arquitectónicos importantes resultan mucho más sencillos de implementar cuando el sistema ha sido diseñado desde el principio con límites claros entre sus responsabilidades y una filosofía de evolución incremental.
 
 # Decisiones Técnicas
 
+Aunque la plataforma ha evolucionado mediante diferentes iteraciones, varias decisiones arquitectónicas se han mantenido constantes desde el inicio. Estas decisiones continúan definiendo tanto la implementación como la forma en la que se crean nuevos casos de estudio.
+
 ## Contenido Estático en Lugar de un CMS
 
-La plataforma evita intencionalmente bases de datos y sistemas de gestión de contenido.
+Technical Journal evita intencionalmente utilizar bases de datos o sistemas tradicionales de gestión de contenido.
 
-Cada artículo vive junto al código fuente del proyecto, lo que hace que el control de versiones, las revisiones y el mantenimiento a largo plazo sean considerablemente más simples.
+Cada artículo vive junto al código fuente de la aplicación, permitiendo que la documentación evolucione mediante el mismo flujo de trabajo basado en Git que el software que describe.
 
-La documentación evoluciona a través de Git de la misma forma que el código de la aplicación.
+Este enfoque simplifica el despliegue, permite revisar cambios de documentación mediante el mismo proceso utilizado para revisar código y elimina la complejidad operativa de mantener una plataforma de contenido separada.
+
+Para un proyecto cuyo propósito principal es documentar ingeniería de software, tratar la documentación como parte del código fuente resultó ser la solución más natural.
+
+## MDX Como Formato de Escritura
+
+MDX fue seleccionado porque combina la simplicidad de Markdown con la posibilidad de integrar componentes React cuando sea necesario.
+
+La mayoría de los artículos permanecen como documentos de texto técnico tradicionales, pero la plataforma conserva la capacidad de incorporar elementos interactivos como diagramas, bloques informativos, ejemplos dinámicos o futuras herramientas de visualización sin cambiar el flujo de escritura.
+
+El objetivo no es convertir cada artículo en una experiencia interactiva por defecto, sino proporcionar esa posibilidad cuando realmente mejore la comunicación técnica.
 
 ## Tabla de Contenidos Automática
 
-La navegación se genera directamente a partir de los encabezados dentro de cada documento MDX.
+La navegación se genera directamente a partir del contenido del documento.
 
-En lugar de mantener una estructura de navegación separada, la aplicación analiza el documento, extrae cada encabezado, genera los IDs de anclaje correspondientes y construye la tabla de contenidos automáticamente.
+Durante el procesamiento de cada archivo MDX, los encabezados son extraídos, transformados en identificadores de ancla y utilizados para construir automáticamente la tabla de contenidos.
 
-Esto garantiza que la navegación siempre refleje el contenido real.
+Mantener una estructura de navegación separada implicaría duplicar información y eventualmente generar inconsistencias entre el artículo y su navegación.
+
+Al generar ambos elementos desde la misma fuente, se garantiza que permanezcan sincronizados en todo momento.
+
+## Páginas Basadas en Metadatos
+
+Los metadatos estructurados funcionan como la fuente principal de información de cada proyecto.
+
+En lugar de distribuir información como títulos, descripciones, tecnologías o estados de publicación entre múltiples componentes, cada caso de estudio mantiene estos datos centralizados en archivos específicos.
+
+Esto permite que la capa de presentación evolucione independientemente mientras mantiene una estructura de contenido predecible y fácil de mantener.
+
+Además, este modelo facilita incorporar nuevas capacidades en el futuro, como mejoras de SEO, filtros, búsqueda o nuevas formas de presentar proyectos sin modificar la documentación existente.
 
 ## Mejora Progresiva
 
-La automatización solo se introduce después de que un flujo de trabajo manual ha demostrado su valor.
+Un principio constante durante el desarrollo de la plataforma ha sido que la automatización debe aparecer después de validar una necesidad real.
 
-En lugar de diseñar sistemas altamente configurables desde el inicio, las funcionalidades se implementan primero en su forma más simple posible, antes de generalizarse.
+Cada flujo de trabajo comienza con la solución más simple que aporta valor.
 
-Esta filosofía influye tanto en el código como en el flujo de trabajo de documentación.
+Solo cuando un proceso manual demuestra ser repetitivo se transforma en una abstracción reutilizable o una herramienta automatizada.
+
+Esta filosofía ha influido en prácticamente todas las funcionalidades del proyecto: desde el descubrimiento automático de proyectos y la organización de metadatos hasta la internacionalización.
 
 # Funcionalidades Actuales
 
-La implementación actual ya soporta:
+Actualmente, Technical Journal cuenta con las siguientes capacidades:
 
-- Descubrimiento estático de proyectos.
-- Documentación basada en MDX.
-- Páginas de proyecto impulsadas por metadata.
-- Tabla de contenidos generada automáticamente.
-- Indicadores de progreso de lectura.
-- Layouts responsivos.
-- Temas claro y oscuro.
-- Navegación mobile-first.
-- Tags de tecnología.
-- Páginas individuales por proyecto.
+* Generación completamente estática utilizando Next.js App Router.
+* Uso de React Server Components con interactividad aislada en componentes cliente.
+* Documentación técnica basada en MDX.
+* Páginas de proyectos basadas en metadatos.
+* Descubrimiento automático de proyectos.
+* Generación automática de tabla de contenidos.
+* Indicadores de progreso de lectura.
+* Navegación fija en escritorio.
+* Diseños responsivos con enfoque *mobile-first*.
+* Temas claro y oscuro.
+* Enrutamiento basado en idioma.
+* Documentación disponible en inglés y español.
+* Metadatos localizados por idioma.
+* Contenido MDX localizado.
+* Enlaces dinámicos hacia el portafolio según el idioma activo.
+* Conservación de la posición de lectura al cambiar de idioma.
+* Etiquetas de tecnologías.
+* Diccionarios de traducción organizados por componente.
 
-La aplicación ya funciona como una plataforma de documentación completa, manteniéndose intencionalmente ligera.
+La plataforma ya funciona como un sistema completo de documentación técnica mientras mantiene una arquitectura intencionalmente ligera y sencilla de mantener.
 
-# Mejoras Futuras
+# Evolución Futura
 
-Se planean varias mejoras conforme el proyecto crece.
+Aunque la implementación actual proporciona una base sólida, existen varias mejoras planeadas para continuar expandiendo la plataforma.
 
-Estas incluyen:
+Cada nueva funcionalidad seguirá la misma filosofía de desarrollo incremental utilizada desde el inicio del proyecto.
 
-- Registro automático de proyectos.
-- Funcionalidad de búsqueda.
-- Series de proyectos.
-- Internacionalización.
-- Tiempo estimado de lectura.
-- Casos de estudio relacionados.
-- Mejoras en los bloques de código.
-- Galerías de imágenes.
-- Diagramas.
-- Mejoras de SEO.
-- Soporte para RSS.
+Las mejoras futuras incluyen:
 
-Cada nueva funcionalidad seguirá la misma filosofía de desarrollo iterativo adoptada a lo largo del proyecto.
+* Búsqueda de texto completo entre proyectos.
+* Tiempo estimado de lectura.
+* Casos de estudio relacionados.
+* Series de proyectos.
+* Galerías de imágenes enriquecidas.
+* Diagramas de arquitectura interactivos.
+* Mejoras en la representación de bloques de código.
+* Mejoras automáticas de resaltado de sintaxis.
+* Optimizaciones de SEO.
+* Soporte para RSS.
+* Soporte para nuevos idiomas.
+* Mejoras de accesibilidad.
+* Sistemas de indexación más avanzados para colecciones grandes de contenido.
 
-# Aprendizajes
+El objetivo no es convertir Technical Journal en una plataforma de blogs genérica, sino continuar refinándola como un entorno especializado para documentar trabajo de ingeniería.
 
-Uno de los resultados más valiosos del proyecto ha sido validar la arquitectura a través de la implementación, en lugar de la especulación.
+Cada nueva capacidad debe mejorar al menos uno de tres aspectos fundamentales: la experiencia de escritura, la experiencia de lectura o la mantenibilidad a largo plazo.
 
-Construir primero la interfaz, luego el contenido, y después la automatización, produjo un modelo de datos significativamente más limpio que intentar diseñar cada abstracción de antemano.
+# Lecciones Aprendidas
 
-El proyecto también reforzó la importancia de separar la metadata estructurada de la documentación narrativa.
+Construir Technical Journal ha reforzado varias ideas que van más allá de este proyecto específico.
 
-Al tratar la escritura técnica como un componente de primera clase de la ingeniería de software, en lugar de una idea secundaria, Technical Journal se convierte en algo más que una extensión del portafolio: se convierte en un cuaderno de ingeniería a largo plazo que documenta no solo qué se construyó, sino cómo evolucionaron las decisiones de ingeniería a lo largo del tiempo.
+La primera es que la arquitectura se valida mucho mejor mediante la implementación que mediante la especulación.
+
+Muchas de las decisiones más importantes de la plataforma —como el modelo de contenido, la organización de metadatos y el desarrollo incremental— surgieron después de resolver problemas reales, en lugar de intentar anticipar todos los escenarios futuros.
+
+Otro aprendizaje importante ha sido el valor de separar responsabilidades desde etapas tempranas.
+
+Mantener independientes los metadatos estructurados de la documentación técnica, aislar la interactividad del cliente del contenido renderizado en servidor y diferenciar la información independiente del idioma del contenido traducido permitió construir una arquitectura capaz de evolucionar sin requerir grandes reescrituras.
+
+El proyecto también demostró que el desarrollo incremental no solo reduce riesgos de implementación, sino que permite descubrir mejores abstracciones.
+
+Funcionalidades como la generación automática de navegación, el modelo de contenido bilingüe y la conservación de posición de lectura fueron incorporadas únicamente después de comprobar que sus versiones manuales resolvían una necesidad real.
+
+Como resultado, cada abstracción fue creada alrededor de requisitos concretos y no de posibles problemas futuros.
+
+Finalmente, quizá el resultado más importante del proyecto es que valida su propia filosofía.
+
+Technical Journal no es solamente una plataforma utilizada para documentar trabajo de ingeniería; también es documentada siguiendo el mismo proceso que promueve para otros proyectos.
+
+Cada decisión arquitectónica relevante, cada problema encontrado, cada compromiso asumido y cada aprendizaje obtenido forman parte del historial del proyecto en lugar de desaparecer después de implementar una funcionalidad.
+
+En ese sentido, la plataforma nunca está realmente terminada.
+
+Cada nueva mejora no representa únicamente una actualización del software, sino otro capítulo dentro de su propia historia de ingeniería, asegurando que la documentación continúe evolucionando junto con el sistema que describe.
