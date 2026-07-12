@@ -8,32 +8,6 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Raleway } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-/*
-
-export default async function LocaleLayout({
-  children,
-  params,
-}: {
-  children: ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  const messages = await getMessages();
-
-  return (
-    <NextIntlClientProvider messages={messages}>
-      <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem>
-        {children}
-      </ThemeProvider>
-    </NextIntlClientProvider>
-  );
-}
-*/
 
 const raleway = Raleway({ subsets: ['latin'], variable: '--font-sans' });
 

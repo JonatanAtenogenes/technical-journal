@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TableOfContentsItem } from '@/components/case-study/table-of-contents';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -25,7 +25,7 @@ type ReadingProgressProps = {
 };
 
 export default function ReadingProgress({ items }: ReadingProgressProps) {
-  const sections = flattenSections(items);
+  const sections = useMemo(() => flattenSections(items), [items]);
   const [progress, setProgress] = useState(0);
   const [activeId, setActiveId] = useState(sections[0]?.id);
 
