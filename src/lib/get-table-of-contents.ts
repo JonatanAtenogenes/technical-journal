@@ -37,6 +37,9 @@ export function getTableOfContents(source: string): TableOfContentsItem[] {
     } else if (node.depth === 2 && items.length > 0) {
       const lastItem = items[items.length - 1];
       lastItem.subitems = [...(lastItem.subitems ?? []), { id, title }];
+    } else if (node.depth === 3 && items.length > 0) {
+      const lastItem = items[items.length - 1];
+      lastItem.subitems = [...(lastItem.subitems ?? []), { id, title }];
     }
   }
 
