@@ -94,12 +94,20 @@ export default function ReadingProgress({ items }: ReadingProgressProps) {
     if (saved === null) return;
 
     const index = Number(saved);
-    const target = sections[index];
 
-    if (target) {
-      const el = document.getElementById(target.id);
-      el?.scrollIntoView({ behavior: 'instant', block: 'start' });
-      setActiveId(target.id);
+    if (index === -1) {
+      // The reader was above the first heading (still on the hero) —
+      // land back at the real top of the page instead of jumping to
+      // the first heading, which would skip past the hero.
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      const target = sections[index];
+
+      if (target) {
+        const el = document.getElementById(target.id);
+        el?.scrollIntoView({ behavior: 'instant', block: 'start' });
+        setActiveId(target.id);
+      }
     }
 
     sessionStorage.removeItem(HEADING_INDEX);
