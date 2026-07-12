@@ -1,9 +1,15 @@
 import { useTranslations } from 'next-intl';
 
-export type TableOfContentsItem = {
+export type TableOfContentsSubItem = {
   id: string;
   title: string;
   subitems?: { id: string; title: string }[];
+};
+
+export type TableOfContentsItem = {
+  id: string;
+  title: string;
+  subitems?: TableOfContentsSubItem[];
 };
 
 type TableOfContentsProps = {
@@ -42,6 +48,23 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
                     >
                       {subItem.title}
                     </a>
+
+                    {subItem.subitems && subItem.subitems.length > 0 && (
+                      <ul className={'mt-1.5 ml-4 space-y-1.5 border-l pl-3'}>
+                        {subItem.subitems.map((subSubItem) => (
+                          <li key={subSubItem.id}>
+                            <a
+                              href={`#${subSubItem.id}`}
+                              className={
+                                'text-xs text-muted-foreground/70 transition-colors hover:text-foreground'
+                              }
+                            >
+                              {subSubItem.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>

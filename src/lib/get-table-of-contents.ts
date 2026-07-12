@@ -15,9 +15,9 @@ function isHeading(node: { type: string }): node is HeadingNode {
   return node.type === 'heading';
 }
 
-// Only h1 (numbered, top-level) and h2 (nested subitems) are shown —
-// deeper levels are parsed but intentionally ignored, same call we made
-// for the mock version: not every heading level adds navigation value.
+// h1 (top-level, numbered), h2 (nested under the current h1), and h3
+// (nested under the current h2) are all shown, each at its own level —
+// deeper levels are parsed but intentionally ignored.
 export function getTableOfContents(source: string): TableOfContentsItem[] {
   const tree = unified().use(remarkParse).use(remarkGfm).parse(source) as {
     children: Array<{ type: string; depth?: number; children?: unknown[] }>;
@@ -39,7 +39,18 @@ export function getTableOfContents(source: string): TableOfContentsItem[] {
       lastItem.subitems = [...(lastItem.subitems ?? []), { id, title }];
     } else if (node.depth === 3 && items.length > 0) {
       const lastItem = items[items.length - 1];
-      lastItem.subitems = [...(lastItem.subitems ?? []), { id, title }];
+      const subitems = lastItem.subitems ?? [];
+      const lastSubitems = subitems[subitems.length - 1];
+
+      // An h3 only makes sense nested under the most recent h2 within
+      // the current h1 — if there's no h2 yet, it's dropped rather
+      // than silently attached to the wrong parent.
+      if (lastSubitems) {
+        lastSubitems.subitems = [
+          ...(lastSubitems.subitems ?? []),
+          { id, title },
+        ];
+      }
     }
   }
 
