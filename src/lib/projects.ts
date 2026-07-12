@@ -1,23 +1,49 @@
-import { Project } from '@/lib/types/project';
-import { metadata as homeServer } from '@/content/projects/home-server/metadata';
-import { metadata as employeeAttrition } from '@/content/projects/employee-attrition/metadata';
-import { metadata as technicalJournal } from '@/content/projects/technical-journal/metadata';
-import { metadata as networkSubnetting } from '@/content/projects/network-subnetting/metadata';
+import { Locale } from 'next-intl';
+import { Project, ProjectMeta, ProjectTranslation } from '@/lib/types/project';
+/*
+import { meta as homeServerMeta } from '@/content/projects/home-server/meta';
+import { metadata as homeServerEn } from '@/content/projects/home-server/en/metadata';
+import { metadata as homeServerEs } from '@/content/projects/home-server/es/metadata';
+*/
+/*
+import { meta as employeeAttritionMeta } from '@/content/projects/employee-attrition/meta';
+import { metadata as employeeAttritionEn } from '@/content/projects/employee-attrition/en/metadata';
+import { metadata as employeeAttritionEs } from '@/content/projects/employee-attrition/es/metadata';
+*/
 
-// Each project registers itself here explicitly. When you add a new
-// case study under content/projects/<slug>/metadata.ts, import it and
-// add it to this array — that's the only wiring required.
-const projects: Project[] = [
-  homeServer,
-  employeeAttrition,
-  technicalJournal,
-  networkSubnetting,
-];
+import { meta as technicalJournalMeta } from '@/content/projects/technical-journal/meta';
+import { metadata as technicalJournalEn } from '@/content/projects/technical-journal/en/metadata';
+import { metadata as technicalJournalEs } from '@/content/projects/technical-journal/es/metadata';
+/*
+import { meta as networkSubnettingMeta } from '@/content/projects/network-subnetting/meta';
+import { metadata as networkSubnettingEn } from '@/content/projects/network-subnetting/en/metadata';
+import { metadata as networkSubnettingEs } from '@/content/projects/network-subnetting/es/metadata';
+*/
 
-export function getProjects(): Project[] {
-  return projects;
+// Structural data: one entry per project, locale-independent.
+const projectMetas: ProjectMeta[] = [technicalJournalMeta];
+
+// Translations: keyed by locale, then by slug.
+const translations: Record<Locale, Record<string, ProjectTranslation>> = {
+  en: {
+    'technical-journal': technicalJournalEn,
+  },
+  es: {
+    'technical-journal': technicalJournalEs,
+  },
+};
+
+export function getProjects(locale: Locale): Project[] {
+  console.log(locale);
+  return projectMetas.map((meta) => ({
+    ...meta,
+    ...translations[locale][meta.slug],
+  }));
 }
 
-export function getProjectBySlug(slug: string): Project | undefined {
-  return projects.find((project) => project.slug === slug);
+export function getProjectBySlug(
+  locale: Locale,
+  slug: string,
+): Project | undefined {
+  return getProjects(locale).find((project) => project.slug === slug);
 }

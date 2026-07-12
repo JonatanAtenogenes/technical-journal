@@ -1,0 +1,173 @@
+# Descripción General
+
+Technical Journal es una plataforma de documentación construida para presentar proyectos de ingeniería de software, infraestructura y datos como casos de estudio técnicos.
+
+En lugar de mostrar los proyectos como demos aislados o simples repositorios de GitHub, cada entrada documenta el proceso de ingeniería completo: el problema original, el contexto de negocio, la arquitectura, la implementación, las decisiones técnicas, los trade-offs, las iteraciones y los resultados finales.
+
+El objetivo es cerrar la brecha entre un portafolio tradicional y el trabajo de ingeniería real. En lugar de responder a la pregunta _"¿Qué has construido?"_, la plataforma responde _"¿Cómo lo construiste, y por qué?"_
+
+Cada proyecto se trata como documentación viva que puede evolucionar con el tiempo conforme se agregan nuevas funcionalidades, mejoras y aprendizajes.
+
+# Por Qué Construir Esto
+
+Los portafolios tradicionales son excelentes para demostrar qué tecnologías se usaron, pero rara vez comunican el razonamiento detrás de un proyecto.
+
+Un reclutador puede ver React, .NET, SQL, Docker o Python, pero nunca entender cómo se eligieron esas tecnologías, qué problemas resolvieron, o qué compromisos se hicieron durante el desarrollo.
+
+Technical Journal nació para documentar esas decisiones.
+
+El portafolio funciona como punto de entrada, ofreciendo un resumen conciso de cada proyecto, mientras que Technical Journal es la documentación técnica completa detrás de él.
+
+Esta separación permite que el portafolio se mantenga limpio y accesible sin sacrificar la profundidad que se espera de un caso de estudio de ingeniería.
+
+# Principios de Diseño
+
+Varios principios guían el diseño de la plataforma.
+
+- La documentación es lo primero.
+- El contenido debe permanecer independiente de la presentación.
+- Cada proyecto debe seguir una estructura consistente.
+- Escribir debe requerir el menor boilerplate posible.
+- La plataforma debe permanecer completamente estática.
+- Agregar nuevos proyectos debe requerir configuración mínima.
+- Leer artículos técnicos largos debe ser cómodo tanto en desktop como en mobile.
+
+En lugar de funcionar como una plataforma de blogging, la aplicación está diseñada intencionalmente como un diario técnico (technical journal).
+
+# Modelo de Contenido
+
+Cada proyecto se almacena en su propio directorio dentro de la carpeta de contenido.
+
+Cada proyecto se divide en dos archivos con responsabilidades claramente separadas.
+
+- `metadata.ts` guarda la información estructurada usada a lo largo de la aplicación: títulos, descripciones, tags, tecnologías, estado de publicación, imágenes de portada y metadata de SEO a futuro.
+- `index.mdx` contiene el artículo en sí. Se enfoca exclusivamente en la escritura técnica, sin incluir lógica de presentación, ruteo o navegación.
+
+Esta separación mantiene el modelo de contenido predecible, permitiendo que la interfaz evolucione de forma independiente a la documentación.
+
+# Arquitectura
+
+La aplicación está construida con Next.js usando el App Router y React Server Components.
+
+El contenido de los proyectos se lee directamente del sistema de archivos, en lugar de depender de APIs externas o un CMS.
+
+Los archivos MDX se renderizan bajo demanda, permitiendo que la documentación se mantenga cerca del código fuente sin sacrificar una experiencia de escritura limpia.
+
+Al ser un proyecto completamente estático, el deployment se mantiene simple sin comprometer el rendimiento.
+
+# Experiencia de Usuario
+
+La experiencia de lectura es uno de los objetivos centrales del diseño del proyecto.
+
+Cada caso de estudio está estructurado alrededor de varios elementos de interfaz pensados para mejorar la navegación en artículos técnicos largos.
+
+Estos incluyen:
+
+- Un hero dedicado que resume el caso de estudio.
+- Navegación generada automáticamente.
+- Indicadores de progreso de lectura.
+- Navegación fija (sticky) en desktop.
+- Layouts responsivos diseñados mobile-first.
+- Tags de tecnología.
+- Temas claro y oscuro.
+
+En lugar de abrumar al lector con bloques largos de texto, la interfaz ofrece contexto visual constante sobre su posición actual dentro del documento.
+
+# Filosofía de Desarrollo
+
+La plataforma sigue un proceso de desarrollo iterativo.
+
+En lugar de diseñar cada funcionalidad antes de implementarla, el proyecto evoluciona a través de iteraciones pequeñas e independientemente valiosas.
+
+Cada iteración comienza con una implementación mínima viable, antes de introducir abstracciones o automatización adicionales.
+
+Este enfoque reduce la complejidad innecesaria, permitiendo que las decisiones arquitectónicas surjan de forma natural a partir del uso real.
+
+## Construyendo la Interfaz Primero
+
+Antes de introducir MDX, metadata o carga dinámica de contenido, la interfaz completa se construyó usando datos ficticios (mock data).
+
+Esto permitió validar espaciado, navegación, layouts responsivos, tipografía y flujo de lectura sin agregar complejidad adicional.
+
+Una vez que la interfaz demostró ser estable, el modelo de datos subyacente pudo diseñarse alrededor de requerimientos reales en lugar de suposiciones.
+
+## Introduciendo Contenido Real
+
+Después de validar el layout, la aplicación comenzó a leer metadata real de los proyectos y archivos MDX.
+
+La interfaz existente requirió casi ningún cambio estructural, porque el modelo de datos ya había sido moldeado por los prototipos anteriores.
+
+Esta transición incremental simplificó considerablemente la implementación.
+
+# Decisiones Técnicas
+
+## Contenido Estático en Lugar de un CMS
+
+La plataforma evita intencionalmente bases de datos y sistemas de gestión de contenido.
+
+Cada artículo vive junto al código fuente del proyecto, lo que hace que el control de versiones, las revisiones y el mantenimiento a largo plazo sean considerablemente más simples.
+
+La documentación evoluciona a través de Git de la misma forma que el código de la aplicación.
+
+## Tabla de Contenidos Automática
+
+La navegación se genera directamente a partir de los encabezados dentro de cada documento MDX.
+
+En lugar de mantener una estructura de navegación separada, la aplicación analiza el documento, extrae cada encabezado, genera los IDs de anclaje correspondientes y construye la tabla de contenidos automáticamente.
+
+Esto garantiza que la navegación siempre refleje el contenido real.
+
+## Mejora Progresiva
+
+La automatización solo se introduce después de que un flujo de trabajo manual ha demostrado su valor.
+
+En lugar de diseñar sistemas altamente configurables desde el inicio, las funcionalidades se implementan primero en su forma más simple posible, antes de generalizarse.
+
+Esta filosofía influye tanto en el código como en el flujo de trabajo de documentación.
+
+# Funcionalidades Actuales
+
+La implementación actual ya soporta:
+
+- Descubrimiento estático de proyectos.
+- Documentación basada en MDX.
+- Páginas de proyecto impulsadas por metadata.
+- Tabla de contenidos generada automáticamente.
+- Indicadores de progreso de lectura.
+- Layouts responsivos.
+- Temas claro y oscuro.
+- Navegación mobile-first.
+- Tags de tecnología.
+- Páginas individuales por proyecto.
+
+La aplicación ya funciona como una plataforma de documentación completa, manteniéndose intencionalmente ligera.
+
+# Mejoras Futuras
+
+Se planean varias mejoras conforme el proyecto crece.
+
+Estas incluyen:
+
+- Registro automático de proyectos.
+- Funcionalidad de búsqueda.
+- Series de proyectos.
+- Internacionalización.
+- Tiempo estimado de lectura.
+- Casos de estudio relacionados.
+- Mejoras en los bloques de código.
+- Galerías de imágenes.
+- Diagramas.
+- Mejoras de SEO.
+- Soporte para RSS.
+
+Cada nueva funcionalidad seguirá la misma filosofía de desarrollo iterativo adoptada a lo largo del proyecto.
+
+# Aprendizajes
+
+Uno de los resultados más valiosos del proyecto ha sido validar la arquitectura a través de la implementación, en lugar de la especulación.
+
+Construir primero la interfaz, luego el contenido, y después la automatización, produjo un modelo de datos significativamente más limpio que intentar diseñar cada abstracción de antemano.
+
+El proyecto también reforzó la importancia de separar la metadata estructurada de la documentación narrativa.
+
+Al tratar la escritura técnica como un componente de primera clase de la ingeniería de software, en lugar de una idea secundaria, Technical Journal se convierte en algo más que una extensión del portafolio: se convierte en un cuaderno de ingeniería a largo plazo que documenta no solo qué se construyó, sino cómo evolucionaron las decisiones de ingeniería a lo largo del tiempo.

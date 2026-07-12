@@ -1,10 +1,11 @@
 import { getProjects } from '@/lib/projects';
 import ProjectCard from '@/components/home/project-card';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Projects() {
+  const locale = useLocale();
   const t = useTranslations('projects');
-  const projects = getProjects();
+  const projects = getProjects(locale);
 
   return (
     <section className="container mx-auto px-4 py-16">
