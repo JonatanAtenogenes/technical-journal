@@ -196,7 +196,7 @@ La plataforma adoptó un sistema de rutas localizadas utilizando **next-intl**.
 El inglés permanece como idioma principal, mientras que el español se publica bajo su propio prefijo de URL.
 
 ```text
-/
+/en
 ```
 
 ```text
@@ -358,6 +358,50 @@ Gracias a que los metadatos, los artículos y la lógica de la aplicación ya te
 
 Más allá de la internacionalización, esta iteración reforzó una idea que ha acompañado al proyecto desde sus primeras versiones: los cambios arquitectónicos importantes resultan mucho más sencillos de implementar cuando el sistema ha sido diseñado desde el principio con límites claros entre sus responsabilidades y una filosofía de evolución incremental.
 
+---
+
+# Iteración 3 — Renderizado Profesional de Bloques de Código
+
+A medida que crecía el número de case studies, los bloques de código planos se volvieron una brecha visible entre Technical Journal y las plataformas de documentación que lo inspiraron. Los walkthroughs con múltiples archivos, comandos de terminal y diffs se veían todos idénticos, sin syntax highlighting, sin contexto de archivo y sin forma de distinguir líneas agregadas o eliminadas.
+
+Esta iteración se enfocó en cerrar esa brecha sin comprometer la arquitectura static-first de la plataforma ni introducir una dependencia que compitiera con el sistema de diseño existente.
+
+## Por Qué Agregar Esto
+
+Una plataforma de documentación inspirada en Vercel Docs, GitHub Docs y Stripe Docs no puede depender de bloques de código sin estilo. El código no es incidental en un case study—frecuentemente es la parte más importante de la explicación, y merece el mismo nivel de cuidado visual que la tipografía que lo rodea.
+
+Más allá de lo estético, se habían acumulado varias necesidades prácticas a lo largo de los artículos existentes: distinguir a qué archivo pertenecía un snippet, resaltar líneas específicas siendo discutidas, y hacer que los ejemplos de código largos fueran más fáciles de escanear sin salir del flujo de lectura.
+
+## Eligiendo Expressive Code
+
+Se eligió Expressive Code sobre alternativas más ligeras como `rehype-pretty-code` porque provee estas capacidades de fábrica en lugar de requerir que se construyan manualmente: frames con nombre de archivo, line numbers, resaltado de diffs, secciones colapsables y ventanas estilo terminal.
+
+Aunque Expressive Code se originó en el ecosistema de Astro, incluye una integración agnóstica de framework, `rehype-expressive-code`, construida específicamente para cualquier pipeline basado en rehype—incluyendo el que ya potencia el renderizado de MDX de esta plataforma.
+
+## Integrando a Través de rehype, No de next.config
+
+La mayoría de la documentación de `rehype-expressive-code` asume una integración a través de `@next/mdx`, registrando el plugin dentro de `next.config.js`. Technical Journal no usa `@next/mdx`; el MDX se compila en tiempo de request mediante `next-mdx-remote/rsc`, directamente dentro del Server Component que renderiza cada case study.
+
+El plugin se registró en su lugar en el array `rehypePlugins` que se le pasa a `MDXRemote`, junto a los ya existentes `remark-gfm` y `rehype-slug`. Como esta compilación ocurre en ejecución normal de Node.js en lugar de a través del loader de MDX de Turbopack basado en Rust, pasar una referencia de función directamente no introdujo ninguna de las restricciones de serialización que aplican al enfoque de `next.config.js`.
+
+Esta distinción fue importante: significó que el pipeline de MDX existente pudo extenderse sin introducir un segundo camino de compilación basado en configuración en paralelo.
+
+## Consistencia con el Sistema de Diseño Existente
+
+El principal riesgo de adoptar una librería de terceros para el renderizado de código era la inconsistencia visual—bloques de código que se vieran como un widget insertado en lugar de parte del sitio.
+
+Dos decisiones de configuración resolvieron esto directamente.
+
+El cambio de tema se ligó a la implementación de dark mode ya existente en la plataforma. Por defecto, Expressive Code usa una media query `prefers-color-scheme`, lo cual habría ignorado el toggle manual ya construido con `next-themes`. Deshabilitar `useDarkModeMediaQuery` y configurar `themeCssSelector` para calzar con la estrategia de clase `.dark` del sitio hizo que los bloques de código cambiaran de tema en sincronía con el resto de la interfaz, en lugar de seguir al sistema operativo de forma independiente.
+
+Los style overrides se mapearon a las propias custom properties de CSS del proyecto—border radius, color de borde y familia tipográfica—en lugar de los valores por defecto de Expressive Code. Esto mantuvo los bloques de código anclados visualmente a los mismos design tokens usados en el resto de los componentes.
+
+## Lecciones Aprendidas
+
+Esta iteración no requirió cambios en el modelo de contenido ni en el flujo de autoría de MDX. Los bloques de código existentes en cada case study, en ambos idiomas, obtuvieron syntax highlighting, frames con nombre de archivo y line numbers automáticamente la siguiente vez que se renderizaron—ningún artículo necesitó ser reescrito.
+
+También reforzó un patrón ya establecido durante la internacionalización: como el pipeline de renderizado de MDX tenía un único punto de entrada bien definido, extenderlo con una nueva capacidad significó agregar un plugin a un array, en lugar de tocar cada lugar donde se renderiza contenido.
+
 # Decisiones Técnicas
 
 Aunque la plataforma ha evolucionado mediante diferentes iteraciones, varias decisiones arquitectónicas se han mantenido constantes desde el inicio. Estas decisiones continúan definiendo tanto la implementación como la forma en la que se crean nuevos casos de estudio.
@@ -432,6 +476,7 @@ Actualmente, Technical Journal cuenta con las siguientes capacidades:
 * Conservación de la posición de lectura al cambiar de idioma.
 * Etiquetas de tecnologías.
 * Diccionarios de traducción organizados por componente.
+* Renderizado de bloques de código mejorado con syntax highlighting.
 
 La plataforma ya funciona como un sistema completo de documentación técnica mientras mantiene una arquitectura intencionalmente ligera y sencilla de mantener.
 
