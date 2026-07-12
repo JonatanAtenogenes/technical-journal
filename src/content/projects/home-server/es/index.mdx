@@ -1,0 +1,545 @@
+# Introducción
+
+Home Server es un proyecto de ingeniería en curso, construido para explorar arquitectura de software, programación de sistemas, redes e infraestructura autoalojada a través de una sola plataforma en evolución.
+
+En lugar de crear proyectos aislados para cada tecnología, el objetivo es construir un ecosistema donde cada nuevo servicio resuelva un problema real, a la vez que introduce una oportunidad para aprender algo nuevo.
+
+El proyecto se desarrolla intencionalmente en iteraciones pequeñas. Cada nuevo componente expande la plataforma sin reemplazar el trabajo anterior, permitiendo que la arquitectura madure con el tiempo en lugar de diseñarse toda de una sola vez.
+
+Aunque el proyecto actualmente se enfoca en infraestructura y desarrollo backend, su objetivo a largo plazo es mucho más amplio: ofrecer una plataforma completa que pueda administrarse desde dispositivos de escritorio y móviles a través de una experiencia de usuario consistente.
+
+Al momento de escribir esto, la base de redes ya está establecida, la arquitectura inicial en Rust está en desarrollo activo, y las primeras bibliotecas compartidas están comenzando a definir las convenciones que seguirán los futuros servicios.
+
+# ¿Por Qué Construir un Home Server?
+
+Muchos proyectos de software existen solo para demostrar una tecnología.
+
+Home Server nació por una razón distinta.
+
+El objetivo no es construir un servidor web, un dashboard o una API de forma aislada. En cambio, la meta es crear un entorno real donde cada tecnología contribuya a un sistema más grande.
+
+Aprender Rust se vuelve más significativo cuando el lenguaje impulsa servicios reales.
+
+Aprender Linux se vuelve más valioso cuando el sistema operativo aloja esos servicios.
+
+Aprender redes se vuelve práctico cuando el propio servidor debe ser accesible y confiable.
+
+En lugar de tratar cada tecnología como un tutorial independiente, Home Server las conecta en un solo proyecto de ingeniería.
+
+# Visión del Proyecto
+
+La visión a largo plazo es transformar una sola computadora física en una plataforma personal capaz de alojar múltiples servicios que se comunican a través de bibliotecas compartidas y convenciones arquitectónicas comunes.
+
+El servidor en sí es solo una parte del sistema.
+
+Alrededor de él, se espera que varias capas evolucionen de forma independiente mientras comparten la misma infraestructura.
+
+```text
+                 Dashboard en React
+                        │
+        App Nativa de Android (Futuro)
+                        │
+              Comunicación vía ASP.NET
+                        │
+─────────────────────────────────────────────
+         Infraestructura Compartida en Rust
+─────────────────────────────────────────────
+ Logging • Configuración • Respuestas • Utilidades
+─────────────────────────────────────────────
+ Docker • Linux • Redes • Almacenamiento • Monitoreo
+─────────────────────────────────────────────
+              Servidor Doméstico Físico
+```
+
+Cada capa tiene una responsabilidad claramente definida.
+
+La infraestructura provee el entorno.
+
+Rust implementa servicios de plataforma reutilizables.
+
+.NET expone los endpoints de comunicación.
+
+React se convierte en la interfaz principal de administración.
+
+Se planea una aplicación nativa de Android para iteraciones futuras, ofreciendo una experiencia móvil optimizada para monitoreo y tareas administrativas ligeras.
+
+Aunque varias de estas capas aún están en desarrollo, definir sus responsabilidades desde el inicio ha influido en muchas de las decisiones arquitectónicas ya presentes en el proyecto.
+
+# Estado Actual
+
+Home Server no debe considerarse una plataforma terminada.
+
+En esta etapa, la mayor parte del esfuerzo se ha invertido en construir la base necesaria para futuros servicios, en lugar de implementar funcionalidades visibles para el usuario.
+
+El progreso actual incluye:
+
+- Configuración inicial del servidor Linux.
+- Configuración de red estática.
+- Administración remota vía SSH.
+- Arquitectura inicial del proyecto en Rust.
+- Módulos de infraestructura compartida.
+- Abstracción de logging.
+- Modelos estandarizados de respuesta de API.
+
+El trabajo futuro introducirá gradualmente servicios backend adicionales, interfaces web y aplicaciones móviles sin requerir cambios arquitectónicos mayores.
+
+# Infraestructura
+
+Antes de escribir código de aplicación, el servidor mismo necesitaba convertirse en un entorno de desarrollo estable.
+
+Esta primera fase se enfocó por completo en preparar el sistema operativo, la configuración de red y la administración remota.
+
+Aunque estas tareas no producen funcionalidades visibles, establecen la base de la que depende cada servicio futuro.
+
+# Configuración de Red
+
+Uno de los primeros objetivos fue asegurar que el servidor siempre pudiera ser alcanzado desde otros dispositivos en la red local.
+
+Usar direcciones IP asignadas dinámicamente eventualmente introduciría fricción innecesaria durante el desarrollo, ya que la dirección del servidor podría cambiar tras un reinicio o una renovación de lease del router.
+
+En cambio, el servidor se configuró con una dirección IP estática, permitiendo que cada futura aplicación y entorno de desarrollo se comunique con un endpoint de red estable.
+
+Aunque simple, esta decisión elimina toda una categoría de problemas operativos antes de introducir servicios adicionales.
+
+# Administración Remota
+
+Un servidor no debería requerir acceso físico cada vez que cambia una configuración.
+
+Por esa razón, SSH se convirtió en el mecanismo principal de administración desde el inicio.
+
+Una vez configurado, el servidor podía administrarse directamente desde otra computadora, haciendo el desarrollo de software, el mantenimiento y la experimentación considerablemente más prácticos.
+
+Este flujo de trabajo se asemeja mucho a entornos de producción reales, donde los servidores rara vez se administran a través de un monitor conectado directamente.
+
+# Filosofía de Infraestructura
+
+Un principio de diseño recurrente a lo largo del proyecto es construir infraestructura reutilizable antes de construir funcionalidades individuales.
+
+En lugar de permitir que cada futura aplicación implemente su propio logging, gestión de configuración o modelos de comunicación, la funcionalidad común se está extrayendo en bibliotecas compartidas desde el principio.
+
+Aunque este enfoque requiere más trabajo inicialmente, reduce significativamente la duplicación conforme la plataforma crece.
+
+El objetivo no es optimizar para los requerimientos de hoy, sino crear una arquitectura capaz de sostener años de desarrollo incremental.
+
+# Mirando Hacia Adelante
+
+Con la base de redes establecida y el entorno de desarrollo listo, la atención se desplaza hacia la plataforma de software en sí misma.
+
+La siguiente fase introduce el núcleo en Rust responsable de proveer infraestructura compartida a través de la plataforma, comenzando con una de las preocupaciones transversales más importantes en cualquier sistema distribuido: el logging.
+
+# Construyendo el Núcleo de la Plataforma
+
+Con la infraestructura del servidor en su lugar, el desarrollo se desplazó hacia la arquitectura de software en sí.
+
+En lugar de implementar servicios completos de inmediato, el primer objetivo fue definir los bloques de construcción comunes que cada futuro componente compartiría.
+
+Logging, configuración, modelos de respuesta y utilidades reutilizables son ejemplos de preocupaciones que no deberían reimplementarse en cada servicio.
+
+En cambio, pertenecen a la plataforma misma.
+
+Esta filosofía ha influido en el proyecto desde sus primeras etapas.
+
+# ¿Por Qué Rust?
+
+Rust se eligió principalmente como un objetivo de aprendizaje.
+
+Aunque lenguajes como C# habrían permitido un desarrollo inicial más rápido, Rust introduce conceptos que fomentan pensar de forma distinta sobre el diseño de software: ownership, borrowing, lifetimes explícitos y garantías más fuertes en torno a la seguridad de memoria.
+
+Más importante aún, el lenguaje encaja naturalmente con la visión a largo plazo del proyecto.
+
+Los servicios backend que corren continuamente se benefician de un rendimiento predecible, bajo uso de memoria y garantías en tiempo de compilación, haciendo de Rust un excelente candidato para la infraestructura de la plataforma.
+
+Aprender estos conceptos dentro de un proyecto real ofrece una motivación mucho más fuerte que ejercicios aislados.
+
+# Organización del Proyecto
+
+Aunque el código base todavía es relativamente pequeño, el proyecto ya está organizado alrededor de módulos reutilizables en lugar de aplicaciones individuales.
+
+Estructura actual:
+
+```text
+src
+├── crates
+│   ├── common
+│   │   ├── config
+│   │   ├── errors
+│   │   ├── logging
+│   │   │   ├── adapters
+│   │   │   ├── engines
+│   │   │   ├── builder.rs
+│   │   │   ├── config.rs
+│   │   │   ├── engine.rs
+│   │   │   ├── level.rs
+│   │   │   ├── logger.rs
+│   │   │   └── macros.rs
+│   │   ├── response
+│   │   └── utils
+│   └── mod.rs
+└── main.rs
+```
+
+En lugar de permitir que cada futuro servicio defina sus propias utilidades, el proyecto separa la infraestructura reutilizable en crates compartidos desde el inicio.
+
+Aunque esto pueda parecer excesivo para un código base pequeño, se espera que la organización escale de forma natural conforme se introducen más servicios.
+
+# Infraestructura Compartida
+
+Ya existen varios módulos incluso antes de implementar cualquier lógica de negocio.
+
+Estos módulos definen convenciones, no funcionalidad.
+
+En lugar de resolver problemas individuales de la aplicación, proveen comportamiento común compartido a través de toda la plataforma.
+
+Los módulos compartidos actuales incluyen:
+
+- Logging
+- Definiciones de errores
+- Configuración
+- Modelos de respuesta de API
+- Funciones utilitarias
+
+La expectativa es que los futuros servicios importen estos módulos en lugar de crear implementaciones independientes.
+
+# Diseñando el Sistema de Logging
+
+El logging es una de las primeras preocupaciones transversales introducidas en el proyecto.
+
+En lugar de llamar directamente a la biblioteca `tracing` a lo largo del código, el objetivo es aislar esa implementación detrás de una API interna.
+
+Esto ofrece dos ventajas importantes.
+
+Primero, el código de la aplicación no depende directamente de una biblioteca de logging específica.
+
+Segundo, reemplazar o extender el motor de logging se vuelve significativamente más fácil en el futuro.
+
+La aplicación sabe que el logging existe.
+
+No necesita saber cómo está implementado.
+
+# Patrón Builder
+
+La configuración se realiza a través de un builder en lugar de construir los objetos de configuración manualmente.
+
+```rust
+let config = LoggingBuilder::new()
+    .level(LogLevel::Debug)
+    .timestamp(true)
+    .colors(true)
+    .build();
+```
+
+Este enfoque hace la configuración expresiva mientras evita que aparezcan objetos parcialmente inicializados a lo largo de la aplicación.
+
+Más adelante se pueden introducir opciones adicionales sin afectar el código existente.
+
+# Separando la Configuración
+
+En lugar de incrustar las opciones de logging directamente dentro del logger, la configuración vive de forma independiente.
+
+```rust
+pub struct LoggingConfig {
+    pub level: LogLevel,
+    pub timestamp: bool,
+    pub colors: bool,
+}
+```
+
+Mantener la configuración separada mejora la legibilidad, además de facilitar mucho la futura serialización o el soporte de archivos de configuración.
+
+El logger se vuelve responsable del comportamiento.
+
+El objeto de configuración se vuelve responsable del estado.
+
+# Abstrayendo el Motor de Logging
+
+Internamente, la implementación actual depende del ecosistema `tracing`.
+
+Sin embargo, esta dependencia está intencionalmente oculta detrás de capas de conversión y abstracciones internas.
+
+Un pequeño ejemplo es la conversión entre los niveles de logging propios del proyecto y los niveles que espera `tracing`.
+
+```rust
+impl From<LogLevel> for Level {
+    fn from(level: LogLevel) -> Self {
+        match level {
+            LogLevel::Error => Level::ERROR,
+            LogLevel::Warn => Level::WARN,
+            LogLevel::Info => Level::INFO,
+            LogLevel::Debug => Level::DEBUG,
+            LogLevel::Trace => Level::TRACE,
+        }
+    }
+}
+```
+
+Aunque relativamente simple, esta separación asegura que el resto de la aplicación dependa solo de tipos de la plataforma, en lugar de bibliotecas externas.
+
+# Manejo de Errores
+
+Los fallos de inicialización se representan usando tipos de error explícitos.
+
+```rust
+pub enum LoggingError {
+    AlreadyInitialized,
+    InvalidConfiguration,
+    InitializeFailed,
+}
+```
+
+En lugar de exponer strings genéricos, estos tipos de error comunican los modos de falla esperados directamente a través del sistema de tipos.
+
+Conforme se introduzcan componentes de infraestructura adicionales, se espera que sigan el mismo patrón.
+
+# Modelos de Respuesta Compartidos
+
+Otra pieza de infraestructura ya existe a pesar de que hoy hay pocos endpoints de API.
+
+En lugar de permitir que cada controlador o servicio defina estructuras de respuesta independientes, se han introducido envoltorios de respuesta estandarizados.
+
+Las respuestas exitosas siguen una estructura común.
+
+```rust
+pub struct ApiResponse<T> {
+    success: bool,
+    timestamp: DateTime<Utc>,
+    data: T,
+}
+```
+
+Los errores siguen la misma filosofía.
+
+```rust
+pub struct ApiError {
+    success: bool,
+    timestamp: DateTime<Utc>,
+    error: ErrorResponse,
+}
+```
+
+Incluso endpoints simples, como futuros health checks, se beneficiarán de estos modelos compartidos.
+
+```rust
+pub struct HealthResponse {
+    pub status: String,
+}
+```
+
+Aunque estas abstracciones parecen pequeñas, establecen consistencia antes de que múltiples servicios comiencen a exponer APIs.
+
+# Arquitectura Antes que Funcionalidades
+
+En esta etapa, el proyecto intencionalmente contiene más infraestructura que funcionalidad de negocio.
+
+Ese equilibrio es esperado.
+
+En lugar de construir varios servicios independientes e intentar unificarlos después, el proyecto establece primero convenciones compartidas.
+
+Conforme aparecen nuevos servicios, heredan esas convenciones automáticamente en lugar de introducir sus propias implementaciones.
+
+Este enfoque ralentiza ligeramente el desarrollo inicial, pero reduce significativamente la fragmentación arquitectónica conforme la plataforma crece.
+
+# Mirando Hacia Adelante
+
+Con la infraestructura compartida comenzando a estabilizarse, el siguiente paso es conectar estos componentes a aplicaciones reales.
+
+La siguiente fase introduce la capa de comunicación, la interfaz web y el futuro cliente móvil que permitirán administrar la plataforma sin interacción directa con el servidor mismo.
+
+# La Capa de Comunicación
+
+Aunque el núcleo en Rust es responsable de la infraestructura interna de la plataforma, no está pensado para comunicarse directamente con las interfaces de usuario.
+
+Se planea un servicio dedicado en .NET para actuar como la capa de comunicación entre los clientes y el backend.
+
+En lugar de exponer detalles internos de implementación, esta capa proveerá una API estable capaz de servir a múltiples clientes simultáneamente.
+
+```text
+ Dashboard en React
+        │
+ Aplicación Android
+        │
+────────▼────────
+ API en ASP.NET Core
+────────▼────────
+ Servicios en Rust
+```
+
+Separar la comunicación del núcleo de la plataforma mantiene las responsabilidades bien definidas.
+
+Rust se enfoca en los servicios de la plataforma.
+
+.NET se enfoca en exponer esos servicios a través de APIs HTTP.
+
+Ambas capas evolucionan de forma independiente mientras se comunican a través de contratos claramente definidos.
+
+# ¿Por Qué .NET?
+
+La decisión de introducir .NET se basa tanto en familiaridad como en el papel que ya juega en mi trabajo profesional.
+
+Usar ASP.NET Core permite desarrollar nuevas APIs rápidamente mientras se aprovecha un ecosistema maduro para autenticación, ruteo, inyección de dependencias y documentación de API.
+
+En lugar de reemplazar a Rust, .NET lo complementa.
+
+Cada tecnología se usa donde aporta el mayor valor.
+
+# Dashboard en React
+
+Administrar la infraestructura a través de SSH funciona bien durante el desarrollo, pero no escala conforme la plataforma crece.
+
+Uno de los objetivos principales del proyecto es hacer la administración accesible a través de una interfaz web moderna.
+
+El dashboard en React está pensado para convertirse en el panel de control central de toda la plataforma.
+
+En lugar de exponer páginas aisladas para cada servicio, el dashboard debería presentar al servidor como un solo sistema.
+
+Las posibles funcionalidades incluyen:
+
+- Monitoreo de servicios
+- Gestión de configuración
+- Visualización de logs
+- Monitoreo de salud
+- Métricas de rendimiento
+- Administración de contenedores
+- Futuros servicios agregados a la plataforma
+
+Debido a que cada servicio backend sigue convenciones compartidas, el dashboard puede ofrecer una experiencia consistente sin importar con qué componente esté interactuando.
+
+# Administración Móvil
+
+Aunque se espera que el dashboard en React funcione bien tanto en navegadores de escritorio como móviles, se planea una aplicación nativa de Android para iteraciones futuras.
+
+La intención no es envolver el sitio web dentro de un WebView.
+
+En cambio, la aplicación se desarrollará de forma nativa usando Kotlin.
+
+Una aplicación nativa ofrece mejor integración con funciones de Android como notificaciones, widgets y servicios en segundo plano, además de una interfaz diseñada específicamente para tareas administrativas rápidas.
+
+Algunos ejemplos incluyen:
+
+- Verificar la salud del servidor.
+- Ver logs recientes.
+- Reiniciar servicios.
+- Recibir alertas.
+- Monitorear el uso de recursos.
+
+Esta aplicación se considera un objetivo a largo plazo y aún no ha entrado en desarrollo activo.
+
+# Filosofía de Desarrollo
+
+Home Server se desarrolla intencionalmente a través de iteraciones pequeñas e incrementales.
+
+En lugar de intentar diseñar cada servicio antes de escribir código, cada nuevo componente introduce solo la infraestructura necesaria para el siguiente paso.
+
+Este enfoque produce progreso continuo mientras permite que las decisiones arquitectónicas evolucionen de forma natural conforme aparecen nuevos requerimientos.
+
+La infraestructura actual de logging es un ejemplo de esta filosofía.
+
+Existe no porque el logging fuera urgentemente necesario, sino porque cada futuro servicio eventualmente dependerá de él.
+
+Construir esa base compartida temprano evita trabajo duplicado más adelante.
+
+# Roadmap Actual
+
+El enfoque inmediato sigue siendo fortalecer el núcleo de la plataforma antes de agregar funcionalidad visible para el usuario.
+
+Las prioridades actuales incluyen:
+
+- Completar la infraestructura de logging.
+- Expandir los crates de utilidades compartidas.
+- Definir la gestión de configuración.
+- Implementar los primeros servicios backend.
+- Diseñar la capa de comunicación en .NET.
+- Comenzar el desarrollo del dashboard en React.
+
+Los objetivos a más largo plazo incluyen:
+
+- Cliente nativo de Android.
+- Autenticación y autorización.
+- Gestión de servicios basada en Docker.
+- Servicios de gestión de archivos.
+- Monitoreo y métricas.
+- Despliegue automatizado.
+- Aplicaciones adicionales autoalojadas.
+
+En lugar de tratar esto como hitos aislados, se espera que cada nueva capacidad se construya sobre la arquitectura establecida en iteraciones anteriores.
+
+# Aprendizajes
+
+Incluso en su estado actual, Home Server ya ha influido en la forma en que abordo la arquitectura de software.
+
+Uno de los aprendizajes más importantes ha sido reconocer el valor de construir infraestructura compartida antes que funcionalidades individuales.
+
+Aunque esto suele retrasar el progreso visible, simplifica dramáticamente el desarrollo futuro al fomentar consistencia a través de toda la plataforma.
+
+El proyecto también ha reforzado la importancia de separar claramente las responsabilidades.
+
+Redes, infraestructura, servicios backend, APIs de comunicación e interfaces de usuario resuelven problemas distintos cada uno.
+
+Tratarlos como capas independientes hace que el sistema completo sea más fácil de entender, mantener y extender.
+
+Finalmente, trabajar en un proyecto a largo plazo ha resaltado la importancia de diseñar para la evolución en lugar de para la finalización.
+
+El objetivo no es terminar la plataforma lo más rápido posible.
+
+El objetivo es crear un entorno donde se puedan introducir nuevas ideas sin requerir que la arquitectura se rediseñe cada pocos meses.
+
+# Estado Actual de la Arquitectura
+
+El proyecto todavía está en sus primeras etapas, pero su dirección ya está bien definida.
+
+```text
+Infraestructura
+██████████
+
+Redes
+██████████
+
+Administración Remota (SSH)
+██████████
+
+Núcleo de Plataforma en Rust
+██████░░░░
+
+Infraestructura de Logging
+██████░░░░
+
+Modelos de Respuesta Compartidos
+███████░░░
+
+Sistema de Configuración
+███░░░░░░░
+
+Capa de Comunicación en .NET
+█░░░░░░░░░
+
+Dashboard en React
+█░░░░░░░░░
+
+Cliente Nativo de Android
+░░░░░░░░░░
+
+Monitoreo
+░░░░░░░░░░
+
+Gestión de Contenedores
+░░░░░░░░░░
+```
+
+Este estado es intencionalmente aproximado.
+
+En lugar de medir finalización, captura el estado actual del proyecto al momento en que se escribió este caso de estudio.
+
+Futuras revisiones de este documento evolucionarán junto con la plataforma, documentando no solo qué se construyó, sino también cómo cambió la arquitectura con el tiempo.
+
+# Conclusión
+
+Home Server es más que una colección de tecnologías.
+
+Es un ejercicio de ingeniería en curso sobre cómo diseñar sistemas que puedan evolucionar sin perder coherencia.
+
+Cada decisión —desde configurar una dirección IP estática hasta abstraer la implementación de logging— contribuye al mismo objetivo: construir una plataforma donde infraestructura, servicios backend e interfaces de usuario trabajen juntos a través de límites arquitectónicos claros.
+
+El proyecto todavía está lejos de estar terminado, y eso es intencional.
+
+En lugar de perseguir un desarrollo rápido de funcionalidades, el enfoque sigue siendo construir una base capaz de sostener años de experimentación y crecimiento gradual.
+
+Conforme la plataforma se expanda, este caso de estudio evolucionará junto con ella, sirviendo no solo como documentación de lo que se construyó, sino como un registro de las decisiones de ingeniería, los trade-offs y los aprendizajes a lo largo de su desarrollo.

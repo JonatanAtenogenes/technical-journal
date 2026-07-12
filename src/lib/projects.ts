@@ -1,16 +1,14 @@
 import { Locale } from 'next-intl';
 import { Project, ProjectMeta, ProjectTranslation } from '@/lib/types/project';
-/*
+
 import { meta as homeServerMeta } from '@/content/projects/home-server/meta';
 import { metadata as homeServerEn } from '@/content/projects/home-server/en/metadata';
 import { metadata as homeServerEs } from '@/content/projects/home-server/es/metadata';
-*/
 /*
 import { meta as employeeAttritionMeta } from '@/content/projects/employee-attrition/meta';
 import { metadata as employeeAttritionEn } from '@/content/projects/employee-attrition/en/metadata';
 import { metadata as employeeAttritionEs } from '@/content/projects/employee-attrition/es/metadata';
 */
-
 import { meta as technicalJournalMeta } from '@/content/projects/technical-journal/meta';
 import { metadata as technicalJournalEn } from '@/content/projects/technical-journal/en/metadata';
 import { metadata as technicalJournalEs } from '@/content/projects/technical-journal/es/metadata';
@@ -22,6 +20,7 @@ import { metadata as networkSubnettingEs } from '@/content/projects/network-subn
 const projectMetas: ProjectMeta[] = [
   technicalJournalMeta,
   networkSubnettingMeta,
+  homeServerMeta,
 ];
 
 // Translations: keyed by locale, then by slug.
@@ -29,10 +28,12 @@ const translations: Record<Locale, Record<string, ProjectTranslation>> = {
   en: {
     'technical-journal': technicalJournalEn,
     'network-subnetting': networkSubnettingEn,
+    'home-server': homeServerEn,
   },
   es: {
     'technical-journal': technicalJournalEs,
     'network-subnetting': networkSubnettingEs,
+    'home-server': homeServerEs,
   },
 };
 
