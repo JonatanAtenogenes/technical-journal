@@ -34,6 +34,7 @@
     "next-intl": "^4.13.2",
     "next-mdx-remote": "^6.0.0",
     "prettier": "^3.9.5",
+    "rehype-expressive-code": "^0.44.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",

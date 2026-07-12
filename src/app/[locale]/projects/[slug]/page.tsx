@@ -7,6 +7,8 @@ import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
+import rehypeExpressiveCode from 'rehype-expressive-code';
+import { expressiveCodeOptions } from '@/lib/mdx/expressive-code-config';
 import { getTableOfContents } from '@/lib/get-table-of-contents';
 import ReadingProgress from '@/components/case-study/reading-progress';
 import type { Locale } from 'next-intl';
@@ -56,7 +58,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
           <aside className="lg:order-last">
-            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+            <div
+              className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
               <TableOfContents items={tableOfContents} />
             </div>
           </aside>
@@ -67,7 +70,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               options={{
                 mdxOptions: {
                   remarkPlugins: [remarkGfm],
-                  rehypePlugins: [rehypeSlug],
+                  rehypePlugins: [
+                    [rehypeExpressiveCode, expressiveCodeOptions],
+                    rehypeSlug],
                 },
               }}
             />
