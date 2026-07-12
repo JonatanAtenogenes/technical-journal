@@ -1,0 +1,505 @@
+# IBM HR Analytics — Análisis de Rotación de Empleados
+
+## Introducción
+
+La rotación de empleados es uno de los retos más comunes que enfrentan los departamentos de Recursos Humanos. Perder empleados con experiencia afecta la productividad, incrementa los costos de reclutamiento y a menudo revela problemas organizacionales más profundos que no son visibles de inmediato.
+
+Este proyecto explora el dataset de IBM HR Analytics Employee Attrition con el objetivo de identificar patrones asociados a la rotación de personal a través de un flujo de trabajo estructurado de análisis de datos.
+
+En lugar de enfocarse únicamente en producir visualizaciones, el proyecto está diseñado para demostrar el proceso analítico completo — desde entender el problema de negocio hasta comunicar hallazgos accionables. Cada etapa se documenta como parte de este caso de estudio, permitiendo al lector seguir tanto la implementación técnica como el razonamiento detrás de cada decisión.
+
+El proyecto también sirve como un ejercicio práctico para combinar prácticas de ingeniería de software con análisis de datos. En lugar de depender de un solo notebook que contenga cada paso, la funcionalidad reutilizable se separa en módulos de Python, mientras los notebooks se mantienen enfocados en las preguntas de negocio y el razonamiento analítico.
+
+---
+
+# Contexto de Negocio
+
+El departamento de Recursos Humanos de una empresa ha observado un número creciente de empleados que abandonan voluntariamente la organización. Aunque hay información demográfica, características del puesto y métricas de satisfacción laboral disponibles, no existe un entendimiento claro de qué factores están más fuertemente asociados con la rotación.
+
+Sin este conocimiento, las decisiones sobre retención de empleados se vuelven reactivas en lugar de proactivas.
+
+El propósito de este análisis no es construir un modelo predictivo de machine learning, sino entender los datos existentes, identificar relaciones significativas entre variables, y comunicar hallazgos que puedan apoyar futuras decisiones de negocio.
+
+Este caso de estudio aborda el problema desde la perspectiva de un Data Analyst trabajando dentro de una organización, donde entender el problema de negocio es tan importante como escribir código.
+
+---
+
+# Preguntas de Negocio
+
+El proyecto comienza con una serie de preguntas proporcionadas desde el negocio, en lugar de requerimientos técnicos.
+
+Entre las preguntas exploradas están:
+
+- ¿Cuál es la tasa general de rotación de empleados?
+- ¿Qué departamentos experimentan la mayor rotación de personal?
+- ¿Qué puestos de trabajo se asocian con mayor frecuencia a la rotación?
+- ¿El tiempo extra parece incrementar la probabilidad de que los empleados se vayan?
+- ¿El salario está relacionado con la retención de empleados?
+- ¿La satisfacción laboral influye en la rotación?
+- ¿Qué características describen a los empleados con mayor probabilidad de renunciar?
+
+Estas preguntas guían cada etapa subsecuente del proyecto, desde la preparación de datos hasta el análisis en SQL y las visualizaciones exploratorias.
+
+En lugar de explorar el dataset sin dirección, cada notebook está diseñado para responder una o más de estas preguntas de negocio.
+
+---
+
+# Objetivos del Proyecto
+
+## Objetivo General
+
+Desarrollar un flujo analítico completo capaz de transformar un dataset CSV crudo en hallazgos de negocio significativos a través de la preparación de datos, análisis en SQL y análisis exploratorio de datos.
+
+El objetivo no es simplemente generar gráficas, sino demostrar el proceso que sigue un Data Analyst al trabajar con datos de negocio.
+
+## Objetivos Específicos
+
+A lo largo del proyecto, se persiguen varias metas técnicas y analíticas.
+
+Estas incluyen:
+
+- Entender la estructura y calidad del dataset.
+- Preparar un dataset limpio apto para el análisis.
+- Persistir los datos procesados dentro de una base de datos relacional.
+- Responder preguntas de negocio usando consultas SQL.
+- Complementar los resultados de SQL con análisis exploratorio basado en Python.
+- Comunicar hallazgos a través de visualizaciones claras e interpretaciones escritas.
+- Construir un proyecto que refleje un flujo analítico realista en lugar de un notebook aislado.
+
+---
+
+# Stack Técnico
+
+El proyecto combina varias tecnologías, cada una seleccionada para un propósito específico dentro del flujo de trabajo.
+
+| Tecnología          | Propósito                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| Python              | Lenguaje de programación principal usado a lo largo del proyecto.         |
+| Pandas              | Carga de datos, transformación y análisis exploratorio.         |
+| SQLite              | Base de datos relacional local usada para almacenar el dataset procesado. |
+| SQLAlchemy          | Conexión a base de datos y persistencia de datos.                      |
+| SQL                 | Consultas analíticas orientadas al negocio.                          |
+| Matplotlib / Plotly | Visualización de datos.                                            |
+| Jupyter Notebook    | Documentación del proceso analítico.                       |
+
+SQLite se seleccionó intencionalmente para la primera iteración porque permite desarrollar el flujo analítico sin introducir la complejidad operativa de un servidor de base de datos.
+
+La arquitectura del proyecto se diseñó de forma que migrar a PostgreSQL en futuras iteraciones requiera cambios mínimos al análisis en sí.
+
+---
+
+# Flujo del Proyecto
+
+El análisis sigue un flujo secuencial inspirado en cómo se desarrollan comúnmente los proyectos de datos en entornos profesionales.
+
+```text
+                CSV Crudo
+                   │
+                   ▼
+    Entendimiento del Negocio
+                   │
+                   ▼
+      Entendimiento de los Datos
+                   │
+                   ▼
+       Preparación de Datos
+                   │
+                   ▼
+        Carga en SQLite
+                   │
+                   ▼
+        Análisis en SQL
+                   │
+                   ▼
+ Análisis Exploratorio de Datos
+                   │
+                   ▼
+      Hallazgos de Negocio
+                   │
+                   ▼
+     Conclusiones y Recomendaciones
+```
+
+Una decisión de diseño que vale la pena resaltar es que el análisis en SQL precede al análisis exploratorio realizado en Python.
+
+Aunque muchos proyectos educativos comienzan de inmediato manipulando DataFrames de pandas, los entornos de negocio reales frecuentemente requieren que los analistas obtengan y resuman información directamente desde bases de datos relacionales antes de pasar a una exploración estadística más profunda.
+
+Por esa razón, SQL ocupa un rol central dentro del flujo de trabajo en lugar de ser una idea secundaria.
+
+---
+
+# Organización del Proyecto
+
+El repositorio separa intencionalmente la lógica de aplicación reutilizable de los notebooks usados durante el análisis.
+
+```text
+ibm-hr-analytics/
+│
+├── data/
+│
+├── notebooks/
+│   ├── 01_data_understanding.ipynb
+│   ├── 02_data_preparation.ipynb
+│   ├── 03_sql_analysis.ipynb
+│   ├── 04_exploratory_analysis.ipynb
+│   └── 05_conclusions.ipynb
+│
+├── src/
+│   ├── data.py
+│   ├── cleaning.py
+│   ├── validation.py
+│   ├── database.py
+│   └── visualization.py
+│
+└── README.md
+```
+
+Esta separación cumple dos propósitos.
+
+Primero, los notebooks se mantienen enfocados en explicar el razonamiento analítico en lugar de contener detalles de implementación no relacionados con el análisis en sí.
+
+Segundo, operaciones reutilizables como cargar datasets, validar información o interactuar con la base de datos pueden compartirse entre múltiples notebooks sin duplicar código.
+
+Conforme el proyecto crece, esta organización también mejora la mantenibilidad al fomentar un diseño modular en lugar de tratar los notebooks como aplicaciones autocontenidas.
+
+---
+
+# Filosofía de Desarrollo
+
+Este proyecto se construye alrededor de la idea de que un notebook de análisis de datos debería comunicar decisiones en lugar de simplemente ejecutar código.
+
+En lugar de documentar cada función de pandas que se llamó, cada notebook está estructurado alrededor de un objetivo de negocio.
+
+Cada etapa sigue el mismo enfoque general:
+
+- Definir el objetivo de negocio.
+- Explicar por qué el análisis es necesario.
+- Ejecutar solo el código requerido para responder la pregunta.
+- Interpretar los resultados.
+- Conectar los hallazgos de vuelta con el contexto de negocio.
+
+Esta filosofía produce documentación que es más fácil de entender tanto para lectores técnicos como no técnicos, a la vez que refleja de forma más precisa cómo se realiza el trabajo analítico en entornos profesionales.
+
+El proyecto también incorpora prácticas de ingeniería de software al separar la funcionalidad reutilizable en módulos de Python dedicados, permitiendo que los notebooks se mantengan concisos, legibles y enfocados en el proceso analítico.
+
+---
+
+# Estado Actual
+
+Al momento en que se escribió este caso de estudio, el proyecto está en desarrollo activo.
+
+Las etapas iniciales de planeación y entendimiento de datos ya se completaron, estableciendo una base sólida para el análisis restante.
+
+El progreso actual puede resumirse de la siguiente manera:
+
+| Etapa                     | Estado      |
+| ------------------------- | ----------- |
+| Entendimiento del Negocio    | Completado   |
+| Entendimiento de los Datos        | Completado   |
+| Preparación de Datos          | En Progreso |
+| Integración con SQLite        | Planeado     |
+| Análisis en SQL              | Planeado     |
+| Análisis Exploratorio de Datos | Planeado     |
+| Conclusiones de Negocio      | Planeado     |
+
+Futuras iteraciones de este caso de estudio documentarán cada etapa conforme se complete, permitiendo que la documentación del proyecto evolucione junto con la implementación, en lugar de escribirse solo después de que el desarrollo haya terminado.
+
+El objetivo es crear un documento técnico vivo que registre no solo los resultados finales, sino también el razonamiento, las decisiones y los aprendizajes a lo largo de todo el proceso analítico.
+
+# Etapa 1 — Entendimiento del Negocio
+
+## Objetivo
+
+Todo proyecto de análisis de datos comienza con un problema de negocio, no con un dataset.
+
+Aunque el dataset de IBM HR Analytics ya está estructurado y listo para el análisis, abordarlo desde una perspectiva de negocio establece las preguntas que el proyecto busca responder y da dirección a cada etapa subsecuente.
+
+En lugar de explorar los datos sin un objetivo claro, el análisis se organiza alrededor de entender la rotación de empleados e identificar factores que puedan contribuir a que los empleados dejen la empresa.
+
+Esta etapa define esos objetivos antes de inspeccionar cualquier dato.
+
+---
+
+## Entendiendo el Problema
+
+La rotación de empleados representa un desafío significativo para las organizaciones.
+
+Reemplazar empleados con experiencia requiere reclutamiento, onboarding y capacitación, lo cual incrementa los costos operativos mientras reduce la productividad durante el periodo de transición.
+
+El departamento de Recursos Humanos tiene acceso a información demográfica, historial laboral y métricas de satisfacción del empleado, pero estos datos por sí solos no explican por qué los empleados se van.
+
+El objetivo de este proyecto es, por lo tanto, explorar esas variables e identificar relaciones significativas que puedan apoyar futuras decisiones de negocio.
+
+En lugar de buscar una sola causa, el análisis intenta determinar qué factores parecen estar asociados con niveles más altos de rotación.
+
+---
+
+## Definiendo las Preguntas de Negocio
+
+El análisis está guiado por preguntas proporcionadas desde una perspectiva de negocio, en lugar de curiosidad técnica.
+
+Estas preguntas determinan tanto el orden de los notebooks como los análisis realizados a lo largo del proyecto.
+
+Las preguntas principales incluyen:
+
+- ¿Cuál es la tasa general de rotación de empleados?
+- ¿Qué departamentos experimentan la mayor rotación?
+- ¿Qué puestos de trabajo parecen más afectados?
+- ¿El tiempo extra se correlaciona con la rotación de empleados?
+- ¿La satisfacción del empleado está asociada con la retención?
+- ¿El salario parece influir en la rotación?
+- ¿Qué características describen a los empleados con mayor probabilidad de irse?
+
+Cada notebook contribuye a responder una o más de estas preguntas.
+
+En lugar de producir gráficas aisladas, cada visualización y consulta SQL está pensada para apoyar un objetivo de negocio específico.
+
+---
+
+## Estrategia Analítica
+
+Antes de explorar relaciones entre variables, es esencial verificar que el dataset en sí sea confiable.
+
+Por esa razón, el proyecto sigue un flujo de trabajo por etapas.
+
+El primer objetivo es entender los datos.
+
+Solo después de validar el dataset, el proyecto avanza con la limpieza, el análisis en SQL y las visualizaciones exploratorias.
+
+Este enfoque reduce la probabilidad de llegar a conclusiones basadas en suposiciones incorrectas o datos de mala calidad.
+
+---
+
+## Entregables Esperados
+
+Al final del proyecto, el análisis debería proveer:
+
+- Un dataset validado apto para el análisis.
+- Una base de datos relacional que contenga la información procesada.
+- Consultas SQL que respondan las preguntas de negocio iniciales.
+- Visualizaciones que respalden esos hallazgos.
+- Interpretaciones escritas que conecten los resultados técnicos con decisiones de negocio.
+- Un flujo de trabajo analítico documentado que pueda reproducirse en proyectos futuros.
+
+En lugar de producir notebooks aislados, el objetivo es construir un pipeline analítico completo.
+
+---
+
+## Resumen de la Etapa
+
+La etapa de Entendimiento del Negocio establece la base para todo el proyecto.
+
+En lugar de cargar de inmediato el dataset en Python, identifica las preguntas que justifican cada análisis subsecuente.
+
+Con esos objetivos claramente definidos, la siguiente etapa se enfoca en examinar el dataset en sí para determinar si la información disponible es capaz de responder esas preguntas.
+
+---
+
+# Etapa 2 — Entendimiento de los Datos
+
+## Objetivo
+
+Con los objetivos de negocio claramente definidos, el siguiente paso es entender los datos en sí.
+
+Antes de limpiar, transformar o consultar el dataset, es importante verificar su estructura, identificar posibles problemas de calidad y determinar si las variables disponibles pueden realmente responder las preguntas de negocio establecidas en la etapa anterior.
+
+No se realizan modificaciones durante este notebook.
+
+Su propósito es puramente observacional.
+
+---
+
+## Cargando el Dataset
+
+El análisis comienza cargando el archivo CSV crudo en un DataFrame de pandas.
+
+En lugar de leer el archivo directamente dentro del notebook, la lógica de carga se encapsula dentro de un módulo de Python reutilizable ubicado dentro del paquete `src`.
+
+Esto mantiene al notebook enfocado en el análisis, mientras hace que el proceso de carga sea reutilizable en futuros notebooks.
+
+```python
+from src.data import load_raw_data
+
+df = load_raw_data()
+```
+
+La función de carga en sí se mantiene intencionalmente simple.
+
+```python
+def load_raw_data() -> pd.DataFrame:
+    return pd.read_csv(
+        Path(__file__)
+        .parent.parent
+        .joinpath("data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv")
+    )
+```
+
+Separar la funcionalidad reutilizable de los notebooks analíticos es una decisión de diseño recurrente a lo largo del proyecto.
+
+---
+
+## Primer Vistazo al Dataset
+
+Antes de calcular estadísticas, es útil inspeccionar algunos registros manualmente.
+
+Esta simple inspección verifica que el dataset se cargó correctamente, a la vez que provee un entendimiento intuitivo de la información disponible.
+
+```python
+df.head()
+
+df.sample(5, random_state=42)
+```
+
+La vista previa confirma que cada fila representa a un empleado individual, mientras las columnas describen información demográfica, condiciones de empleo, compensación y satisfacción del empleado.
+
+No se observan problemas de formato evidentes durante esta inspección inicial.
+
+---
+
+## Midiendo el Dataset
+
+Entender el tamaño del dataset provee contexto para los análisis que siguen.
+
+```python
+rows, columns = df.shape
+
+print(f"Rows: {rows}")
+print(f"Columns: {columns}")
+```
+
+Salida:
+
+```text
+Rows: 1470
+Columns: 35
+```
+
+El dataset contiene 1,470 registros de empleados distribuidos en 35 variables.
+
+Aunque relativamente pequeño, el dataset es lo suficientemente grande para identificar patrones entre diferentes grupos de empleados, mientras se mantiene fácil de explorar de forma interactiva.
+
+---
+
+## Inspeccionando la Estructura del Dataset
+
+El siguiente paso es verificar los tipos de datos e identificar posibles problemas de calidad.
+
+```python
+df.info()
+```
+
+Esta inspección provee varias observaciones útiles.
+
+- Cada columna contiene el número esperado de valores.
+- No se observan valores faltantes de inmediato.
+- Las variables numéricas y categóricas están claramente separadas.
+- El uso de memoria se mantiene lo suficientemente bajo como para permitir un análisis en memoria.
+
+Entender estas características desde el principio simplifica las etapas posteriores del proyecto.
+
+---
+
+## Clasificando Variables
+
+Diferentes tipos de variables requieren diferentes técnicas analíticas.
+
+Por esa razón, las variables se separan según su tipo de dato.
+
+```python
+numeric_columns = df.select_dtypes(include="number").columns.tolist()
+
+string_columns = df.select_dtypes(include="str").columns.tolist()
+```
+
+Esta clasificación determinará más adelante qué resúmenes estadísticos, visualizaciones y agregaciones SQL son más apropiados para cada variable.
+
+---
+
+## Estadísticas Descriptivas
+
+Antes de buscar relaciones entre variables, las estadísticas descriptivas proveen un panorama general del dataset.
+
+```python
+df.describe()
+
+df.describe(include=["str"])
+```
+
+Estos resúmenes permiten identificar variables con distribuciones inusuales y posibles valores atípicos antes de que comience un análisis más profundo.
+
+En esta etapa, el objetivo no es la interpretación, sino familiarizarse con el dataset.
+
+---
+
+## Verificando Valores Faltantes
+
+Los valores faltantes frecuentemente representan una de las mayores fuentes de error analítico.
+
+Por esa razón, se verifican explícitamente antes de realizar cualquier transformación.
+
+```python
+missing_values = (
+    df.isnull()
+      .sum()
+      .sort_values(ascending=False)
+)
+
+missing_values = missing_values[missing_values > 0]
+```
+
+El dataset no contiene valores faltantes.
+
+Debido a que no se requiere imputación, las etapas de preprocesamiento posteriores pueden enfocarse en simplificar el dataset en lugar de reparar información incompleta.
+
+---
+
+## Buscando Registros Duplicados
+
+Los registros duplicados de empleados podrían sesgar los análisis subsecuentes.
+
+Por lo tanto, la verificación se realiza antes de hacer cualquier cálculo.
+
+```python
+df.duplicated().sum()
+```
+
+No se detectan registros duplicados.
+
+Esto indica que cada fila representa una observación única de un empleado.
+
+---
+
+## Identificando Variables Constantes
+
+No toda variable aporta información útil.
+
+Algunas columnas contienen exactamente el mismo valor para cada empleado y, por lo tanto, no pueden explicar diferencias en la rotación.
+
+```python
+unique_values = (
+    df.nunique()
+      .sort_values()
+)
+
+unique_values
+```
+
+Varias variables contienen un único valor.
+
+Estas variables se identifican durante esta etapa y se eliminarán durante la Preparación de Datos para simplificar el dataset sin perder valor analítico.
+
+---
+
+## Evaluación de la Etapa
+
+La etapa de Entendimiento de los Datos confirma que el dataset es apto para el análisis.
+
+Emergen varias observaciones importantes:
+
+- No se detectaron valores faltantes.
+- No se encontraron registros duplicados.
+- Los tipos de datos son consistentes.
+- El dataset combina información numérica y categórica.
+- Algunas variables permanecen constantes para todos los empleados y pueden eliminarse de forma segura durante el preprocesamiento.
+
+Aun
