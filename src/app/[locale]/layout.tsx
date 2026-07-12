@@ -1,0 +1,97 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
+import { notFound } from 'next/navigation';
+import { hasLocale } from 'next-intl';
+import { ThemeProvider } from 'next-themes';
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono, Raleway } from 'next/font/google';
+import './globals.css';
+import { cn } from '@/lib/utils';
+/*
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem>
+        {children}
+      </ThemeProvider>
+    </NextIntlClientProvider>
+  );
+}
+*/
+
+const raleway = Raleway({ subsets: ['latin'], variable: '--font-sans' });
+
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+export const metadata: Metadata = {
+  title: 'Technical Journal',
+  description:
+    'A collection of software engineering and data case studies documenting architecture, implementation and lessons learned.',
+};
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function RootLayout({
+  children,
+  params,
+}: Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}>) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        'h-full',
+        'antialiased',
+        geistSans.variable,
+        geistMono.variable,
+        'font-sans',
+        raleway.variable,
+      )}
+    >
+      <body className="min-h-full flex flex-col">
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider attribute={'class'} defaultTheme="system" enableSystem>
+            {children}
+          </ThemeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}

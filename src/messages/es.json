@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "projects": "Proyectos"
+  },
+  "hero": {
+    "title": "Diario Técnico",
+    "subtitle": "Casos de estudio detallados sobre proyectos de software y datos"
+  }
+}

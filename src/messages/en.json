@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "home": "Home",
+    "projects": "Projects"
+  },
+  "hero": {
+    "title": "Technical Journal",
+    "subtitle": "In-depth case studies on software and data projects"
+  }
+}
