@@ -23,7 +23,8 @@ export default function LocaleSwitcher() {
     // Determine which heading is currently "active" using the same
     // offset-based check as the scrollspy logic.
     const offset = 120;
-    let currentIndex = 0;
+    let currentIndex = -1;
+
     headings.forEach((el, i) => {
       if (el.getBoundingClientRect().top <= offset) {
         currentIndex = i;
