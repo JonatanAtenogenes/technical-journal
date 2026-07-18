@@ -13,6 +13,9 @@ import { metadata as technicalJournalEs } from '@/content/projects/technical-jou
 import { meta as networkSubnettingMeta } from '@/content/projects/network-subnetting/meta';
 import { metadata as networkSubnettingEn } from '@/content/projects/network-subnetting/en/metadata';
 import { metadata as networkSubnettingEs } from '@/content/projects/network-subnetting/es/metadata';
+import { meta as opsTerminalMeta } from '@/content/projects/ops-terminal/meta';
+import { metadata as opsTerminalEn } from '@/content/projects/ops-terminal/en/metadata';
+import { metadata as opsTerminalEs } from '@/content/projects/ops-terminal/es/metadata';
 
 // Structural data: one entry per project, locale-independent.
 const projectMetas: ProjectMeta[] = [
@@ -20,6 +23,7 @@ const projectMetas: ProjectMeta[] = [
   networkSubnettingMeta,
   homeServerMeta,
   employeeAttritionMeta,
+  opsTerminalMeta,
 ];
 
 // Translations: keyed by locale, then by slug.
@@ -29,12 +33,14 @@ const translations: Record<Locale, Record<string, ProjectTranslation>> = {
     'network-subnetting': networkSubnettingEn,
     'home-server': homeServerEn,
     'employee-attrition': employeeAttritionEn,
+    'ops-terminal': opsTerminalEn,
   },
   es: {
     'technical-journal': technicalJournalEs,
     'network-subnetting': networkSubnettingEs,
     'home-server': homeServerEs,
     'employee-attrition': employeeAttritionEs,
+    'ops-terminal': opsTerminalEs,
   },
 };
 

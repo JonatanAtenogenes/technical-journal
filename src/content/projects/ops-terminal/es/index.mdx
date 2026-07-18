@@ -1,0 +1,1131 @@
+# Ops Terminal
+
+> Un gestor de proyectos personal inspirado en terminales CRT retro, diseñado para priorizar la visibilidad del trabajo diario y la constancia por encima de la burocracia de un gestor de proyectos tradicional.
+
+Ops Terminal es una aplicación para el seguimiento de proyectos personales inspirada en las terminales monocromáticas de los primeros sistemas operativos y en la estética de *Fallout*. En lugar de centrarse en colaboración, flujos de trabajo o planeación empresarial, busca responder una pregunta mucho más simple:
+
+**¿En qué proyectos estoy trabajando, qué tareas siguen pendientes y he avanzado hoy?**
+
+Desde el inicio, el proyecto se planteó con un alcance muy específico: una interfaz basada en comandos, una identidad visual retro y un conjunto reducido de funcionalidades. No pretende competir con herramientas como Jira, Trello o Linear, sino ofrecer un entorno ligero donde el estado de los proyectos y el progreso diario permanezcan siempre visibles, sin añadir complejidad innecesaria.
+
+---
+
+# Motivación
+
+## ¿Por qué crear otro gestor de proyectos?
+
+La mayoría de las herramientas de gestión de proyectos están pensadas para equipos. Incorporan permisos, notificaciones, integraciones, flujos de aprobación, tableros e innumerables funciones que resultan muy útiles en organizaciones, pero que suelen ser excesivas para quien únicamente desea organizar su trabajo personal.
+
+Ops Terminal parte de una idea completamente distinta.
+
+La aplicación está diseñada para un solo usuario que quiere mantener organizados sus proyectos, conocer su avance y desarrollar el hábito de trabajar de forma constante. El objetivo no es administrar personas ni procesos, sino mantener una visión clara del trabajo en curso.
+
+Todo el proyecto gira alrededor de tres preguntas:
+
+* ¿Qué proyectos siguen activos?
+* ¿Qué tareas faltan por completar?
+* ¿He trabajado hoy en alguno de mis proyectos?
+
+Cada funcionalidad existe únicamente porque ayuda a responder alguna de esas preguntas.
+
+## Filosofía del proyecto
+
+Desde el principio se definieron varios principios que guiaron todas las decisiones de diseño.
+
+### Simplicidad antes que cantidad de funciones
+
+El objetivo nunca fue desarrollar una plataforma completa de gestión de proyectos. Cada nueva característica añade complejidad, incrementa el mantenimiento y aumenta la carga cognitiva del usuario.
+
+### Visibilidad antes que reportes
+
+La aplicación da prioridad al estado actual del trabajo. Más que generar estadísticas históricas o métricas complejas, busca ofrecer una visión inmediata de lo que realmente importa en el momento.
+
+### Constancia antes que productividad
+
+En lugar de medir velocidad, rendimiento o throughput, el proyecto pone el foco en la consistencia mediante check-ins diarios y rachas de trabajo.
+
+### Uso personal antes que escalabilidad
+
+Ops Terminal fue concebido como una aplicación de un solo usuario. Las decisiones técnicas priorizan la simplicidad y el mantenimiento antes que la capacidad de soportar múltiples usuarios.
+
+---
+
+# Stack Tecnológico
+
+## Tecnologías principales
+
+El proyecto está construido utilizando:
+
+* SvelteKit
+* TypeScript
+* Tailwind CSS
+* Supabase (PostgreSQL)
+* Vitest
+* Render
+* `@sveltejs/adapter-node`
+
+La combinación ofrece un equilibrio entre experiencia de desarrollo, facilidad de despliegue y mantenibilidad, manteniendo una arquitectura relativamente ligera.
+
+## ¿Por qué SvelteKit en lugar de Svelte?
+
+Aunque actualmente la aplicación se compone de una sola página, SvelteKit aporta varias ventajas que resultan útiles desde el primer momento.
+
+### Manejo de variables de entorno
+
+SvelteKit incorpora soporte nativo para variables de entorno mediante `$env/static/public`, eliminando configuraciones adicionales.
+
+### Crecimiento futuro
+
+Hoy la aplicación gira alrededor de una única terminal, pero en el futuro podrían añadirse vistas como configuración, preferencias o estadísticas sin tener que reorganizar la estructura del proyecto.
+
+### Despliegue
+
+Los adaptadores forman parte del propio framework, lo que simplifica el despliegue en plataformas como Render.
+
+### Ecosistema
+
+Actualmente SvelteKit representa el estándar dentro del ecosistema Svelte, por lo que dispone de mayor documentación, ejemplos y soporte de la comunidad.
+
+---
+
+# Decisiones de Alcance
+
+Una parte importante del proyecto consistió en definir explícitamente qué funcionalidades y herramientas **no** formarían parte de la aplicación.
+
+Mantener un alcance reducido disminuye el costo de mantenimiento y evita que el proyecto termine convirtiéndose en otro gestor de proyectos genérico.
+
+## Tecnologías y funcionalidades descartadas
+
+| Tecnología / Funcionalidad     | Motivo                                                                                                                                               |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Drizzle                        | El acceso a la base de datos ya es suficientemente sencillo mediante Supabase y SQL. Incorporar un ORM añadiría una capa de abstracción innecesaria. |
+| better-auth                    | La aplicación es de un solo usuario, por lo que no existe un sistema de autenticación.                                                               |
+| mdsvex                         | No se renderiza contenido en Markdown dentro de la aplicación.                                                                                       |
+| Paraglide (i18n)               | Está pensada para un único idioma y un único usuario.                                                                                                |
+| Storybook                      | La cantidad de componentes no justifica la configuración adicional.                                                                                  |
+| MCP                            | No guarda relación con el objetivo del proyecto.                                                                                                     |
+| Funcionalidades experimentales | Se prioriza la estabilidad sobre el uso de características aún en desarrollo.                                                                        |
+| Playwright                     | La lógica de negocio puede cubrirse adecuadamente mediante pruebas unitarias con Vitest.                                                             |
+| Tailwind Typography            | No existe contenido tipo artículo que requiera este plugin.                                                                                          |
+| Tailwind Forms                 | El campo de comandos utiliza un estilo CRT completamente personalizado.                                                                              |
+
+## ¿Por qué limitar el alcance?
+
+Controlar el alcance ha sido una de las decisiones arquitectónicas más importantes del proyecto.
+
+Descartar explícitamente aquellas funciones que no aportan valor al objetivo principal mantiene la aplicación más sencilla de mantener, más fácil de comprender y mucho más coherente con su propósito original.
+
+El resultado es una herramienta centrada en ofrecer visibilidad sobre los proyectos y fomentar la constancia diaria, en lugar de acumular funcionalidades innecesarias.
+
+---
+
+# Diseño de Base de Datos
+
+La aplicación almacena su información en **Supabase (PostgreSQL)** mediante un esquema deliberadamente pequeño. En lugar de perseguir una base de datos altamente normalizada o introducir múltiples capas de abstracción, el modelo se limita a tres tablas que representan directamente el dominio de la aplicación:
+
+* **Projects**
+* **Tasks**
+* **Check-ins**
+
+Esta simplicidad refleja la filosofía general del proyecto: una herramienta de productividad personal debe ser fácil de comprender, consultar y mantener.
+
+En lugar de crear tablas auxiliares para enumeraciones, PostgreSQL utiliza **CHECK constraints** para garantizar que los datos sean válidos, manteniendo el esquema limpio y autoexplicativo.
+
+---
+
+## Proyectos
+
+Los proyectos representan el nivel más alto de organización dentro de la aplicación.
+
+Cada registro almacena la información básica del proyecto, su estado actual, fechas relevantes y una marca de tiempo utilizada para implementar el borrado lógico (*soft delete*).
+
+```sql
+create table projects (
+    id uuid primary key default gen_random_uuid(),
+
+    name text not null,
+    description text,
+
+    status text not null
+        default 'active'
+        check (status in (
+            'active',
+            'paused',
+            'archived'
+        )),
+
+    start_date date default current_date,
+    due_date date,
+
+    deleted_at timestamptz,
+    created_at timestamptz not null default now()
+);
+
+create unique index projects_name_active_unique
+on projects (name)
+where deleted_at is null;
+```
+
+En lugar de utilizar una restricción `UNIQUE` convencional, se emplea un **índice único parcial**. Esto permite reutilizar el nombre de un proyecto una vez que este ha sido eliminado mediante un *soft delete*, evitando conflictos innecesarios sin perder el historial.
+
+---
+
+## Tareas
+
+Cada tarea pertenece a un único proyecto y almacena toda la información necesaria para calcular el progreso, controlar prioridades y registrar fechas de vencimiento y finalización.
+
+```sql
+create table tasks (
+    id uuid primary key default gen_random_uuid(),
+
+    project_id uuid not null
+        references projects(id)
+        on delete cascade,
+
+    title text not null,
+
+    status text not null
+        default 'todo'
+        check (status in (
+            'todo',
+            'in_progress',
+            'done'
+        )),
+
+    priority text not null
+        default 'medium'
+        check (priority in (
+            'low',
+            'medium',
+            'high'
+        )),
+
+    due_date date,
+
+    completed_at timestamptz,
+
+    deleted_at timestamptz,
+
+    created_at timestamptz not null default now()
+);
+```
+
+Aunque la aplicación nunca elimina proyectos físicamente durante su funcionamiento normal, las claves foráneas mantienen `ON DELETE CASCADE` para conservar la integridad referencial en caso de que algún registro deba eliminarse permanentemente durante tareas de mantenimiento.
+
+---
+
+## Check-ins
+
+Los **check-ins** registran si se trabajó o no en un proyecto durante un día determinado.
+
+A diferencia de las tareas, su estructura es intencionalmente sencilla porque su única responsabilidad es servir como base para el cálculo de las rachas de trabajo.
+
+```sql
+create table check_ins (
+    id uuid primary key default gen_random_uuid(),
+
+    project_id uuid not null
+        references projects(id)
+        on delete cascade,
+
+    date date not null,
+
+    note text,
+
+    created_at timestamptz not null default now(),
+
+    unique(project_id, date)
+);
+```
+
+La restricción `UNIQUE(project_id, date)` garantiza que un mismo proyecto no pueda registrar accidentalmente más de un check-in por día.
+
+---
+
+## Decisiones de Diseño
+
+Además del propio esquema, varias decisiones arquitectónicas buscan mantener la base de datos sencilla y trasladar la complejidad al lugar donde realmente pertenece.
+
+### CHECK constraints en lugar de tablas auxiliares
+
+Los estados de un proyecto y las prioridades de una tarea únicamente admiten un conjunto reducido de valores.
+
+Crear tablas independientes para representar estas enumeraciones añadiría complejidad sin aportar beneficios reales.
+
+Utilizar **CHECK constraints** permite que la propia base de datos valide la información mientras mantiene un esquema compacto y fácil de entender.
+
+### Soft deletes
+
+Tanto **Projects** como **Tasks** implementan borrado lógico mediante una columna nullable llamada `deleted_at`.
+
+Un registro se considera activo siempre que:
+
+```sql
+deleted_at IS NULL
+```
+
+En lugar de eliminar información de forma permanente, el sistema registra la fecha y hora en que el elemento fue eliminado.
+
+Este enfoque evita pérdidas accidentales de datos, conserva el historial de trabajo y permite reutilizar nombres de proyectos gracias al índice único parcial definido anteriormente.
+
+Todas las consultas que recuperan proyectos o tareas filtran automáticamente aquellos registros cuyo `deleted_at` no sea `NULL`.
+
+### Los check-ins son inmutables
+
+A diferencia de proyectos y tareas, los check-ins no implementan *soft delete*.
+
+Su única función consiste en registrar que hubo actividad durante un día concreto, por lo que eliminar registros no aporta ningún beneficio práctico y únicamente complicaría el cálculo de las rachas.
+
+### La lógica de negocio permanece fuera de la base de datos
+
+Cuando una tarea se marca como completada, la aplicación genera automáticamente el check-in correspondiente al día actual.
+
+Sin embargo, este comportamiento no se implementa mediante *triggers* ni procedimientos almacenados.
+
+Toda la lógica permanece en la aplicación porque ofrece varias ventajas:
+
+* Puede probarse mediante pruebas unitarias con Vitest.
+* El comportamiento permanece explícito y fácil de seguir.
+* La base de datos se mantiene enfocada únicamente en almacenar información.
+
+---
+
+# Lógica de Negocio
+
+Mientras que la capa de persistencia busca mantenerse lo más simple posible, prácticamente todo el comportamiento de la aplicación reside en módulos escritos en TypeScript.
+
+Separar la lógica de negocio del acceso a datos permite probar cada cálculo de manera independiente, sin depender de Supabase ni de conexiones a la base de datos.
+
+---
+
+## Progreso del Proyecto
+
+El cálculo del progreso busca ser completamente transparente.
+
+Únicamente se consideran las tareas activas del proyecto.
+
+```text
+tareas_completadas / total_de_tareas_activas × 100
+```
+
+El porcentaje resultante se muestra junto a cada proyecto dentro del **Situation Report**, ofreciendo una referencia inmediata del estado general sin recurrir a sistemas de puntuación más complejos o prioridades ponderadas.
+
+---
+
+## Tendencia de Cumplimiento
+
+El cálculo de tendencia responde a una pregunta diferente:
+
+> **¿Qué tan consistente es el proyecto al cumplir las fechas límite?**
+
+Para ello, únicamente participan las tareas que cumplen ambas condiciones:
+
+* Están marcadas como completadas.
+* Tienen una fecha de vencimiento definida.
+
+Las tareas sin fecha límite quedan excluidas, ya que no existe una referencia objetiva para determinar si fueron terminadas a tiempo.
+
+En lugar de resumir toda la información en un único indicador, la aplicación presenta dos métricas independientes:
+
+* Porcentaje de tareas completadas antes de la fecha de vencimiento.
+* Promedio de días de retraso, calculado únicamente sobre las tareas entregadas fuera de tiempo.
+
+Mostrar ambas cifras proporciona una imagen mucho más representativa que condensarlas en un único valor.
+
+---
+
+## Rachas de Trabajo
+
+Las rachas se calculan exclusivamente a partir de la tabla `check_ins`.
+
+La aplicación no almacena valores precalculados ni mantiene contadores sincronizados en la base de datos.
+
+### Racha actual
+
+La racha actual cuenta los días consecutivos con actividad hasta la fecha actual.
+
+Para evitar que una racha se rompa automáticamente al llegar la medianoche, el algoritmo también considera como válido terminar en el día anterior cuando todavía no se ha registrado actividad hoy.
+
+### Racha más larga
+
+La racha más larga se obtiene recorriendo todo el historial de check-ins ordenado cronológicamente y detectando la secuencia continua de mayor longitud.
+
+Dado que un proyecto personal genera relativamente pocos registros, recalcular las rachas bajo demanda resulta prácticamente insignificante desde el punto de vista del rendimiento.
+
+Almacenar estos valores en caché introduciría riesgos de sincronización sin aportar beneficios reales.
+
+---
+
+## Situation Report
+
+El **Situation Report** constituye la pantalla principal de la aplicación.
+
+En lugar de mostrar dashboards o gráficas, genera un resumen textual con la información más relevante:
+
+* Cantidad de proyectos activos.
+* Barra de progreso de cada proyecto.
+* Racha actual.
+* Tareas que vencen hoy.
+* Tareas atrasadas junto con el número de días de retraso.
+
+Cuando alguna de estas secciones no contiene información, simplemente no se muestra.
+
+Si no existen tareas pendientes ni atrasadas, el informe presenta un único mensaje alternativo en lugar de dejar encabezados vacíos, manteniendo la terminal limpia y fácil de leer.
+
+---
+
+# Sistema de Comandos
+
+Toda la interacción con la aplicación gira alrededor de un pequeño conjunto de comandos.
+
+Cada uno representa una operación concreta de la lógica de negocio, haciendo que el funcionamiento sea fácil de recordar y completamente predecible.
+
+| Comando                        | Descripción                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| `add project <nombre>`         | Crea un nuevo proyecto.                                                         |
+| `add task <proyecto> <título>` | Crea una tarea con prioridad y fecha de vencimiento opcionales.                 |
+| `check <proyecto> <tarea>`     | Marca una tarea como completada y registra automáticamente el check-in del día. |
+| `log <proyecto>`               | Registra manualmente un check-in.                                               |
+| `set-status <proyecto>`        | Cambia el estado del proyecto.                                                  |
+| `rm project`                   | Elimina lógicamente un proyecto tras solicitar confirmación.                    |
+| `rm task`                      | Elimina lógicamente una tarea tras solicitar confirmación.                      |
+| `status`                       | Muestra progreso, tendencia y rachas.                                           |
+| `home` / `report`              | Muestra el Situation Report.                                                    |
+| `clear`                        | Limpia la terminal y vuelve a generar el informe principal.                     |
+| `help`                         | Lista todos los comandos disponibles.                                           |
+
+El **Situation Report** aparece automáticamente al finalizar la secuencia de arranque y puede volver a mostrarse en cualquier momento mediante los comandos `home`, `report` o `clear`.
+
+---
+
+# Experiencia de Usuario
+
+Aunque la funcionalidad es exactamente la misma en todas las plataformas, la aplicación adapta la forma de interactuar según el dispositivo.
+
+En lugar de buscar una única interfaz que funcione "aceptablemente" en cualquier contexto, cada plataforma utiliza el modelo de interacción más natural para su método de entrada.
+
+## Experiencia en escritorio
+
+En escritorio, la forma principal de interactuar es una línea de comandos de texto libre.
+
+Es el método más rápido para ejecutar acciones y, además, refuerza la identidad de la aplicación como una terminal retro.
+
+Para quienes prefieran una experiencia más guiada, existe un interruptor que sustituye la línea de comandos por el mismo asistente visual utilizado en dispositivos móviles.
+
+Ambos métodos terminan ejecutando exactamente los mismos comandos.
+
+## Experiencia en dispositivos móviles
+
+Escribir comandos largos desde un teléfono resulta considerablemente menos cómodo.
+
+Por ello, la versión móvil utiliza un flujo completamente guiado que acompaña al usuario paso a paso hasta construir el comando necesario.
+
+El proceso se divide en cinco etapas:
+
+1. Seleccionar la acción.
+2. Seleccionar el proyecto, cuando sea necesario.
+3. Seleccionar la tarea correspondiente.
+4. Introducir parámetros adicionales como prioridad, fechas o notas.
+5. Confirmar la ejecución.
+
+Una vez finalizado el proceso, el comando generado aparece en pantalla exactamente igual que si hubiese sido escrito manualmente dentro de la terminal.
+
+Las acciones que no requieren información adicional se ejecutan inmediatamente, mientras que cualquier operación destructiva solicita siempre una confirmación explícita antes de continuar.
+
+# Arquitectura del Proyecto
+
+Aunque se trata de una aplicación relativamente pequeña, su estructura interna sigue una separación clara de responsabilidades. El objetivo es mantener la lógica de negocio independiente de la persistencia, permitir que cada módulo pueda probarse de forma aislada y garantizar que las interfaces de escritorio y móvil compartan exactamente el mismo flujo de ejecución.
+
+La estructura final del proyecto es la siguiente:
+
+```text id="z4btrm"
+ops-terminal/
+├── src/
+│   ├── lib/
+│   │   ├── types/
+│   │   ├── supabase/
+│   │   ├── queries/
+│   │   ├── logic/
+│   │   ├── commands/
+│   │   └── components/
+│   └── routes/
+│       └── +page.svelte
+├── tests/
+│   ├── streaks.test.ts
+│   └── trend.test.ts
+└── svelte.config.js
+```
+
+Cada directorio responde a una única responsabilidad. En lugar de organizar el código por tecnologías, la estructura refleja la función que desempeña cada módulo dentro de la aplicación.
+
+---
+
+## `types/`
+
+Este directorio contiene las interfaces de TypeScript que representan las entidades principales del dominio.
+
+Entre ellas se encuentran:
+
+* `Project`
+* `Task`
+* `CheckIn`
+
+Centralizar estas definiciones garantiza que las consultas a la base de datos, la lógica de negocio y los componentes de la interfaz trabajen siempre sobre el mismo contrato de datos.
+
+---
+
+## `supabase/`
+
+Este módulo únicamente se encarga de crear y exportar el cliente de Supabase.
+
+La configuración se obtiene mediante el sistema de variables de entorno de SvelteKit utilizando `$env/static/public`, evitando credenciales embebidas en el código y manteniendo separada la configuración del despliegue de la lógica de la aplicación.
+
+---
+
+## `queries/`
+
+El directorio `queries` agrupa todas las operaciones relacionadas con la base de datos.
+
+En lugar de distribuir consultas SQL entre distintos componentes, cada entidad dispone de su propio módulo.
+
+Por ejemplo:
+
+* `projects.ts`
+* `tasks.ts`
+* `checkIns.ts`
+
+Estos archivos son responsables exclusivamente de acceder a la base de datos, ya sea para consultar, insertar, actualizar o realizar un *soft delete*. No contienen reglas de negocio ni comportamiento relacionado con la interfaz de usuario.
+
+---
+
+## `logic/`
+
+Toda la lógica de negocio reside en este directorio.
+
+Módulos como:
+
+* `progress.ts`
+* `trend.ts`
+* `streaks.ts`
+
+reciben objetos de TypeScript como entrada y devuelven valores calculados sin depender directamente de Supabase.
+
+Gracias a ello, permanecen completamente deterministas y pueden probarse mediante pruebas unitarias sin necesidad de utilizar una base de datos ni crear mocks complejos.
+
+Además, esta separación evita que los componentes de la interfaz sean responsables de realizar cálculos que pertenecen a la lógica del dominio.
+
+---
+
+## `commands/`
+
+Una de las decisiones arquitectónicas más importantes del proyecto es la existencia de una capa dedicada al procesamiento de comandos.
+
+En lugar de que la versión de escritorio y la versión móvil implementen comportamientos distintos, ambas generan exactamente el mismo objeto de comando antes de ejecutarlo.
+
+Este flujo se divide en tres módulos principales:
+
+* **Parser**, encargado de interpretar el comando recibido.
+* **Registry**, donde se registran todos los comandos disponibles.
+* **Executor**, responsable de ejecutar la operación correspondiente.
+
+Gracias a esta arquitectura, ambas interfaces comparten el mismo comportamiento y no duplican lógica de negocio.
+
+---
+
+## `components/`
+
+La interfaz se construye mediante componentes pequeños y reutilizables, cada uno encargado de una parte concreta de la experiencia.
+
+Entre ellos se encuentran:
+
+* Terminal
+* Command Input
+* Command Builder
+* Situation Report
+* Project Status
+* Confirmation Dialog
+
+Los componentes se limitan a representar información en pantalla. Toda la lógica necesaria para calcular métricas o modificar el estado de la aplicación ya ha sido resuelta previamente por la capa de negocio.
+
+---
+
+## Una única ruta
+
+A pesar de utilizar SvelteKit, la aplicación únicamente expone una ruta principal.
+
+```text id="4uxwzt"
+src/routes/+page.svelte
+```
+
+Esta página monta el componente `Terminal`, que actúa como punto de entrada de toda la aplicación.
+
+Aunque en el futuro podrían incorporarse vistas adicionales —como configuración o preferencias—, esas funcionalidades quedan fuera del alcance definido para esta primera versión.
+
+---
+
+## ¿Por qué separar `logic/` de `queries/`?
+
+Uno de los principales objetivos de la arquitectura es facilitar las pruebas y mantener responsabilidades claramente diferenciadas.
+
+Las consultas a la base de datos dependen de un servicio externo, mientras que cálculos como las rachas, el progreso o la tendencia únicamente procesan datos ya existentes.
+
+Separar ambas capas aporta varias ventajas:
+
+* La lógica de negocio puede probarse sin necesidad de una base de datos.
+* Las consultas permanecen enfocadas únicamente en la persistencia.
+* Los componentes reciben información ya procesada y lista para mostrarse.
+* Cambios futuros en la base de datos tienen un impacto mínimo sobre el resto de la aplicación.
+
+En definitiva, la arquitectura sigue un principio muy sencillo:
+
+> **Obtener datos y procesarlos son responsabilidades distintas.**
+
+---
+
+## Flujo compartido de comandos
+
+Aunque la experiencia de escritorio y móvil es muy diferente desde el punto de vista del usuario, ambas terminan ejecutando exactamente el mismo flujo interno.
+
+```text id="q7jtb7"
+CLI (Escritorio)
+        │
+        │
+Command Builder (Móvil)
+        │
+        ▼
+ Objeto de Comando
+        │
+        ▼
+      Parser
+        │
+        ▼
+     Registry
+        │
+        ▼
+     Executor
+        │
+        ▼
+ Lógica de Negocio
+        │
+        ▼
+ Base de Datos
+```
+
+Este diseño evita duplicar comportamiento entre plataformas y garantiza que cualquier mejora o nuevo comando beneficie automáticamente a ambas interfaces.
+
+---
+
+# Diseño Visual
+
+Ops Terminal adopta deliberadamente una estética inspirada en terminales CRT clásicas y en videojuegos como *Fallout* y *Fallout: New Vegas*.
+
+La intención nunca fue recrear una interfaz moderna, sino construir una experiencia que recuerde a una terminal monocromática de un antiguo sistema operativo.
+
+Toda la identidad visual gira alrededor de esa idea.
+
+---
+
+## Paleta de colores
+
+La interfaz utiliza una paleta muy reducida.
+
+Los colores principales son:
+
+* Fondo casi negro (`#050b06` / `#030804`).
+* Texto verde fósforo (`#4af68a`).
+* Bordes verde oscuro (`#1f8f3f`).
+* Ámbar (`#ff8800`), reservado exclusivamente para advertencias y rachas interrumpidas.
+
+Limitar la cantidad de colores mejora la legibilidad y refuerza la identidad retro de la aplicación.
+
+---
+
+## Tipografía
+
+Toda la interfaz utiliza tipografías monoespaciadas, principalmente:
+
+* JetBrains Mono
+* Fira Code
+
+con la fuente monoespaciada del sistema como alternativa.
+
+Este tipo de tipografía no solo mantiene la alineación característica de una terminal, sino que también contribuye a reforzar la estética general del proyecto.
+
+---
+
+## Efectos CRT
+
+Para recrear la sensación de utilizar un monitor de fósforo, la interfaz incorpora varios efectos visuales sutiles.
+
+Entre ellos destacan:
+
+* Scanlines implementadas mediante `repeating-linear-gradient`.
+* Una viñeta radial que oscurece ligeramente los bordes de la pantalla.
+* Un brillo verde generado mediante `text-shadow`.
+* Una animación de parpadeo durante el arranque del sistema.
+
+Todos estos efectos buscan aportar personalidad sin afectar la legibilidad.
+
+---
+
+## Secuencia de arranque
+
+En lugar de mostrar inmediatamente la aplicación, la experiencia comienza con una pequeña secuencia de arranque.
+
+Durante unos instantes aparecen mensajes como:
+
+```text id="hmcqgk"
+INITIALIZING...
+LOADING DATABASE...
+REGISTERING COMMANDS...
+SYSTEM READY.
+```
+
+Cada línea se imprime progresivamente antes de mostrar el **Situation Report**.
+
+Aunque esta secuencia es completamente estética, ayuda a establecer la identidad visual del proyecto desde el primer momento.
+
+---
+
+# Estado Actual
+
+Al momento de redactar este caso de estudio, el proyecto ha completado la etapa de planificación y diseño de la arquitectura.
+
+## Completado
+
+* Definición del alcance funcional.
+* Diseño del esquema de la base de datos.
+* Creación del proyecto en Supabase.
+* Creación de las tablas en PostgreSQL.
+* Inicialización del proyecto con SvelteKit.
+* Configuración de TypeScript.
+* Integración de Tailwind CSS.
+* Configuración de ESLint.
+* Configuración de Prettier.
+* Configuración de Vitest.
+* Configuración del adaptador para Node.
+
+## En desarrollo
+
+La implementación se encuentra actualmente enfocada en conectar la aplicación con Supabase y desarrollar la arquitectura interna.
+
+Las siguientes tareas continúan pendientes:
+
+* Configuración de variables de entorno.
+* Cliente de Supabase.
+* Definición de entidades en TypeScript.
+* Implementación de consultas.
+* Desarrollo de la lógica de negocio.
+* Pruebas unitarias.
+* Parser y executor de comandos.
+* Componentes de la terminal.
+* Secuencia de arranque.
+* Efectos visuales CRT.
+* Despliegue en Render.
+
+---
+
+# Conclusiones
+
+Ops Terminal demuestra que una herramienta de productividad no necesita convertirse en una plataforma empresarial para resultar útil.
+
+Al limitar deliberadamente su alcance, el proyecto mantiene el foco en resolver un problema muy concreto: ayudar a un único desarrollador a visualizar el estado de sus proyectos y mantener la constancia en su trabajo diario.
+
+La mayoría de las decisiones arquitectónicas —desde el diseño de la base de datos hasta la separación entre lógica de negocio y persistencia o el sistema compartido de comandos— nacen precisamente de esa filosofía, más que de limitaciones técnicas.
+
+Las siguientes iteraciones de este proyecto estarán centradas en la implementación. A medida que la lógica de negocio se convierta en código funcional y las pruebas unitarias validen su comportamiento, Ops Terminal dejará de ser únicamente una especificación de arquitectura para convertirse en una herramienta completamente operativa.
+
+# Iteración 2
+
+La primera iteración del proyecto estuvo enfocada en definir el alcance, diseñar la arquitectura y establecer el modelo de datos. Con esa base completada, esta segunda iteración marca el inicio de la implementación.
+
+El trabajo realizado durante esta etapa se centra en construir la infraestructura sobre la que se apoyará el resto de la aplicación: configuración del entorno, conexión con Supabase, modelado de entidades, acceso a datos, desarrollo de la lógica de negocio y validación mediante pruebas unitarias.
+
+---
+
+## Configuración de variables de entorno
+
+La primera tarea consistió en configurar las credenciales necesarias para establecer la conexión con Supabase.
+
+El proyecto utiliza un archivo `.env` ubicado en la raíz con las siguientes variables:
+
+```bash id="5p9kqg"
+PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=tu_anon_key_aca
+```
+
+### ¿Por qué utilizar `PUBLIC_`?
+
+Una decisión importante fue utilizar el prefijo `PUBLIC_` en ambas variables.
+
+En SvelteKit, únicamente las variables que comienzan con este prefijo pueden utilizarse desde el navegador mediante `$env/static/public`. Cualquier otra variable permanece disponible únicamente en el servidor como medida de seguridad.
+
+En este caso resulta completamente válido exponer la **anon key** de Supabase, ya que está diseñada precisamente para ser utilizada por aplicaciones cliente. La clave con privilegios elevados (`service_role`) nunca forma parte del frontend.
+
+Como medida adicional, el archivo `.env` permanece excluido del control de versiones mediante `.gitignore`, configuración que el propio scaffold generado por `sv create` incorpora por defecto.
+
+---
+
+## Cliente de Supabase
+
+Una vez configurado el entorno, el siguiente paso fue establecer la conexión con la base de datos.
+
+Para ello se añadió el cliente oficial de Supabase:
+
+```bash id="fqhz1d"
+pnpm add @supabase/supabase-js
+```
+
+Posteriormente se creó el archivo `src/lib/supabase/client.ts`.
+
+```ts id="fmy2ld"
+import { createClient } from '@supabase/supabase-js';
+import {
+    PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_ANON_KEY
+} from '$env/static/public';
+
+export const supabase = createClient(
+    PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_ANON_KEY
+);
+```
+
+Centralizar la creación del cliente evita duplicar configuración y garantiza que toda la aplicación reutilice la misma instancia.
+
+Cualquier módulo que necesite acceder a la base de datos únicamente debe importar:
+
+```ts id="1p6hhy"
+import { supabase } from '$lib/supabase/client';
+```
+
+---
+
+## Modelado con TypeScript
+
+Con la conexión establecida, el siguiente paso consistió en trasladar el esquema SQL al sistema de tipos de TypeScript.
+
+Las interfaces reflejan la estructura de las tablas prácticamente uno a uno, incluyendo columnas utilizadas para *soft delete* y los valores permitidos por los `CHECK constraints`.
+
+Además de las entidades completas, se definieron interfaces específicas para las operaciones de inserción.
+
+### Separación entre entidades y modelos de creación
+
+Cada tabla dispone de dos tipos distintos.
+
+Por ejemplo:
+
+* `Project`
+* `NewProject`
+
+El primero representa exactamente un registro almacenado en la base de datos.
+
+El segundo únicamente contiene la información que realmente puede proporcionar el usuario al crear un nuevo proyecto.
+
+De esta forma resulta imposible establecer manualmente campos como:
+
+* `id`
+* `created_at`
+* `deleted_at`
+
+ya que dichos valores son responsabilidad exclusiva de PostgreSQL.
+
+### Union types para reflejar los CHECK constraints
+
+En lugar de utilizar `string`, propiedades como `status` y `priority` se modelan mediante *union types*.
+
+Por ejemplo:
+
+```ts id="9l6qtw"
+export type ProjectStatus =
+    | 'active'
+    | 'paused'
+    | 'archived';
+```
+
+Este enfoque ofrece varias ventajas:
+
+* Autocompletado en el editor.
+* Validación durante la compilación.
+* Correspondencia directa entre TypeScript y la base de datos.
+
+En consecuencia, el propio compilador impide asignar estados o prioridades inexistentes antes incluso de ejecutar la aplicación.
+
+### Fechas como cadenas ISO
+
+Aunque PostgreSQL almacena valores `date` y `timestamptz`, el cliente de Supabase los devuelve como cadenas de texto en formato ISO.
+
+Por este motivo todas las fechas se tipan como `string`.
+
+Las conversiones a `Date` únicamente se realizan dentro de los módulos de lógica de negocio cuando es necesario comparar fechas o calcular diferencias entre ellas.
+
+Esto evita conversiones innecesarias y mantiene las entidades fieles al formato recibido desde la base de datos.
+
+---
+
+## Capa de acceso a datos
+
+Toda la comunicación con Supabase se concentra dentro del directorio `queries/`.
+
+En lugar de permitir que los componentes ejecuten consultas directamente, cada entidad dispone de un pequeño módulo responsable únicamente del acceso a datos.
+
+La estructura queda organizada de la siguiente forma:
+
+* `projects.ts`
+* `tasks.ts`
+* `checkIns.ts`
+
+Cada archivo encapsula las operaciones relacionadas con su entidad correspondiente.
+
+### Responsabilidad única
+
+Una decisión importante durante esta etapa fue mantener las consultas completamente independientes de la lógica de negocio.
+
+Por ejemplo, la función encargada de completar una tarea únicamente actualiza su estado.
+
+No crea automáticamente un check-in.
+
+Aunque ambos eventos ocurren juntos desde el punto de vista del usuario, esa coordinación pertenece a una capa superior (`commands/executor.ts`), responsable de orquestar múltiples operaciones.
+
+Este enfoque mantiene las consultas pequeñas, reutilizables y fáciles de probar.
+
+### Soft delete transparente
+
+Otro objetivo consistió en evitar que la interfaz tuviera que recordar constantemente qué registros habían sido eliminados.
+
+Por ello, todas las consultas de lectura sobre proyectos y tareas incluyen automáticamente el filtro:
+
+```sql id="8fdtla"
+deleted_at IS NULL
+```
+
+De esta forma ningún componente necesita preocuparse por excluir registros eliminados.
+
+La única excepción corresponde a `check_ins`, ya que esta tabla no implementa *soft delete*.
+
+### Uso de `upsert` para los check-ins
+
+Los check-ins poseen una restricción de unicidad formada por:
+
+```text id="44fxhm"
+(project_id, date)
+```
+
+Esto significa que un proyecto únicamente puede registrar un check-in por día.
+
+En lugar de utilizar un `insert`, la función `createCheckIn` emplea `upsert` con:
+
+```ts id="j5ohjk"
+onConflict: 'project_id,date'
+```
+
+Gracias a ello, si el usuario ejecuta varias veces el comando `log` durante el mismo día, el registro simplemente se actualiza en lugar de provocar una violación de la restricción `UNIQUE`.
+
+---
+
+## Lógica de negocio
+
+Una vez implementada la persistencia, el desarrollo se centró en construir la capa que realmente da comportamiento a la aplicación.
+
+Todos los algoritmos residen dentro de `logic/` y comparten una característica fundamental:
+
+**No dependen de Supabase.**
+
+Cada módulo recibe datos ya cargados y devuelve únicamente el resultado de los cálculos, lo que permite probar toda la lógica sin necesidad de utilizar una base de datos.
+
+---
+
+### Cálculo de progreso
+
+El módulo `progress.ts` recibe una colección de tareas y calcula cuatro valores fundamentales:
+
+* Tareas completadas.
+* Tareas pendientes.
+* Total de tareas.
+* Porcentaje de avance.
+
+El porcentaje siempre se expresa entre 0 y 100 y se devuelve redondeado para facilitar su representación dentro de la interfaz.
+
+---
+
+### Tendencia de cumplimiento
+
+El módulo `trend.ts` evalúa únicamente las tareas que cumplen dos condiciones:
+
+* Se encuentran completadas.
+* Tienen una fecha límite definida.
+
+Las tareas sin `due_date` quedan excluidas porque no existe una referencia objetiva para determinar si fueron entregadas a tiempo.
+
+El algoritmo devuelve dos indicadores:
+
+* Porcentaje de tareas completadas antes de la fecha límite.
+* Promedio de días de retraso calculado únicamente sobre las tareas entregadas fuera de tiempo.
+
+Cuando no existen datos suficientes para realizar el cálculo, la función devuelve `null` en lugar de `0`.
+
+Esta diferencia resulta importante porque **"sin información disponible"** y **"0% de cumplimiento"** representan situaciones completamente distintas.
+
+---
+
+### Rachas de trabajo
+
+El módulo `streaks.ts` calcula tanto la racha actual como la racha histórica más larga utilizando únicamente las fechas registradas en `check_ins`.
+
+Ninguno de estos valores se almacena en la base de datos.
+
+Antes de comenzar el cálculo, el algoritmo normaliza la información:
+
+* Elimina fechas duplicadas.
+* Ordena cronológicamente los registros.
+* No asume ningún orden previo de entrada.
+
+Durante el desarrollo también se contemplaron varios casos límite.
+
+Entre ellos:
+
+* Historial sin check-ins.
+* Una única fecha registrada.
+* Rachas consecutivas.
+* Último check-in realizado ayer.
+* Rachas interrumpidas por varios días.
+* La racha histórica más larga aparece en mitad del historial.
+* Fechas duplicadas.
+* Fechas recibidas en orden arbitrario.
+
+Cubrir estos escenarios permitió mantener el algoritmo completamente determinista incluso frente a entradas poco habituales.
+
+---
+
+## Pruebas unitarias
+
+Con la lógica de negocio implementada, el siguiente paso consistió en validar cada algoritmo mediante pruebas unitarias utilizando Vitest.
+
+Las pruebas se organizaron siguiendo la estructura recomendada por el scaffold de SvelteKit y se centraron exclusivamente en los módulos de lógica.
+
+### Cobertura de pruebas
+
+Se implementaron dos archivos principales.
+
+**`streaks.test.ts`**
+
+Incluye nueve escenarios distintos que validan el cálculo de las rachas, incluyendo casos borde como fechas duplicadas, entradas desordenadas, rachas rotas y conservación de la racha histórica.
+
+**`trend.test.ts`**
+
+Incluye seis pruebas orientadas a validar el cálculo de la tendencia de cumplimiento, verificando la exclusión de tareas sin fecha límite, tareas no completadas, escenarios con cumplimiento total y distintos niveles de retraso.
+
+Como convención del proyecto, todos los nombres de `describe` e `it` permanecen escritos en inglés, independientemente del idioma utilizado para documentar el resto del código.
+
+---
+
+### Bug encontrado durante las pruebas
+
+Las pruebas también permitieron detectar un error durante el desarrollo.
+
+Al ejecutar:
+
+```bash id="guvz6r"
+pnpm test
+```
+
+dos pruebas correspondientes a `trend.test.ts` comenzaron a fallar.
+
+Los resultados obtenidos fueron:
+
+```text id="5r97u4"
+expected 30 to be 3
+expected 20 to be 2
+```
+
+El patrón resultó inmediatamente llamativo: ambos valores eran exactamente diez veces mayores de lo esperado.
+
+Tras revisar el algoritmo, el problema se localizó en la conversión de milisegundos a días dentro de `trend.ts`.
+
+La implementación correcta debía utilizar:
+
+```ts id="36zngm"
+const diffDays =
+    diffMs / (1000 * 60 * 60 * 24);
+```
+
+Un factor incorrecto dentro de ese divisor reducía artificialmente la cantidad de milisegundos considerados por día, multiplicando el resultado final por diez.
+
+Una vez corregido el cálculo, toda la suite volvió a ejecutarse correctamente.
+
+```text id="yw8x3d"
+Test Files  2 passed (2)
+     Tests  15 passed (15)
+```
+
+Más allá de corregir un error puntual, este incidente confirmó el valor de mantener la lógica completamente desacoplada de la interfaz y de la base de datos: detectar y solucionar el problema tomó únicamente unos minutos gracias a que el algoritmo podía ejecutarse de forma aislada.
+
+---
+
+# Estado Actual
+
+Con esta segunda iteración, el proyecto deja atrás la fase exclusivamente conceptual y entra formalmente en la etapa de implementación.
+
+La arquitectura propuesta durante la primera iteración ya cuenta con una base funcional: la comunicación con Supabase está establecida, las entidades del dominio se encuentran modeladas, la lógica de negocio principal ha sido implementada y validada mediante pruebas unitarias, y la estructura del proyecto comienza a consolidarse alrededor de responsabilidades claramente definidas.
+
+---
+
+## Completado
+
+Hasta el momento se han completado los siguientes hitos:
+
+* Definición completa del alcance funcional.
+* Diseño del esquema de la base de datos.
+* Implementación del esquema en Supabase.
+* Inicialización del proyecto con SvelteKit.
+* Configuración de TypeScript.
+* Configuración de Tailwind CSS.
+* Configuración de ESLint y Prettier.
+* Configuración de Vitest.
+* Configuración del adaptador para Node.
+* Configuración de variables de entorno.
+* Implementación del cliente de Supabase.
+* Modelado de las entidades mediante TypeScript.
+* Desarrollo de la capa de acceso a datos.
+* Implementación de la lógica de negocio.
+* Pruebas unitarias de la lógica de negocio (**15 de 15 pruebas superadas**).
+
+La mayor parte del trabajo realizado hasta este punto ha estado orientado a construir una base sólida sobre la que desarrollar el resto de la aplicación, priorizando una arquitectura mantenible antes que una interfaz funcional.
+
+---
+
+## En desarrollo
+
+Con la infraestructura ya implementada, la siguiente etapa del proyecto estará centrada en construir la experiencia de usuario.
+
+Las próximas iteraciones estarán enfocadas en desarrollar el sistema de comandos y la interfaz que permitirá interactuar con la lógica ya existente.
+
+Los principales elementos pendientes son:
+
+* Implementación del parser de comandos.
+* Registro y ejecución de comandos (`registry` y `executor`).
+* Terminal interactiva.
+* Command Builder para escritorio y dispositivos móviles.
+* Situation Report.
+* Componentes visuales de la aplicación.
+* Boot Sequence.
+* Efectos visuales CRT.
+* Despliegue en Render.
+
+Aunque todavía no existe una interfaz completamente funcional, el núcleo de la aplicación ya dispone de la mayor parte de la infraestructura necesaria para comenzar a construir la experiencia final del usuario.
+
+---
+
+# Conclusiones
+
+Ops Terminal nació como un ejercicio de diseño arquitectónico con un objetivo muy concreto: demostrar que una herramienta de productividad personal no necesita convertirse en una plataforma empresarial para resultar útil.
+
+La primera iteración estuvo dedicada a definir el alcance del proyecto, establecer la arquitectura general y diseñar el modelo de datos. Con esa base completada, esta segunda iteración marca el inicio de la implementación, transformando la especificación en una aplicación funcional.
+
+Actualmente el proyecto ya dispone de una capa de persistencia completamente integrada con Supabase, un modelo de dominio tipado mediante TypeScript, una separación clara entre acceso a datos y lógica de negocio, y un conjunto de pruebas unitarias que valida el comportamiento de los algoritmos más importantes. Esta arquitectura no solo facilita el mantenimiento, sino que también permite evolucionar el proyecto con mayor seguridad a medida que se incorporen nuevas funcionalidades.
+
+Más allá de las tecnologías utilizadas, una de las decisiones más importantes ha sido mantener una separación estricta de responsabilidades. Cada capa del sistema cumple una función específica: la base de datos almacena información, la capa de acceso a datos encapsula la comunicación con Supabase, la lógica de negocio procesa la información de manera independiente y las futuras interfaces únicamente se encargarán de representar el resultado al usuario. Esta organización reduce el acoplamiento entre módulos y facilita tanto las pruebas como la evolución del código.
+
+Las siguientes iteraciones estarán centradas en desarrollar la experiencia de usuario. El sistema de comandos, la terminal interactiva y el **Command Builder** conectarán toda la arquitectura ya implementada con la interfaz final de la aplicación, convirtiendo la base técnica construida durante estas dos primeras iteraciones en una herramienta completamente utilizable.
+
+A medida que el proyecto continúe evolucionando, este caso de estudio también crecerá junto con él, documentando no solo el resultado final, sino también las decisiones técnicas, los problemas encontrados y las soluciones adoptadas durante todo el proceso de desarrollo.
