@@ -35,6 +35,7 @@ export default async function LoginPage({
               <Input
                 id={'password'}
                 name={'password'}
+                type={'password'}
                 placeholder={'Password'}
                 autoComplete={'current-password'}
                 required
