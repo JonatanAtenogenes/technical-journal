@@ -1,32 +1,60 @@
-import { ReactNode } from 'react';
+'use client';
+
+import { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { signOut } from '@/app/admin/actions';
 import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
+import AdminNav from '@/app/admin/(protected)/_components/admin-nav';
 
 // This layout wraps every /admin route except /admin/login,
 // which has its own minimal layout (no nav, no sign-out button).
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  // Controls the mobile drawer open state. Closed by default; also closed
+  // automatically when a nav link is tapped (see onNavigate below).
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
-    <div className={'flex min-h-screen'}>
-      <aside className={'w-56 shrink-0 border-r px-4 py-6'}>
-        <nav className={'flex flex-col gap-2'}>
-          <Link href={'/admin'} className={'text-sm font-medium'}>
-            Projects
-          </Link>
-          <Link href={'/admin/series'} className={'text-sm font-medium'}>
-            Series
-          </Link>
-          <Link href={'/admin/images'} className={'text-sm font-medium'}>
-            Images
-          </Link>
-        </nav>
+    <div className={'flex min-h-screen flex-col md:flex-row'}>
+      {/* Mobile top bar: hamburger trigger + sign out, hidden on md+ */}
+      <header
+        className={
+          'flex items-center justify-between border-b px-4 py-3 md:hidden'
+        }
+      >
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+          <SheetTrigger render={<Button variant={'ghost'} size={'icon'} />}>
+            <Menu className={'size-5'} />
+          </SheetTrigger>
+          <SheetContent side={'left'} className={'w-64 p-4'}>
+            <SheetTitle className={'mb-4'}>Technical Journal Admin</SheetTitle>
+            <AdminNav onNavigate={() => setMobileNavOpen(false)} />
+            <form action={signOut} className={'mt-8'}>
+              <Button variant={'outline'} size={'sm'} type={'submit'}>
+                Sign Out
+              </Button>
+            </form>
+          </SheetContent>
+        </Sheet>
+        <span className={'text-sm font-medium'}>Admin</span>
+      </header>
+
+      {/* Desktop sidebar: static, always visible from md up */}
+      <aside className={'hidden w-56 shrink-0 border-r px-4 py-6 md:block'}>
+        <AdminNav />
         <form action={signOut} className={'mt-8'}>
           <Button variant={'outline'} size={'sm'} type={'submit'}>
             Sign Out
           </Button>
         </form>
       </aside>
-      <main className={'flex-1 p-6'}>{children}</main>
+      <main className={'flex-1 p-4 md:p-6'}>{children}</main>
     </div>
   );
 }
