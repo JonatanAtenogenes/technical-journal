@@ -43,7 +43,7 @@ export default async function AdminProjectsPage() {
     .is('deleted_at', null)
     .eq('project_i18n.locale', 'en')
     .order('updated_at', { ascending: false })
-    .returns<ProjectRow[]>();
+    .overrideTypes<ProjectRow[]>();
 
   if (error) {
     // Surfaced directly for now — this is a single-author admin panel,
@@ -60,12 +60,50 @@ export default async function AdminProjectsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Projects</h1>
         {/* Base UI pattern: render prop instead of asChild */}
-        <Button render={<Link href="/admin/projects/new" />}>
+        <Button
+          nativeButton={false}
+          render={<Link href="/admin/projects/new" />}
+        >
           New project
         </Button>
       </div>
 
-      <Table>
+      {projects.length === 0 && (
+        <p className="text-center text-muted-foreground">No projects yet.</p>
+      )}
+
+      {/* Mobile: stacked cards, one per project. Hidden from md up. */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {projects.map((project) => (
+          <div key={project.id} className="rounded-lg border p-4 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-medium">
+                {project.project_i18n[0]?.title ?? '(untitled)'}
+              </span>
+              <Badge variant="outline">{project.status}</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{project.slug}</p>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs text-muted-foreground">
+                {project.series?.slug ?? 'No series'} ·{' '}
+                {new Date(project.updated_at).toLocaleDateString()}
+              </span>
+              {/* Base UI pattern: render prop instead of asChild */}
+              <Button
+                nativeButton={false}
+                render={<Link href={`/admin/projects/${project.slug}`} />}
+                variant="ghost"
+                size="sm"
+              >
+                Edit
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: full table. Hidden below md. */}
+      <Table className="hidden md:table">
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
@@ -77,16 +115,6 @@ export default async function AdminProjectsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projects.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="text-center text-muted-foreground"
-              >
-                No projects yet.
-              </TableCell>
-            </TableRow>
-          )}
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell className="font-medium">
@@ -107,6 +135,7 @@ export default async function AdminProjectsPage() {
               <TableCell className="text-right">
                 {/* Base UI pattern: render prop instead of asChild */}
                 <Button
+                  nativeButton={false}
                   render={<Link href={`/admin/projects/${project.slug}`} />}
                   variant="ghost"
                   size="sm"
