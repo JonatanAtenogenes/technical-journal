@@ -14,6 +14,10 @@ export const projectMetaSchema = z.object({
   series_id: z.uuid().optional().or(z.literal('')),
   part_number: z.coerce.number().int().min(1).optional(),
   // Comma-separated in the UI, split into an array before validation.
+  tags: z.array(z.string()).default([]),
+  // icon is free text for now — matches the schema's deliberately
+  // unconstrained `links[].icon` (known values: github, globe; a third
+  // value is expected later but not finalized).
   links: z
     .array(
       z.object({
