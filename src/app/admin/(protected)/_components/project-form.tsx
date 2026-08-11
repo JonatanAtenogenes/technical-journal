@@ -49,7 +49,6 @@ type ProjectFormProps = {
 };
 
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
-  const router = useRouter();
   const isEditMode = Boolean(initialData);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -386,12 +385,25 @@ function LocaleFields({
 
       <div className="space-y-2">
         <Label>MDX content</Label>
-        <div className="rounded-md border overflow-hidden">
+
+        <div className="overflow-hidden rounded-md border">
           <CodeMirror
             value={value.mdx_content}
-            height="400px"
+            height="500px"
             extensions={[markdown()]}
-            onChange={(v) => onChange({ ...value, mdx_content: v })}
+            onChange={(v) =>
+              onChange({
+                ...value,
+                mdx_content: v,
+              })
+            }
+            theme="dark"
+            basicSetup={{
+              lineNumbers: true,
+              foldGutter: true,
+              highlightActiveLine: true,
+              autocompletion: true,
+            }}
           />
         </div>
       </div>
