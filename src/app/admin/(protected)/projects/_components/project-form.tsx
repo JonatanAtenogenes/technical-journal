@@ -632,7 +632,7 @@ function LocaleBodyField({
     <div className="rounded-md border overflow-hidden">
       <CodeMirror
         value={value.mdx_content}
-        height="500px"
+        height="600px"
         theme={editorTheme}
         extensions={[markdown()]}
         onChange={(v) => onChange({ ...value, mdx_content: v })}
@@ -659,27 +659,21 @@ function LocaleBodyField({
         )}
       </div>
 
-      {/* Mobile: switch between editor and preview, no room for both. */}
-      <div className="md:hidden">
-        <Tabs defaultValue="editor">
-          <TabsList>
-            <TabsTrigger value="editor">Editor</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-          </TabsList>
-          <TabsContent value="editor" className="pt-3">
-            {editor}
-          </TabsContent>
-          <TabsContent value="preview" className="pt-3">
-            {preview}
-          </TabsContent>
-        </Tabs>
-      </div>
+      {/* GitHub-style: Write/Preview tabs at every screen size, so each
+          view gets the full available width instead of splitting it. */}
 
-      {/* Desktop: side by side, so you see the result as you type. */}
-      <div className="hidden md:grid md:grid-cols-2 md:gap-4">
-        {editor}
-        {preview}
-      </div>
+      <Tabs defaultValue="editor">
+        <TabsList>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
+        <TabsContent value="editor" className="pt-3">
+          {editor}
+        </TabsContent>
+        <TabsContent value="preview" className="pt-3">
+          {preview}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
