@@ -1,8 +1,16 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useTransition,
+  type ReactNode,
+} from 'react';
+import { useTheme } from 'next-themes';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
+import { githubLight, githubDark } from '@uiw/codemirror-theme-github';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +29,7 @@ import {
   updateProject,
   softDeleteProject,
 } from '@/app/admin/(protected)/projects/actions';
+import { renderMdxPreview } from '@/app/admin/(protected)/projects/preview-actions';
 import type { CreateProjectInput } from '@/app/admin/(protected)/projects/schema';
 
 type LocaleContent = CreateProjectInput['en'];
@@ -579,6 +588,10 @@ function LocaleDetailsFields({
 
 // Step 3: just the MDX body, isolated so CodeMirror only mounts once
 // the earlier steps are already filled in.
+// Step 3: MDX editor + live preview. The editor follows the app's theme
+// (next-themes), and the preview is debounced and compiled server-side
+// through the exact same remark/rehype pipeline as the public site — see
+// preview-actions.ts for what's included and what's approximated.
 function LocaleBodyField({
   value,
   onChange,
@@ -586,17 +599,121 @@ function LocaleBodyField({
   value: LocaleContent;
   onChange: (v: LocaleContent) => void;
 }) {
+  const { resolvedTheme } = useTheme();
+  const editorTheme = resolvedTheme === 'dark' ? githubDark : githubLight;
+
+  const [previewContent, setPreviewContent] = useState<ReactNode>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [isPreviewPending, startPreviewTransition] = useTransition();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(() => {
+      startPreviewTransition(async () => {
+        const result = await renderMdxPreview(value.mdx_content);
+        if ('error' in result && result.error) {
+          setPreviewError(result.error);
+          setPreviewContent(null);
+        } else {
+          setPreviewError(null);
+          setPreviewContent(result.content ?? null);
+        }
+      });
+    }, 600); // debounce: avoid compiling MDX on every keystroke
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [value.mdx_content]);
+
+  const editor = (
+    <div className="rounded-md border overflow-hidden">
+      <CodeMirror
+        value={value.mdx_content}
+        height="500px"
+        theme={editorTheme}
+        extensions={[markdown()]}
+        onChange={(v) => onChange({ ...value, mdx_content: v })}
+      />
+    </div>
+  );
+
+  const preview = (
+    <PreviewPane
+      content={previewContent}
+      error={previewError}
+      className="h-125 overflow-y-auto rounded-md border p-4"
+    />
+  );
+
   return (
     <div className="space-y-2 pt-4">
-      <Label>MDX content</Label>
-      <div className="rounded-md border overflow-hidden">
-        <CodeMirror
-          value={value.mdx_content}
-          height="450px"
-          extensions={[markdown()]}
-          onChange={(v) => onChange({ ...value, mdx_content: v })}
-        />
+      <div className="flex items-center justify-between">
+        <Label>MDX content</Label>
+        {isPreviewPending && (
+          <span className="text-xs text-muted-foreground">
+            Updating preview…
+          </span>
+        )}
       </div>
+
+      {/* Mobile: switch between editor and preview, no room for both. */}
+      <div className="md:hidden">
+        <Tabs defaultValue="editor">
+          <TabsList>
+            <TabsTrigger value="editor">Editor</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+          </TabsList>
+          <TabsContent value="editor" className="pt-3">
+            {editor}
+          </TabsContent>
+          <TabsContent value="preview" className="pt-3">
+            {preview}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Desktop: side by side, so you see the result as you type. */}
+      <div className="hidden md:grid md:grid-cols-2 md:gap-4">
+        {editor}
+        {preview}
+      </div>
+    </div>
+  );
+}
+
+function PreviewPane({
+  content,
+  error,
+  className,
+}: {
+  content: ReactNode;
+  error: string | null;
+  className?: string;
+}) {
+  if (error) {
+    return (
+      <div className={cn('text-sm text-destructive', className)}>
+        Preview error: {error}
+      </div>
+    );
+  }
+
+  if (!content) {
+    return (
+      <div className={cn('text-sm text-muted-foreground', className)}>
+        Nothing to preview yet.
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn('prose prose-sm dark:prose-invert max-w-none', className)}
+    >
+      {content}
     </div>
   );
 }
