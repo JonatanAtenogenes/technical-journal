@@ -58,14 +58,14 @@ const STEPS = [
 // matching item's label — passing `items` to <Select> tells it which
 // label corresponds to each value once something is selected.
 const STATUS_ITEMS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'in-progress', label: 'In progress' },
-  { value: 'published', label: 'Published' },
+  { label: 'Draft', value: 'draft' },
+  { label: 'In progress', value: 'in-progress' },
+  { label: 'Published', value: 'published' },
 ];
 
 const ICON_ITEMS = [
-  { value: 'github', label: 'GitHub' },
-  { value: 'globe', label: 'Globe' },
+  { label: 'github', value: 'github' },
+  { label: 'globe', value: 'globe' },
 ];
 
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
@@ -150,8 +150,7 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function submitForm() {
     setError(null);
 
     // Defensive: only send series_id if it actually looks like a UUID.
@@ -188,6 +187,17 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
         setError(result.error);
       }
     });
+  }
+
+  // Kept only as a fallback for native form submission (e.g. pressing
+  // Enter). The actual "Save"/"Create" button below no longer relies on
+  // type="submit" — see the note on isLastStep flip further down.
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isLastStep) {
+      return;
+    }
+    submitForm();
   }
 
   function handleDelete() {
@@ -283,7 +293,7 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
         </div>
 
         {isLastStep ? (
-          <Button type="submit" disabled={isPending}>
+          <Button type="button" disabled={isPending} onClick={submitForm}>
             {isPending
               ? isEditMode
                 ? 'Saving...'
@@ -489,8 +499,8 @@ function BasicInfoStep({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="github">Github</SelectItem>
-                  <SelectItem value="globe">Globe</SelectItem>
+                  <SelectItem value="github">github</SelectItem>
+                  <SelectItem value="globe">globe</SelectItem>
                 </SelectContent>
               </Select>
               <Button
