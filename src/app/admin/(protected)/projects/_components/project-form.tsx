@@ -54,6 +54,20 @@ const STEPS = [
   { label: 'Body content' },
 ] as const;
 
+// Base UI's <Select.Value> renders the raw value by default, not the
+// matching item's label — passing `items` to <Select> tells it which
+// label corresponds to each value once something is selected.
+const STATUS_ITEMS = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'in-progress', label: 'In progress' },
+  { value: 'published', label: 'Published' },
+];
+
+const ICON_ITEMS = [
+  { value: 'github', label: 'GitHub' },
+  { value: 'globe', label: 'Globe' },
+];
+
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
   const isEditMode = Boolean(initialData);
   const [isPending, startTransition] = useTransition();
@@ -377,6 +391,7 @@ function BasicInfoStep({
           <Select
             value={status}
             onValueChange={(v) => setStatus(v as typeof status)}
+            items={STATUS_ITEMS}
           >
             <SelectTrigger id="status">
               <SelectValue />
@@ -402,7 +417,11 @@ function BasicInfoStep({
 
         <div className="space-y-2">
           <Label htmlFor="series">Series (optional)</Label>
-          <Select value={seriesId} onValueChange={setSeriesId}>
+          <Select
+            value={seriesId}
+            onValueChange={(value) => setSeriesId(value ?? '')}
+            items={seriesOptions.map((s) => ({ label: s.label, value: s.id }))}
+          >
             <SelectTrigger id="series">
               <SelectValue placeholder="Standalone project" />
             </SelectTrigger>
@@ -463,14 +482,15 @@ function BasicInfoStep({
               />
               <Select
                 value={link.icon}
-                onValueChange={(v) => updateLink(i, { icon: v })}
+                onValueChange={(v) => updateLink(i, { icon: v ?? '' })}
+                items={ICON_ITEMS}
               >
                 <SelectTrigger className="sm:w-28">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="github">github</SelectItem>
-                  <SelectItem value="globe">globe</SelectItem>
+                  <SelectItem value="github">Github</SelectItem>
+                  <SelectItem value="globe">Globe</SelectItem>
                 </SelectContent>
               </Select>
               <Button
