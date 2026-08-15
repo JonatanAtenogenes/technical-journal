@@ -1,0 +1,572 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown } from '@codemirror/lang-markdown';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+import {
+  createProject,
+  updateProject,
+  softDeleteProject,
+} from '@/app/admin/(protected)/projects/actions';
+import type { CreateProjectInput } from '@/app/admin/(protected)/projects/schema';
+
+type LocaleContent = CreateProjectInput['en'];
+
+const emptyLocaleContent: LocaleContent = {
+  title: '',
+  description: '',
+  category: '',
+  part_tags: [],
+  mdx_content: '',
+};
+
+type LinkEntry = { label: string; url: string; icon: string };
+
+type ProjectFormProps = {
+  seriesOptions: { id: string; label: string }[];
+  // When provided, the form runs in edit mode: fields are pre-filled,
+  // submit calls updateProject instead of createProject, and a delete
+  // button is shown. Absent (create mode) means an empty form.
+  initialData?: {
+    id: string;
+    meta: CreateProjectInput['meta'];
+    en: LocaleContent;
+    es: LocaleContent;
+  };
+};
+
+const STEPS = [
+  { label: 'Basic info' },
+  { label: 'Content details' },
+  { label: 'Body content' },
+] as const;
+
+export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
+  const isEditMode = Boolean(initialData);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState(0);
+
+  // --- Locale-independent fields (step 1) ---
+  const [slug, setSlug] = useState(initialData?.meta.slug ?? '');
+  const [status, setStatus] = useState<'draft' | 'in-progress' | 'published'>(
+    initialData?.meta.status ?? 'draft',
+  );
+  const [startYear, setStartYear] = useState(
+    initialData?.meta.start_year?.toString() ?? '',
+  );
+  const [seriesId, setSeriesId] = useState<string>(
+    initialData?.meta.series_id ?? '',
+  );
+  const [partNumber, setPartNumber] = useState(
+    initialData?.meta.part_number?.toString() ?? '',
+  );
+  const [tagsInput, setTagsInput] = useState(
+    initialData?.meta.tags.join(', ') ?? '',
+  ); // comma-separated
+  const [links, setLinks] = useState<LinkEntry[]>(
+    (initialData?.meta.links as LinkEntry[]) ?? [],
+  );
+
+  // --- Per-locale content (steps 2 and 3) ---
+  const [en, setEn] = useState<LocaleContent>(
+    initialData?.en ?? emptyLocaleContent,
+  );
+  const [es, setEs] = useState<LocaleContent>(
+    initialData?.es ?? emptyLocaleContent,
+  );
+
+  function addLink() {
+    setLinks((prev) => [...prev, { label: '', url: '', icon: 'github' }]);
+  }
+
+  function updateLink(index: number, patch: Partial<LinkEntry>) {
+    setLinks((prev) =>
+      prev.map((link, i) => (i === index ? { ...link, ...patch } : link)),
+    );
+  }
+
+  function removeLink(index: number) {
+    setLinks((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  // Lightweight per-step validation — just enough to stop someone from
+  // reaching the content step with no slug, not a full re-implementation
+  // of the Zod schema (that still runs server-side on submit).
+  function validateStep(current: number): string | null {
+    if (current === 0) {
+      if (!slug.trim()) return 'Slug is required.';
+    }
+    if (current === 1) {
+      if (!en.title.trim() || !en.description.trim()) {
+        return 'English title and description are required.';
+      }
+      if (!es.title.trim() || !es.description.trim()) {
+        return 'Spanish title and description are required.';
+      }
+    }
+    return null;
+  }
+
+  function goNext() {
+    const validationError = validateStep(step);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  }
+
+  function goBack() {
+    setError(null);
+    setStep((s) => Math.max(s - 1, 0));
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    // Defensive: only send series_id if it actually looks like a UUID.
+    // Guards against an empty-but-not-"" value ever reaching the server
+    // and failing Zod's .uuid() check with an unhelpful message.
+    const UUID_RE =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const sanitizedSeriesId = UUID_RE.test(seriesId) ? seriesId : undefined;
+
+    const input: CreateProjectInput = {
+      meta: {
+        slug,
+        status,
+        start_year: startYear ? Number(startYear) : undefined,
+        series_id: sanitizedSeriesId,
+        part_number: partNumber ? Number(partNumber) : undefined,
+        tags: tagsInput
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+        links,
+      },
+      en,
+      es,
+    };
+
+    startTransition(async () => {
+      const result = isEditMode
+        ? await updateProject(initialData!.id, input)
+        : await createProject(input);
+      // Both actions redirect on success, so reaching this line means
+      // an error was returned instead of NEXT_REDIRECT being thrown.
+      if (result && !result.success) {
+        setError(result.error);
+      }
+    });
+  }
+
+  function handleDelete() {
+    if (!initialData) return;
+    if (!confirm(`Hide "${en.title || slug}"? This can be undone later.`)) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await softDeleteProject(initialData.id);
+      if (result && !result.success) {
+        setError(result.error);
+      }
+    });
+  }
+
+  const isLastStep = step === STEPS.length - 1;
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-5xl space-y-6">
+      <StepIndicator currentStep={step} />
+
+      {step === 0 && (
+        <BasicInfoStep
+          slug={slug}
+          setSlug={setSlug}
+          status={status}
+          setStatus={setStatus}
+          startYear={startYear}
+          setStartYear={setStartYear}
+          seriesId={seriesId}
+          setSeriesId={setSeriesId}
+          partNumber={partNumber}
+          setPartNumber={setPartNumber}
+          tagsInput={tagsInput}
+          setTagsInput={setTagsInput}
+          links={links}
+          addLink={addLink}
+          updateLink={updateLink}
+          removeLink={removeLink}
+          seriesOptions={seriesOptions}
+        />
+      )}
+
+      {step === 1 && (
+        <Tabs defaultValue="en">
+          <TabsList>
+            <TabsTrigger value="en">English</TabsTrigger>
+            <TabsTrigger value="es">Español</TabsTrigger>
+          </TabsList>
+          <TabsContent value="en">
+            <LocaleDetailsFields value={en} onChange={setEn} />
+          </TabsContent>
+          <TabsContent value="es">
+            <LocaleDetailsFields value={es} onChange={setEs} />
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {step === 2 && (
+        <Tabs defaultValue="en">
+          <TabsList>
+            <TabsTrigger value="en">English</TabsTrigger>
+            <TabsTrigger value="es">Español</TabsTrigger>
+          </TabsList>
+          <TabsContent value="en">
+            <LocaleBodyField value={en} onChange={setEn} />
+          </TabsContent>
+          <TabsContent value="es">
+            <LocaleBodyField value={es} onChange={setEs} />
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-3">
+          {step > 0 && (
+            <Button type="button" variant="outline" onClick={goBack}>
+              Back
+            </Button>
+          )}
+          {isEditMode && isLastStep && (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isPending}
+              onClick={handleDelete}
+            >
+              Hide project
+            </Button>
+          )}
+        </div>
+
+        {isLastStep ? (
+          <Button type="submit" disabled={isPending}>
+            {isPending
+              ? isEditMode
+                ? 'Saving...'
+                : 'Creating...'
+              : isEditMode
+                ? 'Save changes'
+                : 'Create project'}
+          </Button>
+        ) : (
+          <Button type="button" onClick={goNext}>
+            Next
+          </Button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function StepIndicator({ currentStep }: { currentStep: number }) {
+  return (
+    <ol className="flex items-center gap-2 text-sm">
+      {STEPS.map((s, i) => (
+        <li key={s.label} className="flex items-center gap-2">
+          <span
+            className={cn(
+              'flex size-6 shrink-0 items-center justify-center rounded-full border text-xs',
+              i === currentStep &&
+                'border-primary bg-primary text-primary-foreground',
+              i < currentStep && 'border-primary text-primary',
+              i > currentStep && 'text-muted-foreground',
+            )}
+          >
+            {i + 1}
+          </span>
+          <span
+            className={cn(
+              'hidden sm:inline',
+              i === currentStep ? 'font-medium' : 'text-muted-foreground',
+            )}
+          >
+            {s.label}
+          </span>
+          {i < STEPS.length - 1 && (
+            <span className="mx-1 h-px w-4 bg-border sm:w-8" />
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function BasicInfoStep({
+  slug,
+  setSlug,
+  status,
+  setStatus,
+  startYear,
+  setStartYear,
+  seriesId,
+  setSeriesId,
+  partNumber,
+  setPartNumber,
+  tagsInput,
+  setTagsInput,
+  links,
+  addLink,
+  updateLink,
+  removeLink,
+  seriesOptions,
+}: {
+  slug: string;
+  setSlug: (v: string) => void;
+  status: 'draft' | 'in-progress' | 'published';
+  setStatus: (v: 'draft' | 'in-progress' | 'published') => void;
+  startYear: string;
+  setStartYear: (v: string) => void;
+  seriesId: string;
+  setSeriesId: (v: string) => void;
+  partNumber: string;
+  setPartNumber: (v: string) => void;
+  tagsInput: string;
+  setTagsInput: (v: string) => void;
+  links: LinkEntry[];
+  addLink: () => void;
+  updateLink: (index: number, patch: Partial<LinkEntry>) => void;
+  removeLink: (index: number) => void;
+  seriesOptions: { id: string; label: string }[];
+}) {
+  return (
+    <section className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="slug">Slug</Label>
+          <Input
+            id="slug"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="my-project"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select
+            value={status}
+            onValueChange={(v) => setStatus(v as typeof status)}
+          >
+            <SelectTrigger id="status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">Draft</SelectItem>
+              <SelectItem value="in-progress">In progress</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="start_year">Start year</Label>
+          <Input
+            id="start_year"
+            type="number"
+            value={startYear}
+            onChange={(e) => setStartYear(e.target.value)}
+            placeholder="2025"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="series">Series (optional)</Label>
+          <Select value={seriesId} onValueChange={setSeriesId}>
+            <SelectTrigger id="series">
+              <SelectValue placeholder="Standalone project" />
+            </SelectTrigger>
+            <SelectContent>
+              {seriesOptions.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {seriesId && (
+          <div className="space-y-2">
+            <Label htmlFor="part_number">Part number</Label>
+            <Input
+              id="part_number"
+              type="number"
+              min={1}
+              value={partNumber}
+              onChange={(e) => setPartNumber(e.target.value)}
+              placeholder="1"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="tags">
+          Tags (comma-separated, affects home filtering)
+        </Label>
+        <Input
+          id="tags"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+          placeholder="nextjs, supabase, typescript"
+        />
+      </div>
+
+      {/* Links repeater */}
+      <div className="space-y-2">
+        <Label>Links</Label>
+        <div className="space-y-2">
+          {links.map((link, i) => (
+            <div key={i} className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                placeholder="Label"
+                value={link.label}
+                onChange={(e) => updateLink(i, { label: e.target.value })}
+                className="sm:w-32"
+              />
+              <Input
+                placeholder="https://..."
+                value={link.url}
+                onChange={(e) => updateLink(i, { url: e.target.value })}
+                className="flex-1"
+              />
+              <Select
+                value={link.icon}
+                onValueChange={(v) => updateLink(i, { icon: v })}
+              >
+                <SelectTrigger className="sm:w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="github">github</SelectItem>
+                  <SelectItem value="globe">globe</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => removeLink(i)}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+          <Button type="button" variant="outline" size="sm" onClick={addLink}>
+            Add link
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Step 2: everything about the project's content except the MDX body itself.
+function LocaleDetailsFields({
+  value,
+  onChange,
+}: {
+  value: LocaleContent;
+  onChange: (v: LocaleContent) => void;
+}) {
+  return (
+    <div className="grid gap-4 pt-4 sm:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Title</Label>
+        <Input
+          value={value.title}
+          onChange={(e) => onChange({ ...value, title: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Category</Label>
+        <Input
+          value={value.category}
+          onChange={(e) => onChange({ ...value, category: e.target.value })}
+          placeholder="Developer Tools"
+        />
+      </div>
+
+      <div className="space-y-2 sm:col-span-2">
+        <Label>Description</Label>
+        <Textarea
+          value={value.description}
+          onChange={(e) => onChange({ ...value, description: e.target.value })}
+          rows={3}
+        />
+      </div>
+
+      <div className="space-y-2 sm:col-span-2">
+        <Label>Part tags (comma-separated, display-only)</Label>
+        <Input
+          value={value.part_tags.join(', ')}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              part_tags: e.target.value
+                .split(',')
+                .map((t) => t.trim())
+                .filter(Boolean),
+            })
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+// Step 3: just the MDX body, isolated so CodeMirror only mounts once
+// the earlier steps are already filled in.
+function LocaleBodyField({
+  value,
+  onChange,
+}: {
+  value: LocaleContent;
+  onChange: (v: LocaleContent) => void;
+}) {
+  return (
+    <div className="space-y-2 pt-4">
+      <Label>MDX content</Label>
+      <div className="rounded-md border overflow-hidden">
+        <CodeMirror
+          value={value.mdx_content}
+          height="450px"
+          extensions={[markdown()]}
+          onChange={(v) => onChange({ ...value, mdx_content: v })}
+        />
+      </div>
+    </div>
+  );
+}

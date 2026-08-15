@@ -1,11 +1,9 @@
 'use server';
 
-import {
-  CreateProjectInput,
-  createProjectSchema,
-} from '@/app/admin/(protected)/projects/schema';
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import { createProjectSchema, type CreateProjectInput } from './schema';
+import { is } from 'zod/locales';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -15,7 +13,11 @@ export async function createProject(
   const parsed = createProjectSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
+    const issue = parsed.error.issues[0];
+    return {
+      success: false,
+      error: `${issue.path.join('.')}: ${issue.message}`,
+    };
   }
 
   const { meta, en, es } = parsed.data;
@@ -40,7 +42,7 @@ export async function createProject(
     .single();
 
   if (projectError) {
-    // 23505 = unique_violation, most likely the slug exist.
+    // 23505 = unique_violation, most likely the slug already exists.
     if (projectError.code === '23505') {
       return {
         success: false,
@@ -73,7 +75,11 @@ export async function updateProject(
   const parsed = createProjectSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0].message };
+    const issue = parsed.error.issues[0];
+    return {
+      success: false,
+      error: `${issue.path.join('.')}: ${issue.message}`,
+    };
   }
 
   const { meta, en, es } = parsed.data;
@@ -110,13 +116,9 @@ export async function updateProject(
   const { error: i18nError } = await supabase.from('project_i18n').upsert(
     [
       { project_id: projectId, locale: 'en', ...en },
-      {
-        project_id: projectId,
-        locale: 'es',
-        ...es,
-      },
+      { project_id: projectId, locale: 'es', ...es },
     ],
-    { onConflict: 'project_id.locale' },
+    { onConflict: 'project_id,locale' },
   );
 
   if (i18nError) {
