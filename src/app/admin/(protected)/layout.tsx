@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
-import Link from 'next/link';
 import { signOut } from '@/app/admin/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,7 +53,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </Button>
         </form>
       </aside>
-      <main className={'flex-1 p-4 md:p-6'}>{children}</main>
+      <main className={'min-w-0 flex-1 p-4 md:p-6'}>{children}</main>
     </div>
   );
 }
