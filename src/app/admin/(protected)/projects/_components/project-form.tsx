@@ -201,7 +201,7 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
   // Kept only as a fallback for native form submission (e.g. pressing
   // Enter). The actual "Save"/"Create" button below no longer relies on
   // type="submit" — see the note on isLastStep flip further down.
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     if (!isLastStep) {
       return;
