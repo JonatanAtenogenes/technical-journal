@@ -31,6 +31,7 @@ import {
 } from '@/app/admin/(protected)/projects/actions';
 import { renderMdxPreview } from '@/app/admin/(protected)/projects/preview-actions';
 import type { CreateProjectInput } from '@/app/admin/(protected)/projects/schema';
+import { DeleteProjectButton } from './delete-project-button';
 
 type LocaleContent = CreateProjectInput['en'];
 
@@ -209,19 +210,6 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
     submitForm();
   }
 
-  function handleDelete() {
-    if (!initialData) return;
-    if (!confirm(`Hide "${en.title || slug}"? This can be undone later.`)) {
-      return;
-    }
-    startTransition(async () => {
-      const result = await softDeleteProject(initialData.id);
-      if (result && !result.success) {
-        setError(result.error);
-      }
-    });
-  }
-
   const isLastStep = step === STEPS.length - 1;
 
   return (
@@ -290,14 +278,11 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
             </Button>
           )}
           {isEditMode && isLastStep && (
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={isPending}
-              onClick={handleDelete}
-            >
-              Hide project
-            </Button>
+            <DeleteProjectButton
+              projectId={initialData!.id}
+              projectTitle={en.title || slug}
+              variant="full"
+            />
           )}
         </div>
 

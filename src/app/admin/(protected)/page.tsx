@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { DeleteProjectButton } from './projects/_components/delete-project-button';
 
 // Shape returned by the query below. Only the fields the table needs.
 type ProjectRow = {
@@ -97,6 +98,11 @@ export default async function AdminProjectsPage() {
               >
                 Edit
               </Button>
+              <DeleteProjectButton
+                projectId={project.id}
+                projectTitle={project.project_i18n[0]?.title ?? project.slug}
+                variant="icon"
+              />
             </div>
           </div>
         ))}
@@ -142,6 +148,11 @@ export default async function AdminProjectsPage() {
                 >
                   Edit
                 </Button>
+                <DeleteProjectButton
+                  projectId={project.id}
+                  projectTitle={project.project_i18n[0]?.title ?? project.slug}
+                  variant="icon"
+                />
               </TableCell>
             </TableRow>
           ))}
