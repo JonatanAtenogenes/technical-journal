@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { IMAGE_BUCKET } from '@/lib/supabase/storage';
 import sizeOf from 'image-size';
+import { revalidatePath } from 'next/cache';
 
 type UploadImageInput = {
   file: File;
@@ -133,4 +134,79 @@ export async function deleteImage(imageId: string, storagePath: string) {
   }
 
   return { success: true };
+}
+
+type CoverActionResult =
+  | {
+      success: true;
+      image: {
+        id: string;
+        storage_path: string;
+        width: number | null;
+        height: number | null;
+      };
+    }
+  | { success: false; error: string };
+
+export async function uploadCoverImage(
+  projectId: string,
+  file: File,
+  altEn: string,
+  altEs?: string,
+): Promise<CoverActionResult> {
+  const supabase = await createClient();
+
+  // Find the current cover (if any) so it can be cleaned up after the
+  // new one is successfully linked — avoids orphaning the old file/row.
+  const { data: project } = await supabase
+    .from('projects')
+    .select('cover_image_id, images:cover_image_id ( storage_path )')
+    .eq('id', projectId)
+    .single();
+
+  const uploadResult = await uploadImage({
+    file,
+    kind: 'cover',
+    projectId,
+    altEn,
+    altEs,
+  });
+
+  if (!uploadResult.success) {
+    return uploadResult;
+  }
+
+  const { error: linkError } = await supabase
+    .from('projects')
+    .update({ cover_image_id: uploadResult.image.id })
+    .eq('id', projectId);
+
+  if (linkError) {
+    // Roll back the just-uploaded image, since the project was never
+    // linked to it — otherwise it becomes an orphaned "cover" row.
+    await deleteImage(uploadResult.image.id, uploadResult.image.storage_path);
+    return { success: false, error: linkError.message };
+  }
+
+  // Clean up the previous cover now that the new one is safely linked.
+  const previousCoverId = project?.cover_image_id;
+  const previousCoverPath = (project?.images as { storage_path: string } | null)
+    ?.storage_path;
+  if (previousCoverId && previousCoverPath) {
+    await deleteImage(previousCoverId, previousCoverPath);
+  }
+
+  revalidatePath('/admin/projects/[slug]', 'page');
+  return uploadResult;
+}
+
+export async function removeCoverImage(
+  imageId: string,
+  storagePath: string,
+): Promise<{ success: boolean; error?: string }> {
+  // Deleting the images row auto-nulls projects.cover_image_id via the
+  // FK's ON DELETE SET NULL — no separate projects update needed.
+  const result = await deleteImage(imageId, storagePath);
+  revalidatePath('/admin/projects/[slug]', 'page');
+  return result;
 }
