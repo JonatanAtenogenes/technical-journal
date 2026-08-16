@@ -27,11 +27,11 @@ import { cn } from '@/lib/utils';
 import {
   createProject,
   updateProject,
-  softDeleteProject,
 } from '@/app/admin/(protected)/projects/actions';
 import { renderMdxPreview } from '@/app/admin/(protected)/projects/preview-actions';
 import type { CreateProjectInput } from '@/app/admin/(protected)/projects/schema';
 import { DeleteProjectButton } from './delete-project-button';
+import { CoverImageUploader } from './cover-image-uploader';
 
 type LocaleContent = CreateProjectInput['en'];
 
@@ -55,6 +55,13 @@ type ProjectFormProps = {
     meta: CreateProjectInput['meta'];
     en: LocaleContent;
     es: LocaleContent;
+    cover: {
+      id: string;
+      storage_path: string;
+      width: number | null;
+      height: number | null;
+      alt: { en?: string; es?: string } | null;
+    } | null;
   };
 };
 
@@ -235,6 +242,8 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
           updateLink={updateLink}
           removeLink={removeLink}
           seriesOptions={seriesOptions}
+          projectId={initialData?.id}
+          initialCover={initialData?.cover ?? null}
         />
       )}
 
@@ -357,6 +366,8 @@ function BasicInfoStep({
   updateLink,
   removeLink,
   seriesOptions,
+  projectId,
+  initialCover,
 }: {
   slug: string;
   setSlug: (v: string) => void;
@@ -375,6 +386,16 @@ function BasicInfoStep({
   updateLink: (index: number, patch: Partial<LinkEntry>) => void;
   removeLink: (index: number) => void;
   seriesOptions: { id: string; label: string }[];
+  // Cover upload needs an existing project row (FK), so it's only
+  // available in edit mode. projectId is undefined while creating.
+  projectId?: string;
+  initialCover: {
+    id: string;
+    storage_path: string;
+    width: number | null;
+    height: number | null;
+    alt: { en?: string; es?: string } | null;
+  } | null;
 }) {
   return (
     <section className="space-y-4">
@@ -512,6 +533,14 @@ function BasicInfoStep({
           </Button>
         </div>
       </div>
+
+      {projectId ? (
+        <CoverImageUploader projectId={projectId} initialCover={initialCover} />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Cover image: save the project first, then come back here to add one.
+        </p>
+      )}
     </section>
   );
 }
