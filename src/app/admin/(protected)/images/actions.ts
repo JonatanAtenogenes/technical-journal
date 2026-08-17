@@ -77,7 +77,7 @@ export async function uploadImage(
   const { data: image, error: insertError } = await supabase
     .from('images')
     .insert({
-      storagePath: storagePath,
+      storage_path: storagePath,
       alt: { en: input.altEn, es: input.altEs ?? '' },
       caption:
         input.captionEn || input.captionEs
