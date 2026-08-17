@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useTheme } from 'next-themes';
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubLight, githubDark } from '@uiw/codemirror-theme-github';
 import { Button } from '@/components/ui/button';
@@ -269,10 +269,20 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
             <TabsTrigger value="es">Español</TabsTrigger>
           </TabsList>
           <TabsContent value="en">
-            <LocaleBodyField value={en} onChange={setEn} />
+            <LocaleBodyField
+              value={en}
+              onChange={setEn}
+              projectId={initialData?.id}
+              locale="en"
+            />
           </TabsContent>
           <TabsContent value="es">
-            <LocaleBodyField value={es} onChange={setEs} />
+            <LocaleBodyField
+              value={es}
+              onChange={setEs}
+              projectId={initialData?.id}
+              locale="es"
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -609,9 +619,15 @@ function LocaleDetailsFields({
 function LocaleBodyField({
   value,
   onChange,
+  projectId,
+  locale,
 }: {
   value: LocaleContent;
   onChange: (v: LocaleContent) => void;
+  // Undefined while creating a new project — <ProjectImage> tags will
+  // render as "missing" placeholders until the project is saved once.
+  projectId?: string;
+  locale: 'en' | 'es';
 }) {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? githubDark : githubLight;
@@ -626,7 +642,11 @@ function LocaleBodyField({
 
     debounceRef.current = setTimeout(() => {
       startPreviewTransition(async () => {
-        const result = await renderMdxPreview(value.mdx_content);
+        const result = await renderMdxPreview(
+          value.mdx_content,
+          projectId,
+          locale,
+        );
         if ('error' in result && result.error) {
           setPreviewError(result.error);
           setPreviewContent(null);
@@ -643,12 +663,16 @@ function LocaleBodyField({
   }, [value.mdx_content]);
 
   const editor = (
-    <div className="rounded-md border overflow-hidden">
+    <div className="h-[60dvh] min-h-80 max-h-150 w-full min-w-0 rounded-md border overflow-hidden">
       <CodeMirror
         value={value.mdx_content}
         height="600px"
         theme={editorTheme}
-        extensions={[markdown()]}
+        // Wrap long lines instead of letting them extend the editor's
+        // intrinsic width — without this, a single long line of MDX can
+        // push the whole page into horizontal scroll (see min-w-0 note
+        // in the admin layout for the other half of this fix).
+        extensions={[markdown(), EditorView.lineWrapping]}
         onChange={(v) => onChange({ ...value, mdx_content: v })}
       />
     </div>
