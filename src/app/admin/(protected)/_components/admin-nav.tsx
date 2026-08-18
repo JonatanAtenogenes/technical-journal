@@ -12,7 +12,7 @@ const links = [
     label: 'Series',
   },
   {
-    href: '/admin/image',
+    href: '/admin/images',
     label: 'Images',
   },
 ];

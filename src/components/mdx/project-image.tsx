@@ -50,7 +50,7 @@ export function createMdxComponents(
 
       return (
         <figure>
-          <Image
+          <img
             src={getImagePublicUrl(image.storage_path)}
             alt={alt}
             width={image.width ?? 1200}
