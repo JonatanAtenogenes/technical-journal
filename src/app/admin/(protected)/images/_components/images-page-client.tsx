@@ -41,7 +41,7 @@ export function ImagesPageClient({
         <Label htmlFor="project-select">Project</Label>
         <Select
           value={selectedId}
-          onValueChange={setSelectedId}
+          onValueChange={(value) => setSelectedId(value ?? '')}
           items={projects.map((p) => ({ label: p.label, value: p.id }))}
         >
           <SelectTrigger id="project-select">

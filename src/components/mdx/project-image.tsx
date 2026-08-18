@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { getImagePublicUrl } from '@/lib/supabase/storage';
 
 export type ContentImage = {
@@ -56,6 +55,7 @@ export function createMdxComponents(
             width={image.width ?? 1200}
             height={image.height ?? 630}
             style={{ width: '100%', height: 'auto' }}
+            loading="eager"
           />
           {caption && (
             <figcaption style={{ textAlign: 'center', fontSize: '0.875rem' }}>
