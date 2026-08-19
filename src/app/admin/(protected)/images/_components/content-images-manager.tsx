@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import Image from 'next/image';
 import { Check, Copy, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -265,13 +264,13 @@ function ContentImageCard({
   return (
     <div className="overflow-hidden rounded-lg border">
       {/* Top: image */}
-      <div className="relative aspect-video w-full bg-muted">
-        <Image
+      <div className="relative h-40 w-full overflow-hidden bg-muted">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={getImagePublicUrl(image.storage_path)}
           alt={image.alt?.en ?? ''}
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="h-full w-full object-cover"
+          loading="lazy"
         />
       </div>
 
