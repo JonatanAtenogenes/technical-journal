@@ -79,7 +79,7 @@ export function SeriesForm({ initialData, projects }: SeriesFormProps) {
             <Input
               id="slug"
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              onChange={(e) => setSlug(e.target.value.toLowerCase())}
               placeholder="home-server"
               required
             />
