@@ -75,14 +75,16 @@ const STEPS = [
 // matching item's label — passing `items` to <Select> tells it which
 // label corresponds to each value once something is selected.
 const STATUS_ITEMS = [
-  { label: 'Draft', value: 'draft' },
+  { label: 'Completed', value: 'completed' },
   { label: 'In progress', value: 'in-progress' },
-  { label: 'Published', value: 'published' },
+  { label: 'Paused', value: 'paused' },
+  { label: 'Archived', value: 'archived' },
 ];
 
 const ICON_ITEMS = [
   { label: 'github', value: 'github' },
   { label: 'globe', value: 'globe' },
+  { label: 'external-link', value: 'external-link' },
 ];
 
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
@@ -432,9 +434,12 @@ function BasicInfoStep({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="in-progress">In progress</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
+              <SelectContent>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="in-progress">In progress</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
             </SelectContent>
           </Select>
         </div>
@@ -526,6 +531,7 @@ function BasicInfoStep({
                 <SelectContent>
                   <SelectItem value="github">github</SelectItem>
                   <SelectItem value="globe">globe</SelectItem>
+                  <SelectItem value="external-link">external-link</SelectItem>
                 </SelectContent>
               </Select>
               <Button
