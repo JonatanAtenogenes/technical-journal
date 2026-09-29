@@ -94,3 +94,70 @@ export async function getProjectSlugFromDb(
 
   return (data ?? []).map((row) => row.slug);
 }
+
+// Fetches all visible projects for the home page listing, ordered by
+// start_year descending (most recent first) and already shaped into the
+// public site's `Project` type — same normalization logic as
+// getProjectFromDb, but for the list instead of a single row.
+//
+// The database is the source of truth for status: drafts are excluded
+// here since they aren't ready for the public listing.
+export async function getProjectsFromDb(
+  supabase: SupabaseClient,
+  locale: Locale,
+): Promise<Project[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select(
+      `
+      slug,
+      status,
+      start_year,
+      end_year,
+      tags,
+      links,
+      cover:cover_image_id ( storage_path ),
+      project_i18n ( locale, title, description, category )
+      `,
+    )
+    .is('deleted_at', null)
+    .order('start_year', { ascending: false });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data
+    .map((row) => {
+      const i18n = row.project_i18n.find((r) => r.locale === locale);
+
+      if (!i18n) {
+        // No translation for this locale — skip rather than render a
+        // blank card.
+        return null;
+      }
+
+      // Same array/object normalization as getProjectFromDb — without
+      // generated Database types, Supabase can't always tell this FK
+      // is a to-one relation.
+      const cover = Array.isArray(row.cover)
+        ? (row.cover[0] ?? null)
+        : (row.cover ?? null);
+
+      const project: Project = {
+        slug: row.slug,
+        cover: cover ? getImagePublicUrl(cover.storage_path) : '',
+        tags: row.tags ?? [],
+        status: row.status as ProjectStatus,
+        startYear: row.start_year ?? new Date().getFullYear(),
+        endYear: row.end_year ?? undefined,
+        links: (row.links ?? []) as ProjectLink[],
+        title: i18n.title ?? '',
+        category: i18n.category ?? '',
+        description: i18n.description,
+      };
+
+      return project;
+    })
+    .filter((p): p is Project => p !== null);
+}
