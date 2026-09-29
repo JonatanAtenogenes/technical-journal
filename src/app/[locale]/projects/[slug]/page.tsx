@@ -1,8 +1,6 @@
 import CaseStudyHeader from '@/components/case-study/case-study-header';
 import CaseStudyHero from '@/components/case-study/case-study-hero';
 import TableOfContents from '@/components/case-study/table-of-contents';
-import { getProjectContent } from '@/lib/get-project-content';
-import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
@@ -13,38 +11,58 @@ import { getTableOfContents } from '@/lib/get-table-of-contents';
 import ReadingProgress from '@/components/case-study/reading-progress';
 import type { Locale } from 'next-intl';
 import { routing } from '@/i18n/routing';
+import {
+  getProjectFromDb,
+  getProjectSlugFromDb,
+} from '@/lib/get-project-from-db';
+import { createStaticClient } from '@/lib/supabase/static';
+import { createMdxComponents } from '@/components/mdx/project-image';
 
 type ProjectPageProps = {
   params: Promise<{ locale: Locale; slug: string }>;
 };
 
-// Pre-renders one static route per locale × registered project at build
-// time — consistent with the "fully static" architecture from the
-// project vision, now extended across both languages.
-export function generateStaticParams() {
+// Pre-renders one static route per locale × project that actually exists
+// in the database (and isn't hidden) — replaces the old hardcoded
+// 5-project list from lib/projects.ts now that content lives in Supabase.
+// dynamicParams stays at its default (true), so a project created after
+// the last build still renders on first visit instead of 404ing.
+//
+// Uses the static (cookie-free) client — generateStaticParams runs at
+// build time, with no HTTP request to read a session from.
+export async function generateStaticParams() {
+  const supabase = createStaticClient();
+  const slugs = await getProjectSlugFromDb(supabase);
   return routing.locales.flatMap((locale) =>
-    getProjects(locale).map((project) => ({
-      locale,
-      slug: project.slug,
-    })),
+    slugs.map((slug) => ({ locale, slug })),
   );
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { locale, slug } = await params;
-  const project = getProjectBySlug(locale, slug);
 
-  if (!project) {
+  // Public page, no session needed — the static client here (not
+  // server.ts's cookie-aware client) is what keeps this route statically
+  // generated instead of Next.js silently opting it into dynamic rendering.
+  const supabase = createStaticClient();
+  const result = await getProjectFromDb(supabase, locale, slug);
+
+  if (!result) {
     notFound();
   }
 
-  const content = await getProjectContent(locale, slug);
+  const { project, mdxContent, projectId } = result;
 
-  if (!content) {
-    notFound();
-  }
+  // Content images referenced inside this project's MDX via
+  // <ProjectImage slot="..." /> — fetched once, resolved in-memory by
+  // the components factory (see components/mdx/project-image.tsx).
+  const { data: contentImages } = await supabase
+    .from('images')
+    .select('slot_key, storage_path, width, height, alt, caption')
+    .eq('project_id', projectId)
+    .eq('kind', 'content');
 
-  const tableOfContents = getTableOfContents(content);
+  const tableOfContents = getTableOfContents(mdxContent);
 
   return (
     <>
@@ -58,21 +76,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 lg:grid-cols-[1fr_240px]">
           <aside className="lg:order-last">
-            <div
-              className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
               <TableOfContents items={tableOfContents} />
             </div>
           </aside>
 
           <article className="prose dark:prose-invert max-w-3xl">
             <MDXRemote
-              source={content}
+              source={mdxContent}
+              components={createMdxComponents(
+                contentImages ?? [],
+                locale as 'en' | 'es',
+              )}
               options={{
                 mdxOptions: {
                   remarkPlugins: [remarkGfm],
                   rehypePlugins: [
                     [rehypeExpressiveCode, expressiveCodeOptions],
-                    rehypeSlug],
+                    rehypeSlug,
+                  ],
                 },
               }}
             />

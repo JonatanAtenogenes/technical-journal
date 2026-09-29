@@ -2,7 +2,7 @@
 
 > Un gestor de proyectos personal inspirado en terminales CRT retro, diseñado para priorizar la visibilidad del trabajo diario y la constancia por encima de la burocracia de un gestor de proyectos tradicional.
 
-Ops Terminal es una aplicación para el seguimiento de proyectos personales inspirada en las terminales monocromáticas de los primeros sistemas operativos y en la estética de *Fallout*. En lugar de centrarse en colaboración, flujos de trabajo o planeación empresarial, busca responder una pregunta mucho más simple:
+Ops Terminal es una aplicación para el seguimiento de proyectos personales inspirada en las terminales monocromáticas de los primeros sistemas operativos y en la estética de _Fallout_. En lugar de centrarse en colaboración, flujos de trabajo o planeación empresarial, busca responder una pregunta mucho más simple:
 
 **¿En qué proyectos estoy trabajando, qué tareas siguen pendientes y he avanzado hoy?**
 
@@ -22,9 +22,9 @@ La aplicación está diseñada para un solo usuario que quiere mantener organiza
 
 Todo el proyecto gira alrededor de tres preguntas:
 
-* ¿Qué proyectos siguen activos?
-* ¿Qué tareas faltan por completar?
-* ¿He trabajado hoy en alguno de mis proyectos?
+- ¿Qué proyectos siguen activos?
+- ¿Qué tareas faltan por completar?
+- ¿He trabajado hoy en alguno de mis proyectos?
 
 Cada funcionalidad existe únicamente porque ayuda a responder alguna de esas preguntas.
 
@@ -56,13 +56,13 @@ Ops Terminal fue concebido como una aplicación de un solo usuario. Las decision
 
 El proyecto está construido utilizando:
 
-* SvelteKit
-* TypeScript
-* Tailwind CSS
-* Supabase (PostgreSQL)
-* Vitest
-* Render
-* `@sveltejs/adapter-node`
+- SvelteKit
+- TypeScript
+- Tailwind CSS
+- Supabase (PostgreSQL)
+- Vitest
+- Render
+- `@sveltejs/adapter-node`
 
 La combinación ofrece un equilibrio entre experiencia de desarrollo, facilidad de despliegue y mantenibilidad, manteniendo una arquitectura relativamente ligera.
 
@@ -123,9 +123,9 @@ El resultado es una herramienta centrada en ofrecer visibilidad sobre los proyec
 
 La aplicación almacena su información en **Supabase (PostgreSQL)** mediante un esquema deliberadamente pequeño. En lugar de perseguir una base de datos altamente normalizada o introducir múltiples capas de abstracción, el modelo se limita a tres tablas que representan directamente el dominio de la aplicación:
 
-* **Projects**
-* **Tasks**
-* **Check-ins**
+- **Projects**
+- **Tasks**
+- **Check-ins**
 
 Esta simplicidad refleja la filosofía general del proyecto: una herramienta de productividad personal debe ser fácil de comprender, consultar y mantener.
 
@@ -137,7 +137,7 @@ En lugar de crear tablas auxiliares para enumeraciones, PostgreSQL utiliza **CHE
 
 Los proyectos representan el nivel más alto de organización dentro de la aplicación.
 
-Cada registro almacena la información básica del proyecto, su estado actual, fechas relevantes y una marca de tiempo utilizada para implementar el borrado lógico (*soft delete*).
+Cada registro almacena la información básica del proyecto, su estado actual, fechas relevantes y una marca de tiempo utilizada para implementar el borrado lógico (_soft delete_).
 
 ```sql
 create table projects (
@@ -166,7 +166,7 @@ on projects (name)
 where deleted_at is null;
 ```
 
-En lugar de utilizar una restricción `UNIQUE` convencional, se emplea un **índice único parcial**. Esto permite reutilizar el nombre de un proyecto una vez que este ha sido eliminado mediante un *soft delete*, evitando conflictos innecesarios sin perder el historial.
+En lugar de utilizar una restricción `UNIQUE` convencional, se emplea un **índice único parcial**. Esto permite reutilizar el nombre de un proyecto una vez que este ha sido eliminado mediante un _soft delete_, evitando conflictos innecesarios sin perder el historial.
 
 ---
 
@@ -272,7 +272,7 @@ Todas las consultas que recuperan proyectos o tareas filtran automáticamente aq
 
 ### Los check-ins son inmutables
 
-A diferencia de proyectos y tareas, los check-ins no implementan *soft delete*.
+A diferencia de proyectos y tareas, los check-ins no implementan _soft delete_.
 
 Su única función consiste en registrar que hubo actividad durante un día concreto, por lo que eliminar registros no aporta ningún beneficio práctico y únicamente complicaría el cálculo de las rachas.
 
@@ -280,13 +280,13 @@ Su única función consiste en registrar que hubo actividad durante un día conc
 
 Cuando una tarea se marca como completada, la aplicación genera automáticamente el check-in correspondiente al día actual.
 
-Sin embargo, este comportamiento no se implementa mediante *triggers* ni procedimientos almacenados.
+Sin embargo, este comportamiento no se implementa mediante _triggers_ ni procedimientos almacenados.
 
 Toda la lógica permanece en la aplicación porque ofrece varias ventajas:
 
-* Puede probarse mediante pruebas unitarias con Vitest.
-* El comportamiento permanece explícito y fácil de seguir.
-* La base de datos se mantiene enfocada únicamente en almacenar información.
+- Puede probarse mediante pruebas unitarias con Vitest.
+- El comportamiento permanece explícito y fácil de seguir.
+- La base de datos se mantiene enfocada únicamente en almacenar información.
 
 ---
 
@@ -320,15 +320,15 @@ El cálculo de tendencia responde a una pregunta diferente:
 
 Para ello, únicamente participan las tareas que cumplen ambas condiciones:
 
-* Están marcadas como completadas.
-* Tienen una fecha de vencimiento definida.
+- Están marcadas como completadas.
+- Tienen una fecha de vencimiento definida.
 
 Las tareas sin fecha límite quedan excluidas, ya que no existe una referencia objetiva para determinar si fueron terminadas a tiempo.
 
 En lugar de resumir toda la información en un único indicador, la aplicación presenta dos métricas independientes:
 
-* Porcentaje de tareas completadas antes de la fecha de vencimiento.
-* Promedio de días de retraso, calculado únicamente sobre las tareas entregadas fuera de tiempo.
+- Porcentaje de tareas completadas antes de la fecha de vencimiento.
+- Promedio de días de retraso, calculado únicamente sobre las tareas entregadas fuera de tiempo.
 
 Mostrar ambas cifras proporciona una imagen mucho más representativa que condensarlas en un único valor.
 
@@ -362,11 +362,11 @@ El **Situation Report** constituye la pantalla principal de la aplicación.
 
 En lugar de mostrar dashboards o gráficas, genera un resumen textual con la información más relevante:
 
-* Cantidad de proyectos activos.
-* Barra de progreso de cada proyecto.
-* Racha actual.
-* Tareas que vencen hoy.
-* Tareas atrasadas junto con el número de días de retraso.
+- Cantidad de proyectos activos.
+- Barra de progreso de cada proyecto.
+- Racha actual.
+- Tareas que vencen hoy.
+- Tareas atrasadas junto con el número de días de retraso.
 
 Cuando alguna de estas secciones no contiene información, simplemente no se muestra.
 
@@ -374,27 +374,79 @@ Si no existen tareas pendientes ni atrasadas, el informe presenta un único mens
 
 ---
 
-# Sistema de Comandos
+# Ops Terminal — Referencia de Comandos
 
-Toda la interacción con la aplicación gira alrededor de un pequeño conjunto de comandos.
+> **Sintaxis general:** los argumentos que contienen espacios pueden escribirse entre comillas dobles o simples (`"texto con espacios"` / `'texto con espacios'`). Sin comillas, varias palabras consecutivas también se interpretan como un solo nombre, por lo que `add project Ops Terminal` funciona igual que `add project "Ops Terminal"`.
 
-Cada uno representa una operación concreta de la lógica de negocio, haciendo que el funcionamiento sea fácil de recordar y completamente predecible.
+---
 
-| Comando                        | Descripción                                                                     |
-| ------------------------------ | ------------------------------------------------------------------------------- |
-| `add project <nombre>`         | Crea un nuevo proyecto.                                                         |
-| `add task <proyecto> <título>` | Crea una tarea con prioridad y fecha de vencimiento opcionales.                 |
-| `check <proyecto> <tarea>`     | Marca una tarea como completada y registra automáticamente el check-in del día. |
-| `log <proyecto>`               | Registra manualmente un check-in.                                               |
-| `set-status <proyecto>`        | Cambia el estado del proyecto.                                                  |
-| `rm project`                   | Elimina lógicamente un proyecto tras solicitar confirmación.                    |
-| `rm task`                      | Elimina lógicamente una tarea tras solicitar confirmación.                      |
-| `status`                       | Muestra progreso, tendencia y rachas.                                           |
-| `home` / `report`              | Muestra el Situation Report.                                                    |
-| `clear`                        | Limpia la terminal y vuelve a generar el informe principal.                     |
-| `help`                         | Lista todos los comandos disponibles.                                           |
+## Comandos disponibles
 
-El **Situation Report** aparece automáticamente al finalizar la secuencia de arranque y puede volver a mostrarse en cualquier momento mediante los comandos `home`, `report` o `clear`.
+| Comando               | Uso                                                                                                                                                                                              | Ejemplo                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| **add project**       | `add project <nombre> [--description "<texto>"] [--due <fecha>]`                                                                                                                                 | `add project "Ops Terminal" --description "Personal project tracker" --due 2026-09-01` |
+| **add task**          | `add task <proyecto> <título> [--priority low\|medium\|high] [--due <fecha>]`                                                                                                                    | `add task "Ops Terminal" "Connect Supabase" --priority high --due 2026-07-20`          |
+| **check**             | `check <proyecto> <tarea>` — marca la tarea como `done` y crea automáticamente el check-in del día para ese proyecto                                                                             | `check "Ops Terminal" "Connect Supabase"`                                              |
+| **log**               | `log <proyecto> [nota opcional]` — registra un check-in manual, independiente de completar tareas                                                                                                | `log "Ops Terminal" "worked on the parser today"`                                      |
+| **set-status**        | `set-status <proyecto> <active\|paused\|archived>`                                                                                                                                               | `set-status "Ops Terminal" paused`                                                     |
+| **rm project**        | `rm project <nombre>` — realiza un _soft delete_ y solicita confirmación antes de ejecutar                                                                                                       | `rm project "Old Project"`                                                             |
+| **rm task**           | `rm task <proyecto> <tarea>` — realiza un _soft delete_ y solicita confirmación antes de ejecutar                                                                                                | `rm task "Ops Terminal" "Old task"`                                                    |
+| **tasks**             | `tasks <proyecto>` — lista todas las tareas con su estado (`[ ]` todo, `[~]` in_progress, `[x]` done), prioridad y fecha límite si existe                                                        | `tasks "Ops Terminal"`                                                                 |
+| **status** (proyecto) | `status <proyecto>` — muestra un resumen completo: barra de avance, tareas completadas y pendientes, tendencia de cumplimiento (% a tiempo + promedio de atraso), racha actual y racha más larga | `status "Ops Terminal"`                                                                |
+| **status** (general)  | `status` — muestra el mismo resumen para todos los proyectos activos                                                                                                                             | `status`                                                                               |
+| **home / report**     | `home` o `report` — muestra el _Situation Report_ (proyectos activos, tareas que vencen hoy y tareas atrasadas)                                                                                  | `home`                                                                                 |
+| **clear**             | `clear` — limpia la pantalla y vuelve a generar el _Situation Report_                                                                                                                            | `clear`                                                                                |
+| **help**              | `help` — muestra la lista de comandos disponibles                                                                                                                                                | `help`                                                                                 |
+
+---
+
+## Referencia rápida
+
+### Prioridades válidas
+
+`low`, `medium`, `high`
+
+Valor por defecto: `medium`
+
+---
+
+### Estados válidos del proyecto
+
+`active`, `paused`, `archived`
+
+---
+
+### Ciclo de vida de una tarea
+
+```text
+todo → in_progress → done
+```
+
+Actualmente no existe un comando dedicado para cambiar una tarea a `in_progress`; el comando `check` la mueve directamente a `done`.
+
+---
+
+### Formato de fecha para `--due`
+
+```text
+YYYY-MM-DD
+```
+
+Ejemplo: `2026-07-20`
+
+---
+
+### Acciones destructivas requieren confirmación
+
+Los comandos `rm project` y `rm task` siempre muestran un diálogo de confirmación antes de ejecutar el _soft delete_. La confirmación no puede omitirse desde la línea de comandos.
+
+---
+
+### Comportamiento del _soft delete_
+
+Ningún comando `rm` elimina realmente el registro de la base de datos. El registro se conserva y únicamente se establece un valor en la columna `deleted_at`.
+
+Por el momento no existe un comando `restore`, por lo que los proyectos y tareas eliminados no pueden recuperarse desde la terminal.
 
 ---
 
@@ -466,9 +518,9 @@ Este directorio contiene las interfaces de TypeScript que representan las entida
 
 Entre ellas se encuentran:
 
-* `Project`
-* `Task`
-* `CheckIn`
+- `Project`
+- `Task`
+- `CheckIn`
 
 Centralizar estas definiciones garantiza que las consultas a la base de datos, la lógica de negocio y los componentes de la interfaz trabajen siempre sobre el mismo contrato de datos.
 
@@ -490,11 +542,11 @@ En lugar de distribuir consultas SQL entre distintos componentes, cada entidad d
 
 Por ejemplo:
 
-* `projects.ts`
-* `tasks.ts`
-* `checkIns.ts`
+- `projects.ts`
+- `tasks.ts`
+- `checkIns.ts`
 
-Estos archivos son responsables exclusivamente de acceder a la base de datos, ya sea para consultar, insertar, actualizar o realizar un *soft delete*. No contienen reglas de negocio ni comportamiento relacionado con la interfaz de usuario.
+Estos archivos son responsables exclusivamente de acceder a la base de datos, ya sea para consultar, insertar, actualizar o realizar un _soft delete_. No contienen reglas de negocio ni comportamiento relacionado con la interfaz de usuario.
 
 ---
 
@@ -504,9 +556,9 @@ Toda la lógica de negocio reside en este directorio.
 
 Módulos como:
 
-* `progress.ts`
-* `trend.ts`
-* `streaks.ts`
+- `progress.ts`
+- `trend.ts`
+- `streaks.ts`
 
 reciben objetos de TypeScript como entrada y devuelven valores calculados sin depender directamente de Supabase.
 
@@ -524,9 +576,9 @@ En lugar de que la versión de escritorio y la versión móvil implementen compo
 
 Este flujo se divide en tres módulos principales:
 
-* **Parser**, encargado de interpretar el comando recibido.
-* **Registry**, donde se registran todos los comandos disponibles.
-* **Executor**, responsable de ejecutar la operación correspondiente.
+- **Parser**, encargado de interpretar el comando recibido.
+- **Registry**, donde se registran todos los comandos disponibles.
+- **Executor**, responsable de ejecutar la operación correspondiente.
 
 Gracias a esta arquitectura, ambas interfaces comparten el mismo comportamiento y no duplican lógica de negocio.
 
@@ -538,12 +590,12 @@ La interfaz se construye mediante componentes pequeños y reutilizables, cada un
 
 Entre ellos se encuentran:
 
-* Terminal
-* Command Input
-* Command Builder
-* Situation Report
-* Project Status
-* Confirmation Dialog
+- Terminal
+- Command Input
+- Command Builder
+- Situation Report
+- Project Status
+- Confirmation Dialog
 
 Los componentes se limitan a representar información en pantalla. Toda la lógica necesaria para calcular métricas o modificar el estado de la aplicación ya ha sido resuelta previamente por la capa de negocio.
 
@@ -571,10 +623,10 @@ Las consultas a la base de datos dependen de un servicio externo, mientras que c
 
 Separar ambas capas aporta varias ventajas:
 
-* La lógica de negocio puede probarse sin necesidad de una base de datos.
-* Las consultas permanecen enfocadas únicamente en la persistencia.
-* Los componentes reciben información ya procesada y lista para mostrarse.
-* Cambios futuros en la base de datos tienen un impacto mínimo sobre el resto de la aplicación.
+- La lógica de negocio puede probarse sin necesidad de una base de datos.
+- Las consultas permanecen enfocadas únicamente en la persistencia.
+- Los componentes reciben información ya procesada y lista para mostrarse.
+- Cambios futuros en la base de datos tienen un impacto mínimo sobre el resto de la aplicación.
 
 En definitiva, la arquitectura sigue un principio muy sencillo:
 
@@ -617,7 +669,7 @@ Este diseño evita duplicar comportamiento entre plataformas y garantiza que cua
 
 # Diseño Visual
 
-Ops Terminal adopta deliberadamente una estética inspirada en terminales CRT clásicas y en videojuegos como *Fallout* y *Fallout: New Vegas*.
+Ops Terminal adopta deliberadamente una estética inspirada en terminales CRT clásicas y en videojuegos como _Fallout_ y _Fallout: New Vegas_.
 
 La intención nunca fue recrear una interfaz moderna, sino construir una experiencia que recuerde a una terminal monocromática de un antiguo sistema operativo.
 
@@ -631,10 +683,10 @@ La interfaz utiliza una paleta muy reducida.
 
 Los colores principales son:
 
-* Fondo casi negro (`#050b06` / `#030804`).
-* Texto verde fósforo (`#4af68a`).
-* Bordes verde oscuro (`#1f8f3f`).
-* Ámbar (`#ff8800`), reservado exclusivamente para advertencias y rachas interrumpidas.
+- Fondo casi negro (`#050b06` / `#030804`).
+- Texto verde fósforo (`#4af68a`).
+- Bordes verde oscuro (`#1f8f3f`).
+- Ámbar (`#ff8800`), reservado exclusivamente para advertencias y rachas interrumpidas.
 
 Limitar la cantidad de colores mejora la legibilidad y refuerza la identidad retro de la aplicación.
 
@@ -644,8 +696,8 @@ Limitar la cantidad de colores mejora la legibilidad y refuerza la identidad ret
 
 Toda la interfaz utiliza tipografías monoespaciadas, principalmente:
 
-* JetBrains Mono
-* Fira Code
+- JetBrains Mono
+- Fira Code
 
 con la fuente monoespaciada del sistema como alternativa.
 
@@ -659,10 +711,10 @@ Para recrear la sensación de utilizar un monitor de fósforo, la interfaz incor
 
 Entre ellos destacan:
 
-* Scanlines implementadas mediante `repeating-linear-gradient`.
-* Una viñeta radial que oscurece ligeramente los bordes de la pantalla.
-* Un brillo verde generado mediante `text-shadow`.
-* Una animación de parpadeo durante el arranque del sistema.
+- Scanlines implementadas mediante `repeating-linear-gradient`.
+- Una viñeta radial que oscurece ligeramente los bordes de la pantalla.
+- Un brillo verde generado mediante `text-shadow`.
+- Una animación de parpadeo durante el arranque del sistema.
 
 Todos estos efectos buscan aportar personalidad sin afectar la legibilidad.
 
@@ -693,17 +745,17 @@ Al momento de redactar este caso de estudio, el proyecto ha completado la etapa 
 
 ## Completado
 
-* Definición del alcance funcional.
-* Diseño del esquema de la base de datos.
-* Creación del proyecto en Supabase.
-* Creación de las tablas en PostgreSQL.
-* Inicialización del proyecto con SvelteKit.
-* Configuración de TypeScript.
-* Integración de Tailwind CSS.
-* Configuración de ESLint.
-* Configuración de Prettier.
-* Configuración de Vitest.
-* Configuración del adaptador para Node.
+- Definición del alcance funcional.
+- Diseño del esquema de la base de datos.
+- Creación del proyecto en Supabase.
+- Creación de las tablas en PostgreSQL.
+- Inicialización del proyecto con SvelteKit.
+- Configuración de TypeScript.
+- Integración de Tailwind CSS.
+- Configuración de ESLint.
+- Configuración de Prettier.
+- Configuración de Vitest.
+- Configuración del adaptador para Node.
 
 ## En desarrollo
 
@@ -711,17 +763,17 @@ La implementación se encuentra actualmente enfocada en conectar la aplicación 
 
 Las siguientes tareas continúan pendientes:
 
-* Configuración de variables de entorno.
-* Cliente de Supabase.
-* Definición de entidades en TypeScript.
-* Implementación de consultas.
-* Desarrollo de la lógica de negocio.
-* Pruebas unitarias.
-* Parser y executor de comandos.
-* Componentes de la terminal.
-* Secuencia de arranque.
-* Efectos visuales CRT.
-* Despliegue en Render.
+- Configuración de variables de entorno.
+- Cliente de Supabase.
+- Definición de entidades en TypeScript.
+- Implementación de consultas.
+- Desarrollo de la lógica de negocio.
+- Pruebas unitarias.
+- Parser y executor de comandos.
+- Componentes de la terminal.
+- Secuencia de arranque.
+- Efectos visuales CRT.
+- Despliegue en Render.
 
 ---
 
@@ -781,13 +833,13 @@ Posteriormente se creó el archivo `src/lib/supabase/client.ts`.
 ```ts id="fmy2ld"
 import { createClient } from '@supabase/supabase-js';
 import {
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY
+  PUBLIC_SUPABASE_URL,
+  PUBLIC_SUPABASE_ANON_KEY,
 } from '$env/static/public';
 
 export const supabase = createClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY
+  PUBLIC_SUPABASE_URL,
+  PUBLIC_SUPABASE_ANON_KEY,
 );
 ```
 
@@ -805,7 +857,7 @@ import { supabase } from '$lib/supabase/client';
 
 Con la conexión establecida, el siguiente paso consistió en trasladar el esquema SQL al sistema de tipos de TypeScript.
 
-Las interfaces reflejan la estructura de las tablas prácticamente uno a uno, incluyendo columnas utilizadas para *soft delete* y los valores permitidos por los `CHECK constraints`.
+Las interfaces reflejan la estructura de las tablas prácticamente uno a uno, incluyendo columnas utilizadas para _soft delete_ y los valores permitidos por los `CHECK constraints`.
 
 Además de las entidades completas, se definieron interfaces específicas para las operaciones de inserción.
 
@@ -815,8 +867,8 @@ Cada tabla dispone de dos tipos distintos.
 
 Por ejemplo:
 
-* `Project`
-* `NewProject`
+- `Project`
+- `NewProject`
 
 El primero representa exactamente un registro almacenado en la base de datos.
 
@@ -824,30 +876,27 @@ El segundo únicamente contiene la información que realmente puede proporcionar
 
 De esta forma resulta imposible establecer manualmente campos como:
 
-* `id`
-* `created_at`
-* `deleted_at`
+- `id`
+- `created_at`
+- `deleted_at`
 
 ya que dichos valores son responsabilidad exclusiva de PostgreSQL.
 
 ### Union types para reflejar los CHECK constraints
 
-En lugar de utilizar `string`, propiedades como `status` y `priority` se modelan mediante *union types*.
+En lugar de utilizar `string`, propiedades como `status` y `priority` se modelan mediante _union types_.
 
 Por ejemplo:
 
 ```ts id="9l6qtw"
-export type ProjectStatus =
-    | 'active'
-    | 'paused'
-    | 'archived';
+export type ProjectStatus = 'active' | 'paused' | 'archived';
 ```
 
 Este enfoque ofrece varias ventajas:
 
-* Autocompletado en el editor.
-* Validación durante la compilación.
-* Correspondencia directa entre TypeScript y la base de datos.
+- Autocompletado en el editor.
+- Validación durante la compilación.
+- Correspondencia directa entre TypeScript y la base de datos.
 
 En consecuencia, el propio compilador impide asignar estados o prioridades inexistentes antes incluso de ejecutar la aplicación.
 
@@ -871,9 +920,9 @@ En lugar de permitir que los componentes ejecuten consultas directamente, cada e
 
 La estructura queda organizada de la siguiente forma:
 
-* `projects.ts`
-* `tasks.ts`
-* `checkIns.ts`
+- `projects.ts`
+- `tasks.ts`
+- `checkIns.ts`
 
 Cada archivo encapsula las operaciones relacionadas con su entidad correspondiente.
 
@@ -901,7 +950,7 @@ deleted_at IS NULL
 
 De esta forma ningún componente necesita preocuparse por excluir registros eliminados.
 
-La única excepción corresponde a `check_ins`, ya que esta tabla no implementa *soft delete*.
+La única excepción corresponde a `check_ins`, ya que esta tabla no implementa _soft delete_.
 
 ### Uso de `upsert` para los check-ins
 
@@ -916,7 +965,7 @@ Esto significa que un proyecto únicamente puede registrar un check-in por día.
 En lugar de utilizar un `insert`, la función `createCheckIn` emplea `upsert` con:
 
 ```ts id="j5ohjk"
-onConflict: 'project_id,date'
+onConflict: 'project_id,date';
 ```
 
 Gracias a ello, si el usuario ejecuta varias veces el comando `log` durante el mismo día, el registro simplemente se actualiza en lugar de provocar una violación de la restricción `UNIQUE`.
@@ -939,10 +988,10 @@ Cada módulo recibe datos ya cargados y devuelve únicamente el resultado de los
 
 El módulo `progress.ts` recibe una colección de tareas y calcula cuatro valores fundamentales:
 
-* Tareas completadas.
-* Tareas pendientes.
-* Total de tareas.
-* Porcentaje de avance.
+- Tareas completadas.
+- Tareas pendientes.
+- Total de tareas.
+- Porcentaje de avance.
 
 El porcentaje siempre se expresa entre 0 y 100 y se devuelve redondeado para facilitar su representación dentro de la interfaz.
 
@@ -952,15 +1001,15 @@ El porcentaje siempre se expresa entre 0 y 100 y se devuelve redondeado para fac
 
 El módulo `trend.ts` evalúa únicamente las tareas que cumplen dos condiciones:
 
-* Se encuentran completadas.
-* Tienen una fecha límite definida.
+- Se encuentran completadas.
+- Tienen una fecha límite definida.
 
 Las tareas sin `due_date` quedan excluidas porque no existe una referencia objetiva para determinar si fueron entregadas a tiempo.
 
 El algoritmo devuelve dos indicadores:
 
-* Porcentaje de tareas completadas antes de la fecha límite.
-* Promedio de días de retraso calculado únicamente sobre las tareas entregadas fuera de tiempo.
+- Porcentaje de tareas completadas antes de la fecha límite.
+- Promedio de días de retraso calculado únicamente sobre las tareas entregadas fuera de tiempo.
 
 Cuando no existen datos suficientes para realizar el cálculo, la función devuelve `null` en lugar de `0`.
 
@@ -976,22 +1025,22 @@ Ninguno de estos valores se almacena en la base de datos.
 
 Antes de comenzar el cálculo, el algoritmo normaliza la información:
 
-* Elimina fechas duplicadas.
-* Ordena cronológicamente los registros.
-* No asume ningún orden previo de entrada.
+- Elimina fechas duplicadas.
+- Ordena cronológicamente los registros.
+- No asume ningún orden previo de entrada.
 
 Durante el desarrollo también se contemplaron varios casos límite.
 
 Entre ellos:
 
-* Historial sin check-ins.
-* Una única fecha registrada.
-* Rachas consecutivas.
-* Último check-in realizado ayer.
-* Rachas interrumpidas por varios días.
-* La racha histórica más larga aparece en mitad del historial.
-* Fechas duplicadas.
-* Fechas recibidas en orden arbitrario.
+- Historial sin check-ins.
+- Una única fecha registrada.
+- Rachas consecutivas.
+- Último check-in realizado ayer.
+- Rachas interrumpidas por varios días.
+- La racha histórica más larga aparece en mitad del historial.
+- Fechas duplicadas.
+- Fechas recibidas en orden arbitrario.
 
 Cubrir estos escenarios permitió mantener el algoritmo completamente determinista incluso frente a entradas poco habituales.
 
@@ -1045,8 +1094,7 @@ Tras revisar el algoritmo, el problema se localizó en la conversión de miliseg
 La implementación correcta debía utilizar:
 
 ```ts id="36zngm"
-const diffDays =
-    diffMs / (1000 * 60 * 60 * 24);
+const diffDays = diffMs / (1000 * 60 * 60 * 24);
 ```
 
 Un factor incorrecto dentro de ese divisor reducía artificialmente la cantidad de milisegundos considerados por día, multiplicando el resultado final por diez.
@@ -1074,21 +1122,21 @@ La arquitectura propuesta durante la primera iteración ya cuenta con una base f
 
 Hasta el momento se han completado los siguientes hitos:
 
-* Definición completa del alcance funcional.
-* Diseño del esquema de la base de datos.
-* Implementación del esquema en Supabase.
-* Inicialización del proyecto con SvelteKit.
-* Configuración de TypeScript.
-* Configuración de Tailwind CSS.
-* Configuración de ESLint y Prettier.
-* Configuración de Vitest.
-* Configuración del adaptador para Node.
-* Configuración de variables de entorno.
-* Implementación del cliente de Supabase.
-* Modelado de las entidades mediante TypeScript.
-* Desarrollo de la capa de acceso a datos.
-* Implementación de la lógica de negocio.
-* Pruebas unitarias de la lógica de negocio (**15 de 15 pruebas superadas**).
+- Definición completa del alcance funcional.
+- Diseño del esquema de la base de datos.
+- Implementación del esquema en Supabase.
+- Inicialización del proyecto con SvelteKit.
+- Configuración de TypeScript.
+- Configuración de Tailwind CSS.
+- Configuración de ESLint y Prettier.
+- Configuración de Vitest.
+- Configuración del adaptador para Node.
+- Configuración de variables de entorno.
+- Implementación del cliente de Supabase.
+- Modelado de las entidades mediante TypeScript.
+- Desarrollo de la capa de acceso a datos.
+- Implementación de la lógica de negocio.
+- Pruebas unitarias de la lógica de negocio (**15 de 15 pruebas superadas**).
 
 La mayor parte del trabajo realizado hasta este punto ha estado orientado a construir una base sólida sobre la que desarrollar el resto de la aplicación, priorizando una arquitectura mantenible antes que una interfaz funcional.
 
@@ -1102,15 +1150,15 @@ Las próximas iteraciones estarán enfocadas en desarrollar el sistema de comand
 
 Los principales elementos pendientes son:
 
-* Implementación del parser de comandos.
-* Registro y ejecución de comandos (`registry` y `executor`).
-* Terminal interactiva.
-* Command Builder para escritorio y dispositivos móviles.
-* Situation Report.
-* Componentes visuales de la aplicación.
-* Boot Sequence.
-* Efectos visuales CRT.
-* Despliegue en Render.
+- Implementación del parser de comandos.
+- Registro y ejecución de comandos (`registry` y `executor`).
+- Terminal interactiva.
+- Command Builder para escritorio y dispositivos móviles.
+- Situation Report.
+- Componentes visuales de la aplicación.
+- Boot Sequence.
+- Efectos visuales CRT.
+- Despliegue en Render.
 
 Aunque todavía no existe una interfaz completamente funcional, el núcleo de la aplicación ya dispone de la mayor parte de la infraestructura necesaria para comenzar a construir la experiencia final del usuario.
 

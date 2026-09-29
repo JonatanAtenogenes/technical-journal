@@ -22,9 +22,9 @@ The application is designed for a single user who wants to keep track of persona
 
 Three questions drive the entire design:
 
-* Which projects are currently active?
-* What tasks remain unfinished?
-* Have I worked on my projects today?
+- Which projects are currently active?
+- What tasks remain unfinished?
+- Have I worked on my projects today?
 
 Every feature included in the application exists because it contributes directly to answering one of those questions.
 
@@ -56,13 +56,13 @@ The application is intentionally single-user. Decisions are optimized for simpli
 
 The project is built using:
 
-* SvelteKit
-* TypeScript
-* Tailwind CSS
-* Supabase (PostgreSQL)
-* Vitest
-* Render
-* `@sveltejs/adapter-node`
+- SvelteKit
+- TypeScript
+- Tailwind CSS
+- Supabase (PostgreSQL)
+- Vitest
+- Render
+- `@sveltejs/adapter-node`
 
 This stack provides a balance between developer experience, deployment simplicity, and long-term maintainability while keeping the architecture relatively lightweight.
 
@@ -90,7 +90,7 @@ SvelteKit represents the standard approach within the Svelte ecosystem and benef
 
 # Scope Decisions
 
-A significant part of the project involved defining what would *not* be included.
+A significant part of the project involved defining what would _not_ be included.
 
 Keeping the scope intentionally small reduces maintenance burden and prevents the application from evolving into a general-purpose project management tool.
 
@@ -123,9 +123,9 @@ The result is a tool focused on project visibility and daily consistency rather 
 
 The application stores its data in **Supabase (PostgreSQL)** using a deliberately minimal schema. Instead of pursuing a highly normalized design or introducing multiple abstraction layers, the database consists of only three tables that directly represent the application's domain:
 
-* **Projects**
-* **Tasks**
-* **Check-ins**
+- **Projects**
+- **Tasks**
+- **Check-ins**
 
 The simplicity of the schema reflects the overall philosophy of the project: a personal productivity tool should remain easy to understand, easy to query, and easy to maintain.
 
@@ -284,9 +284,9 @@ Completing a task automatically creates a daily check-in, but this behavior is i
 
 Keeping business rules inside TypeScript offers several advantages:
 
-* Logic remains easier to test with Vitest.
-* Behavior is explicit rather than hidden inside database procedures.
-* The database remains focused on persistence instead of application rules.
+- Logic remains easier to test with Vitest.
+- Behavior is explicit rather than hidden inside database procedures.
+- The database remains focused on persistence instead of application rules.
 
 ---
 
@@ -316,7 +316,7 @@ This percentage is displayed alongside each project inside the Situation Report,
 
 Completion trend attempts to answer a different question:
 
-> *How consistently are deadlines being respected?*
+> _How consistently are deadlines being respected?_
 
 Only completed tasks that define a due date participate in the calculation.
 
@@ -324,8 +324,8 @@ Tasks without deadlines are intentionally excluded because there is no objective
 
 Instead of collapsing the information into a single score, the application exposes two independent metrics:
 
-* Percentage of tasks completed before their due date.
-* Average delay, measured only across late tasks.
+- Percentage of tasks completed before their due date.
+- Average delay, measured only across late tasks.
 
 Displaying both values provides a more complete picture than a single aggregated indicator.
 
@@ -361,11 +361,11 @@ The Situation Report serves as the application's home screen.
 
 Instead of presenting dashboards or charts, it produces a concise textual summary containing:
 
-* Number of active projects.
-* Progress bar for every project.
-* Current work streak.
-* Tasks due today.
-* Overdue tasks with the number of delayed days.
+- Number of active projects.
+- Progress bar for every project.
+- Current work streak.
+- Tasks due today.
+- Overdue tasks with the number of delayed days.
 
 Whenever one of these sections has no content, it simply disappears.
 
@@ -375,63 +375,81 @@ This keeps the terminal uncluttered while preserving the retro command-line expe
 
 ---
 
-# Command System
+# Ops Terminal — Command Reference
 
-Rather than relying on menus or navigation, the application revolves around a small command language.
-
-Each command maps directly to a business operation, making interaction predictable and easy to remember.
-
-| Command                      | Description                                                             |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `add project <name>`         | Creates a new project.                                                  |
-| `add task <project> <title>` | Creates a task with optional priority and due date.                     |
-| `check <project> <task>`     | Marks a task as completed and automatically creates the day's check-in. |
-| `log <project>`              | Creates a manual work check-in.                                         |
-| `set-status <project>`       | Changes the project status.                                             |
-| `rm project`                 | Soft deletes a project after confirmation.                              |
-| `rm task`                    | Soft deletes a task after confirmation.                                 |
-| `status`                     | Displays progress, trends, and streak information.                      |
-| `home` / `report`            | Displays the Situation Report.                                          |
-| `clear`                      | Clears the terminal and redraws the home screen.                        |
-| `help`                       | Lists every available command.                                          |
-
-The Situation Report appears automatically after the boot sequence and can be displayed again at any time using `home`, `report`, or `clear`.
+> **General syntax:** arguments containing spaces may be wrapped in double or single quotes (`"text with spaces"` / `'text with spaces'`). Without quotes, consecutive words are also treated as a single name, so `add project Ops Terminal` works the same as `add project "Ops Terminal"`.
 
 ---
 
-# User Experience
+## Available commands
 
-The application deliberately provides different interaction models for desktop and mobile while maintaining identical functionality.
+| Command              | Usage                                                                                                                                                          | Example                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **add project**      | `add project <name> [--description "<text>"] [--due <date>]`                                                                                                   | `add project "Ops Terminal" --description "Personal project tracker" --due 2026-09-01` |
+| **add task**         | `add task <project> <title> [--priority low\|medium\|high] [--due <date>]`                                                                                     | `add task "Ops Terminal" "Connect Supabase" --priority high --due 2026-07-20`          |
+| **check**            | `check <project> <task>` — marks the task as `done` and automatically creates a check-in for today                                                             | `check "Ops Terminal" "Connect Supabase"`                                              |
+| **log**              | `log <project> [optional note]` — manual check-in, independent of task completion                                                                              | `log "Ops Terminal" "worked on the parser today"`                                      |
+| **set-status**       | `set-status <project> <active\|paused\|archived>`                                                                                                              | `set-status "Ops Terminal" paused`                                                     |
+| **rm project**       | `rm project <name>` — soft delete, requires confirmation                                                                                                       | `rm project "Old Project"`                                                             |
+| **rm task**          | `rm task <project> <task>` — soft delete, requires confirmation                                                                                                | `rm task "Ops Terminal" "Old task"`                                                    |
+| **tasks**            | `tasks <project>` — lists all tasks with status (`[ ]` todo, `[~]` in_progress, `[x]` done), priority, and due date when present                               | `tasks "Ops Terminal"`                                                                 |
+| **status** (project) | `status <project>` — detailed summary: progress bar, completed/pending tasks, completion trend (on-time % + average delay), current streak, and longest streak | `status "Ops Terminal"`                                                                |
+| **status** (all)     | `status` — same summary for all active projects                                                                                                                | `status`                                                                               |
+| **home / report**    | `home` or `report` — displays the Situation Report (active projects, tasks due today, overdue tasks)                                                           | `home`                                                                                 |
+| **clear**            | `clear` — clears the screen and redraws the Situation Report                                                                                                   | `clear`                                                                                |
+| **help**             | `help` — displays the list of available commands                                                                                                               | `help`                                                                                 |
 
-Rather than forcing one compromise that works everywhere, each platform receives the interface that best matches its input method.
+---
 
-## Desktop Experience
+## Quick reference
 
-Desktop users interact primarily through a free-form command line.
+### Valid priorities
 
-Typing commands is the fastest way to operate the application and reinforces the terminal-inspired experience.
+`low`, `medium`, `high`
 
-For users who prefer a more guided workflow, the interface also provides an optional toggle that switches to the same visual command builder used on mobile devices.
+Default: `medium`
 
-Both interaction methods execute exactly the same commands internally.
+---
 
-## Mobile Experience
+### Valid project statuses
 
-Typing long commands on a phone is considerably less comfortable.
+`active`, `paused`, `archived`
 
-Instead of exposing a text terminal, mobile presents a guided workflow composed of sequential selections.
+---
 
-The command builder follows five simple steps:
+### Task lifecycle
 
-1. Select an action.
-2. Select a project when required.
-3. Select a task when required.
-4. Enter additional parameters such as priority, dates, or notes.
-5. Confirm execution.
+```text
+todo → in_progress → done
+```
 
-Once completed, the generated command is rendered inside the terminal exactly as if it had been typed manually, preserving consistency between both platforms.
+There is currently no dedicated command for moving a task to `in_progress`; the `check` command transitions it directly to `done`.
 
-Commands that require no additional information execute immediately, while destructive actions always require explicit confirmation.
+---
+
+### Due date format
+
+```text
+YYYY-MM-DD
+```
+
+Example: `2026-07-20`
+
+---
+
+### Destructive actions require confirmation
+
+`rm project` and `rm task` always display a confirmation dialog before performing the soft delete. The confirmation step cannot be bypassed from the command line.
+
+---
+
+### Soft delete behavior
+
+No `rm` command permanently removes data from the database. The record is kept and only its `deleted_at` field is populated.
+
+A `restore` command is not available yet, so deleted projects and tasks cannot currently be recovered from the terminal interface.
+
+---
 
 # Project Architecture
 
@@ -467,9 +485,9 @@ The `types` directory contains the TypeScript interfaces that describe the appli
 
 Examples include:
 
-* `Project`
-* `Task`
-* `CheckIn`
+- `Project`
+- `Task`
+- `CheckIn`
 
 Keeping these interfaces centralized guarantees that database queries, business logic, and UI components all operate on the same contracts.
 
@@ -491,9 +509,9 @@ Instead of scattering SQL operations throughout UI components, each entity expos
 
 For example:
 
-* `projects.ts`
-* `tasks.ts`
-* `checkIns.ts`
+- `projects.ts`
+- `tasks.ts`
+- `checkIns.ts`
 
 These modules focus exclusively on persistence.
 
@@ -507,9 +525,9 @@ Business calculations live inside the `logic` directory.
 
 Modules such as:
 
-* `progress.ts`
-* `trend.ts`
-* `streaks.ts`
+- `progress.ts`
+- `trend.ts`
+- `streaks.ts`
 
 receive plain JavaScript objects and return computed values.
 
@@ -527,9 +545,9 @@ Instead of allowing desktop and mobile interfaces to implement different behavio
 
 The pipeline is divided into three modules:
 
-* **Parser**, responsible for interpreting commands.
-* **Registry**, responsible for defining the available operations.
-* **Executor**, responsible for invoking the corresponding business logic.
+- **Parser**, responsible for interpreting commands.
+- **Registry**, responsible for defining the available operations.
+- **Executor**, responsible for invoking the corresponding business logic.
 
 This architecture guarantees that both interfaces behave identically while avoiding duplicated implementations.
 
@@ -541,12 +559,12 @@ The UI is composed of small reusable components, each responsible for a specific
 
 Examples include:
 
-* Terminal
-* Command Input
-* Command Builder
-* Situation Report
-* Project Status
-* Confirmation Dialog
+- Terminal
+- Command Input
+- Command Builder
+- Situation Report
+- Project Status
+- Confirmation Dialog
 
 Rather than embedding business rules inside the interface, components receive already computed data and focus solely on presentation.
 
@@ -574,10 +592,10 @@ Database operations inherently depend on external services, whereas calculations
 
 Keeping them separated provides several benefits:
 
-* Business logic can be tested without a database.
-* Queries remain responsible only for persistence.
-* Components receive ready-to-render data.
-* Future database migrations have minimal impact on application behavior.
+- Business logic can be tested without a database.
+- Queries remain responsible only for persistence.
+- Components receive ready-to-render data.
+- Future database migrations have minimal impact on application behavior.
 
 This follows a simple but effective principle:
 
@@ -620,7 +638,7 @@ This design eliminates duplicated business logic while ensuring feature parity a
 
 # Visual Design
 
-Ops Terminal intentionally embraces a retro CRT aesthetic inspired by classic terminals and games such as *Fallout* and *Fallout: New Vegas*.
+Ops Terminal intentionally embraces a retro CRT aesthetic inspired by classic terminals and games such as _Fallout_ and _Fallout: New Vegas_.
 
 The interface is designed to feel like a monochrome operating system rather than a modern dashboard.
 
@@ -630,10 +648,10 @@ The visual language is intentionally restrained.
 
 Only a handful of colors are used throughout the interface:
 
-* Near-black background (`#050b06` / `#030804`)
-* Phosphor green text (`#4af68a`)
-* Dark green borders (`#1f8f3f`)
-* Amber (`#ff8800`) reserved exclusively for warnings and broken streaks
+- Near-black background (`#050b06` / `#030804`)
+- Phosphor green text (`#4af68a`)
+- Dark green borders (`#1f8f3f`)
+- Amber (`#ff8800`) reserved exclusively for warnings and broken streaks
 
 Using a limited palette reinforces readability while preserving the retro aesthetic.
 
@@ -643,8 +661,8 @@ Using a limited palette reinforces readability while preserving the retro aesthe
 
 The interface relies on monospaced fonts such as:
 
-* JetBrains Mono
-* Fira Code
+- JetBrains Mono
+- Fira Code
 
 with the system monospace font serving as a fallback.
 
@@ -658,10 +676,10 @@ Several subtle visual effects recreate the feeling of an old phosphor monitor wi
 
 These include:
 
-* Scanlines implemented with `repeating-linear-gradient`.
-* A radial vignette that darkens screen edges.
-* Soft green glow produced through `text-shadow`.
-* A subtle blinking animation during startup.
+- Scanlines implemented with `repeating-linear-gradient`.
+- A radial vignette that darkens screen edges.
+- Soft green glow produced through `text-shadow`.
+- A subtle blinking animation during startup.
 
 The objective is immersion rather than realism.
 
@@ -692,17 +710,17 @@ At the time of writing, the project has completed its planning and database desi
 
 ## Completed
 
-* Functional scope definition.
-* Database schema.
-* Supabase project creation.
-* PostgreSQL tables.
-* SvelteKit project initialization.
-* TypeScript configuration.
-* Tailwind CSS.
-* ESLint.
-* Prettier.
-* Vitest.
-* Node adapter configuration.
+- Functional scope definition.
+- Database schema.
+- Supabase project creation.
+- PostgreSQL tables.
+- SvelteKit project initialization.
+- TypeScript configuration.
+- Tailwind CSS.
+- ESLint.
+- Prettier.
+- Vitest.
+- Node adapter configuration.
 
 ## In Progress
 
@@ -710,17 +728,17 @@ The implementation phase is currently focused on connecting the application to S
 
 Remaining work includes:
 
-* Environment variable configuration.
-* Supabase client.
-* TypeScript entity definitions.
-* Query modules.
-* Business logic implementation.
-* Unit tests.
-* Command parser and executor.
-* Terminal components.
-* Boot sequence.
-* CRT visual effects.
-* Render deployment.
+- Environment variable configuration.
+- Supabase client.
+- TypeScript entity definitions.
+- Query modules.
+- Business logic implementation.
+- Unit tests.
+- Command parser and executor.
+- Terminal components.
+- Boot sequence.
+- CRT visual effects.
+- Render deployment.
 
 ---
 
@@ -782,13 +800,13 @@ A dedicated client module was then created under `src/lib/supabase/client.ts`.
 ```ts id="3e9gc6"
 import { createClient } from '@supabase/supabase-js';
 import {
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY
+  PUBLIC_SUPABASE_URL,
+  PUBLIC_SUPABASE_ANON_KEY,
 } from '$env/static/public';
 
 export const supabase = createClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY
+  PUBLIC_SUPABASE_URL,
+  PUBLIC_SUPABASE_ANON_KEY,
 );
 ```
 
@@ -816,8 +834,8 @@ Each table exposes two different interfaces.
 
 For example:
 
-* `Project`
-* `NewProject`
+- `Project`
+- `NewProject`
 
 The first represents a complete record returned by the database.
 
@@ -825,9 +843,9 @@ The second only contains the information that users are actually allowed to prov
 
 This separation prevents application code from assigning database-managed fields such as:
 
-* `id`
-* `created_at`
-* `deleted_at`
+- `id`
+- `created_at`
+- `deleted_at`
 
 Those values remain entirely under PostgreSQL's control.
 
@@ -838,17 +856,14 @@ Instead of representing fields such as `status` or `priority` as generic strings
 For example:
 
 ```ts id="mxrbv0"
-export type ProjectStatus =
-    | 'active'
-    | 'paused'
-    | 'archived';
+export type ProjectStatus = 'active' | 'paused' | 'archived';
 ```
 
 This approach provides several advantages:
 
-* Better editor autocompletion.
-* Compile-time validation.
-* A direct correspondence between the TypeScript model and the database schema.
+- Better editor autocompletion.
+- Compile-time validation.
+- A direct correspondence between the TypeScript model and the database schema.
 
 As a result, invalid project states or task priorities are caught during development instead of becoming runtime errors.
 
@@ -872,9 +887,9 @@ Instead of allowing components to execute database operations directly, each ent
 
 The structure is organized as follows:
 
-* `projects.ts`
-* `tasks.ts`
-* `checkIns.ts`
+- `projects.ts`
+- `tasks.ts`
+- `checkIns.ts`
 
 Each module encapsulates every operation related to its corresponding entity.
 
@@ -917,7 +932,7 @@ This guarantees that each project can only register one check-in per day.
 Instead of performing a simple `insert`, the `createCheckIn` function uses an `upsert` operation with:
 
 ```ts id="v4j2go"
-onConflict: 'project_id,date'
+onConflict: 'project_id,date';
 ```
 
 If the user executes the `log` command multiple times on the same day, the existing record is updated instead of generating a constraint violation.
@@ -940,10 +955,10 @@ Each module receives plain data structures and returns computed results, making 
 
 The `progress.ts` module receives a collection of tasks and computes four key metrics:
 
-* Completed tasks.
-* Pending tasks.
-* Total tasks.
-* Overall completion percentage.
+- Completed tasks.
+- Pending tasks.
+- Total tasks.
+- Overall completion percentage.
 
 The percentage is always normalized to a value between 0 and 100 and rounded before being returned, making it immediately suitable for display within the interface.
 
@@ -953,15 +968,15 @@ The percentage is always normalized to a value between 0 and 100 and rounded bef
 
 The `trend.ts` module evaluates only tasks that satisfy two conditions:
 
-* The task has been completed.
-* A due date exists.
+- The task has been completed.
+- A due date exists.
 
 Tasks without a due date are intentionally ignored because there is no objective reference for determining whether they were completed on time.
 
 The algorithm produces two independent metrics:
 
-* Percentage of tasks completed on or before their deadline.
-* Average delay, calculated only across late tasks.
+- Percentage of tasks completed on or before their deadline.
+- Average delay, calculated only across late tasks.
 
 When there is insufficient information to evaluate performance, the function returns `null` rather than `0`.
 
@@ -977,22 +992,22 @@ Neither value is cached inside the database.
 
 Before performing any calculations, the algorithm normalizes the input by:
 
-* Removing duplicate dates.
-* Sorting entries chronologically.
-* Making no assumptions about the order of incoming data.
+- Removing duplicate dates.
+- Sorting entries chronologically.
+- Making no assumptions about the order of incoming data.
 
 Several edge cases were also considered during implementation.
 
 These include:
 
-* No check-ins.
-* A single recorded day.
-* Simple consecutive streaks.
-* The latest check-in occurring yesterday.
-* Broken streaks caused by multi-day gaps.
-* The longest streak appearing in the middle of the timeline.
-* Duplicate dates.
-* Unsorted input.
+- No check-ins.
+- A single recorded day.
+- Simple consecutive streaks.
+- The latest check-in occurring yesterday.
+- Broken streaks caused by multi-day gaps.
+- The longest streak appearing in the middle of the timeline.
+- Duplicate dates.
+- Unsorted input.
 
 Handling these scenarios ensures that the algorithm behaves consistently regardless of how the input data is provided.
 
@@ -1046,8 +1061,7 @@ After reviewing the implementation, the issue was traced back to the conversion 
 The correct implementation is:
 
 ```ts id="o6ks17"
-const diffDays =
-    diffMs / (1000 * 60 * 60 * 24);
+const diffDays = diffMs / (1000 * 60 * 60 * 24);
 ```
 
 An incorrect conversion factor reduced the number of milliseconds considered equivalent to one day, causing every delay calculation to be multiplied by ten.
@@ -1077,21 +1091,21 @@ At this stage, the project already has the infrastructure required to support th
 
 The following milestones have been completed so far:
 
-* Functional scope definition.
-* Database schema design.
-* Database implementation in Supabase.
-* SvelteKit project initialization.
-* TypeScript configuration.
-* Tailwind CSS configuration.
-* ESLint and Prettier configuration.
-* Vitest configuration.
-* Node adapter configuration.
-* Environment variable setup.
-* Supabase client configuration.
-* TypeScript domain models.
-* Data access layer.
-* Business logic implementation.
-* Unit testing of the business logic (**15 out of 15 tests passing**).
+- Functional scope definition.
+- Database schema design.
+- Database implementation in Supabase.
+- SvelteKit project initialization.
+- TypeScript configuration.
+- Tailwind CSS configuration.
+- ESLint and Prettier configuration.
+- Vitest configuration.
+- Node adapter configuration.
+- Environment variable setup.
+- Supabase client configuration.
+- TypeScript domain models.
+- Data access layer.
+- Business logic implementation.
+- Unit testing of the business logic (**15 out of 15 tests passing**).
 
 Most of the work completed during these two iterations has focused on building a maintainable foundation before investing time in the user interface. Establishing clear architectural boundaries early in the project reduces future complexity and allows new features to be developed on top of a well-defined structure.
 
@@ -1105,15 +1119,15 @@ The business logic already exists; the remaining work consists of exposing that 
 
 The primary tasks scheduled for upcoming iterations are:
 
-* Command parser.
-* Command registry and executor.
-* Interactive terminal.
-* Command Builder for desktop and mobile.
-* Situation Report.
-* Visual interface components.
-* Boot sequence.
-* CRT visual effects.
-* Deployment to Render.
+- Command parser.
+- Command registry and executor.
+- Interactive terminal.
+- Command Builder for desktop and mobile.
+- Situation Report.
+- Visual interface components.
+- Boot sequence.
+- CRT visual effects.
+- Deployment to Render.
 
 Although the application is not yet feature-complete, the underlying architecture has reached a point where new functionality can be implemented incrementally without requiring significant changes to the existing codebase.
 
