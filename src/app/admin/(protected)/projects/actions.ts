@@ -3,7 +3,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createProjectSchema, type CreateProjectInput } from './schema';
-import { is } from 'zod/locales';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -33,6 +32,7 @@ export async function createProject(
       slug: meta.slug,
       status: meta.status,
       start_year: meta.start_year ?? null,
+      end_year: meta.end_year ?? null,
       series_id: meta.series_id || null,
       part_number: meta.part_number ?? null,
       tags: meta.tags,
@@ -91,6 +91,7 @@ export async function updateProject(
       slug: meta.slug,
       status: meta.status,
       start_year: meta.start_year ?? null,
+      end_year: meta.end_year ?? null,
       series_id: meta.series_id || null,
       part_number: meta.part_number ?? null,
       tags: meta.tags,

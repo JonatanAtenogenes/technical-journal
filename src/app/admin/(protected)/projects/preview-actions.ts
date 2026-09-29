@@ -4,6 +4,11 @@ import { compileMDX } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 import type { ReactNode } from 'react';
+import {
+  ContentImage,
+  createMdxComponents,
+} from '@/components/mdx/project-image';
+import { createClient } from '@/lib/supabase/server';
 
 type PreviewResult =
   | { content: ReactNode; error?: undefined }
@@ -25,12 +30,29 @@ type PreviewResult =
 // elements natively over the RSC protocol, so there's no need for it.
 export async function renderMdxPreview(
   mdxContent: string,
+  // Undefined while creating a new project (no id yet, no images can
+  // exist). Any <ProjectImage> tags render as "missing" placeholders
+  // in that case, rather than the preview failing outright.
+  projectId?: string,
+  locale: 'en' | 'es' = 'en',
 ): Promise<PreviewResult> {
   if (!mdxContent.trim()) {
     return { content: null };
   }
 
   try {
+    let images: ContentImage[] = [];
+
+    if (projectId) {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('images')
+        .select('slot_key, storage_path, width, height, alt, caption')
+        .eq('project_id', projectId)
+        .eq('kind', 'content');
+      images = data ?? [];
+    }
+
     const { content } = await compileMDX({
       source: mdxContent,
       options: {
@@ -39,6 +61,7 @@ export async function renderMdxPreview(
           rehypePlugins: [rehypeSlug],
         },
       },
+      components: createMdxComponents(images, locale),
     });
 
     return { content };

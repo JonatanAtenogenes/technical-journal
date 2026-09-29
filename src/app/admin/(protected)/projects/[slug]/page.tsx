@@ -20,10 +20,12 @@ export default async function EditProjectPage({
         slug,
         status,
         start_year,
+        end_year,
         series_id,
         part_number,
         tags,
         links,
+        cover:cover_image_id (id, storage_path, width, height, alt),
         project_i18n ( locale, title, description, category, part_tags, mdx_content )
       `,
       )
@@ -39,6 +41,14 @@ export default async function EditProjectPage({
 
   const en = project.project_i18n.find((row) => row.locale === 'en');
   const es = project.project_i18n.find((row) => row.locale === 'es');
+
+  // Supabase's client (without generated Database types) can't always
+  // tell this is a to-one relation (cover_image_id lives on `projects`),
+  // so it sometimes infers/returns the embed as an array. Normalize
+  // either shape to a single object or null.
+  const cover = Array.isArray(project.cover)
+    ? (project.cover[0] ?? null)
+    : (project.cover ?? null);
 
   const emptyContent = {
     title: '',
@@ -59,6 +69,7 @@ export default async function EditProjectPage({
             slug: project.slug,
             status: project.status,
             start_year: project.start_year ?? undefined,
+            end_year: project.end_year ?? undefined,
             series_id: project.series_id ?? undefined,
             part_number: project.part_number ?? undefined,
             tags: project.tags ?? [],
@@ -66,6 +77,7 @@ export default async function EditProjectPage({
           },
           en: en ?? emptyContent,
           es: es ?? emptyContent,
+          cover: cover,
         }}
       />
     </div>

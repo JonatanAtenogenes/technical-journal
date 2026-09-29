@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useTheme } from 'next-themes';
-import CodeMirror from '@uiw/react-codemirror';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubLight, githubDark } from '@uiw/codemirror-theme-github';
 import { Button } from '@/components/ui/button';
@@ -27,11 +27,11 @@ import { cn } from '@/lib/utils';
 import {
   createProject,
   updateProject,
-  softDeleteProject,
 } from '@/app/admin/(protected)/projects/actions';
 import { renderMdxPreview } from '@/app/admin/(protected)/projects/preview-actions';
 import type { CreateProjectInput } from '@/app/admin/(protected)/projects/schema';
 import { DeleteProjectButton } from './delete-project-button';
+import { CoverImageUploader } from './cover-image-uploader';
 
 type LocaleContent = CreateProjectInput['en'];
 
@@ -55,6 +55,13 @@ type ProjectFormProps = {
     meta: CreateProjectInput['meta'];
     en: LocaleContent;
     es: LocaleContent;
+    cover: {
+      id: string;
+      storage_path: string;
+      width: number | null;
+      height: number | null;
+      alt: { en?: string; es?: string } | null;
+    } | null;
   };
 };
 
@@ -68,14 +75,16 @@ const STEPS = [
 // matching item's label — passing `items` to <Select> tells it which
 // label corresponds to each value once something is selected.
 const STATUS_ITEMS = [
-  { label: 'Draft', value: 'draft' },
+  { label: 'Completed', value: 'completed' },
   { label: 'In progress', value: 'in-progress' },
-  { label: 'Published', value: 'published' },
+  { label: 'Paused', value: 'paused' },
+  { label: 'Archived', value: 'archived' },
 ];
 
 const ICON_ITEMS = [
   { label: 'github', value: 'github' },
   { label: 'globe', value: 'globe' },
+  { label: 'external-link', value: 'external-link' },
 ];
 
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
@@ -86,11 +95,14 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
 
   // --- Locale-independent fields (step 1) ---
   const [slug, setSlug] = useState(initialData?.meta.slug ?? '');
-  const [status, setStatus] = useState<'draft' | 'in-progress' | 'published'>(
-    initialData?.meta.status ?? 'draft',
-  );
+  const [status, setStatus] = useState<
+    'completed' | 'in-progress' | 'paused' | 'archived'
+  >(initialData?.meta.status ?? 'in-progress');
   const [startYear, setStartYear] = useState(
-    initialData?.meta.start_year?.toString() ?? '',
+    initialData?.meta.end_year?.toString() ?? '',
+  );
+  const [endYear, setEndYear] = useState(
+    initialData?.meta.end_year?.toString() ?? '',
   );
   const [seriesId, setSeriesId] = useState<string>(
     initialData?.meta.series_id ?? '',
@@ -175,6 +187,7 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
         slug,
         status,
         start_year: startYear ? Number(startYear) : undefined,
+        end_year: endYear ? Number(endYear) : undefined,
         series_id: sanitizedSeriesId,
         part_number: partNumber ? Number(partNumber) : undefined,
         tags: tagsInput
@@ -224,6 +237,8 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
           setStatus={setStatus}
           startYear={startYear}
           setStartYear={setStartYear}
+          endYear={endYear}
+          setEndYear={setEndYear}
           seriesId={seriesId}
           setSeriesId={setSeriesId}
           partNumber={partNumber}
@@ -235,6 +250,8 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
           updateLink={updateLink}
           removeLink={removeLink}
           seriesOptions={seriesOptions}
+          projectId={initialData?.id}
+          initialCover={initialData?.cover ?? null}
         />
       )}
 
@@ -260,10 +277,20 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
             <TabsTrigger value="es">Español</TabsTrigger>
           </TabsList>
           <TabsContent value="en">
-            <LocaleBodyField value={en} onChange={setEn} />
+            <LocaleBodyField
+              value={en}
+              onChange={setEn}
+              projectId={initialData?.id}
+              locale="en"
+            />
           </TabsContent>
           <TabsContent value="es">
-            <LocaleBodyField value={es} onChange={setEs} />
+            <LocaleBodyField
+              value={es}
+              onChange={setEs}
+              projectId={initialData?.id}
+              locale="es"
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -346,6 +373,8 @@ function BasicInfoStep({
   setStatus,
   startYear,
   setStartYear,
+  endYear,
+  setEndYear,
   seriesId,
   setSeriesId,
   partNumber,
@@ -357,13 +386,17 @@ function BasicInfoStep({
   updateLink,
   removeLink,
   seriesOptions,
+  projectId,
+  initialCover,
 }: {
   slug: string;
   setSlug: (v: string) => void;
-  status: 'draft' | 'in-progress' | 'published';
-  setStatus: (v: 'draft' | 'in-progress' | 'published') => void;
+  status: 'completed' | 'in-progress' | 'paused' | 'archived';
+  setStatus: (v: 'completed' | 'in-progress' | 'paused' | 'archived') => void;
   startYear: string;
   setStartYear: (v: string) => void;
+  endYear: string;
+  setEndYear: (v: string) => void;
   seriesId: string;
   setSeriesId: (v: string) => void;
   partNumber: string;
@@ -375,6 +408,16 @@ function BasicInfoStep({
   updateLink: (index: number, patch: Partial<LinkEntry>) => void;
   removeLink: (index: number) => void;
   seriesOptions: { id: string; label: string }[];
+  // Cover upload needs an existing project row (FK), so it's only
+  // available in edit mode. projectId is undefined while creating.
+  projectId?: string;
+  initialCover: {
+    id: string;
+    storage_path: string;
+    width: number | null;
+    height: number | null;
+    alt: { en?: string; es?: string } | null;
+  } | null;
 }) {
   return (
     <section className="space-y-4">
@@ -401,9 +444,12 @@ function BasicInfoStep({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="in-progress">In progress</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
+              <SelectContent>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="in-progress">In progress</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
             </SelectContent>
           </Select>
         </div>
@@ -416,6 +462,19 @@ function BasicInfoStep({
             value={startYear}
             onChange={(e) => setStartYear(e.target.value)}
             placeholder="2025"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="end_year">
+            End year (optional, leave empty if ongoing)
+          </Label>
+          <Input
+            id="end_year"
+            type="number"
+            value={endYear}
+            onChange={(e) => setEndYear(e.target.value)}
+            placeholder="2026"
           />
         </div>
 
@@ -495,6 +554,7 @@ function BasicInfoStep({
                 <SelectContent>
                   <SelectItem value="github">github</SelectItem>
                   <SelectItem value="globe">globe</SelectItem>
+                  <SelectItem value="external-link">external-link</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -512,6 +572,14 @@ function BasicInfoStep({
           </Button>
         </div>
       </div>
+
+      {projectId ? (
+        <CoverImageUploader projectId={projectId} initialCover={initialCover} />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Cover image: save the project first, then come back here to add one.
+        </p>
+      )}
     </section>
   );
 }
@@ -580,9 +648,15 @@ function LocaleDetailsFields({
 function LocaleBodyField({
   value,
   onChange,
+  projectId,
+  locale,
 }: {
   value: LocaleContent;
   onChange: (v: LocaleContent) => void;
+  // Undefined while creating a new project — <ProjectImage> tags will
+  // render as "missing" placeholders until the project is saved once.
+  projectId?: string;
+  locale: 'en' | 'es';
 }) {
   const { resolvedTheme } = useTheme();
   const editorTheme = resolvedTheme === 'dark' ? githubDark : githubLight;
@@ -597,7 +671,11 @@ function LocaleBodyField({
 
     debounceRef.current = setTimeout(() => {
       startPreviewTransition(async () => {
-        const result = await renderMdxPreview(value.mdx_content);
+        const result = await renderMdxPreview(
+          value.mdx_content,
+          projectId,
+          locale,
+        );
         if ('error' in result && result.error) {
           setPreviewError(result.error);
           setPreviewContent(null);
@@ -614,12 +692,16 @@ function LocaleBodyField({
   }, [value.mdx_content]);
 
   const editor = (
-    <div className="rounded-md border overflow-hidden">
+    <div className="h-[60dvh] min-h-80 max-h-150 w-full min-w-0 rounded-md border overflow-hidden">
       <CodeMirror
         value={value.mdx_content}
         height="600px"
         theme={editorTheme}
-        extensions={[markdown()]}
+        // Wrap long lines instead of letting them extend the editor's
+        // intrinsic width — without this, a single long line of MDX can
+        // push the whole page into horizontal scroll (see min-w-0 note
+        // in the admin layout for the other half of this fix).
+        extensions={[markdown(), EditorView.lineWrapping]}
         onChange={(v) => onChange({ ...value, mdx_content: v })}
       />
     </div>
