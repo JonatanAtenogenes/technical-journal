@@ -1,8 +1,6 @@
 import CaseStudyHeader from '@/components/case-study/case-study-header';
 import CaseStudyHero from '@/components/case-study/case-study-hero';
 import TableOfContents from '@/components/case-study/table-of-contents';
-import { getProjectContent } from '@/lib/get-project-content';
-import { getProjectBySlug, getProjects } from '@/lib/projects';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
@@ -17,7 +15,7 @@ import {
   getProjectFromDb,
   getProjectSlugFromDb,
 } from '@/lib/get-project-from-db';
-import { createClient } from '@/lib/supabase/server';
+import { createStaticClient } from '@/lib/supabase/static';
 import { createMdxComponents } from '@/components/mdx/project-image';
 
 type ProjectPageProps = {
@@ -29,8 +27,12 @@ type ProjectPageProps = {
 // 5-project list from lib/projects.ts now that content lives in Supabase.
 // dynamicParams stays at its default (true), so a project created after
 // the last build still renders on first visit instead of 404ing.
+//
+// Uses the static (cookie-free) client — generateStaticParams runs at
+// build time, with no HTTP request to read a session from.
 export async function generateStaticParams() {
-  const slugs = await getProjectSlugFromDb();
+  const supabase = createStaticClient();
+  const slugs = await getProjectSlugFromDb(supabase);
   return routing.locales.flatMap((locale) =>
     slugs.map((slug) => ({ locale, slug })),
   );
@@ -38,7 +40,12 @@ export async function generateStaticParams() {
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { locale, slug } = await params;
-  const result = await getProjectFromDb(locale, slug);
+
+  // Public page, no session needed — the static client here (not
+  // server.ts's cookie-aware client) is what keeps this route statically
+  // generated instead of Next.js silently opting it into dynamic rendering.
+  const supabase = createStaticClient();
+  const result = await getProjectFromDb(supabase, locale, slug);
 
   if (!result) {
     notFound();
@@ -49,7 +56,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   // Content images referenced inside this project's MDX via
   // <ProjectImage slot="..." /> — fetched once, resolved in-memory by
   // the components factory (see components/mdx/project-image.tsx).
-  const supabase = await createClient();
   const { data: contentImages } = await supabase
     .from('images')
     .select('slot_key, storage_path, width, height, alt, caption')

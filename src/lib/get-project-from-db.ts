@@ -2,6 +2,7 @@ import { Project, ProjectLink, ProjectStatus } from '@/lib/types/project';
 import { Locale } from 'next-intl';
 import { createClient } from '@/lib/supabase/server';
 import { getImagePublicUrl } from '@/lib/supabase/storage';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export type DbProjectResult = {
   project: Project;
@@ -13,12 +14,16 @@ export type DbProjectResult = {
 // `Project` type — so ProjectPage and its child components (CaseStudyHero,
 // etc.) don't need to know or care that the data now comes from Supabase
 // instead of meta.ts/metadata.ts files.
+//
+// Takes the Supabase client as a parameter instead of creating one
+// internally, since this function is used both from request-context
+// pages (session-aware client) and from generateStaticParams (static,
+// cookie-free client). The caller decides which one applies.
 export async function getProjectFromDb(
+  supabase: SupabaseClient,
   locale: Locale,
   slug: string,
 ): Promise<DbProjectResult | null> {
-  const supabase = await createClient();
-
   const { data, error } = await supabase
     .from('projects')
     .select(
@@ -76,9 +81,12 @@ export async function getProjectFromDb(
 // Used by generateStaticParams — only pre-renders routes for projects
 // that actually exist in the DB (and aren't hidden), instead of the old
 // hardcoded 5-project list from lib/projects.ts.
-export async function getProjectSlugFromDb(): Promise<string[]> {
-  const supabase = await createClient();
-
+//
+// Always called with the static, cookie-free client, since
+// generateStaticParams has no request context to read a session from.
+export async function getProjectSlugFromDb(
+  supabase: SupabaseClient,
+): Promise<string[]> {
   const { data } = await supabase
     .from('projects')
     .select('slug')
