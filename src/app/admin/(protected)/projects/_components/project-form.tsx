@@ -75,14 +75,16 @@ const STEPS = [
 // matching item's label — passing `items` to <Select> tells it which
 // label corresponds to each value once something is selected.
 const STATUS_ITEMS = [
-  { label: 'Draft', value: 'draft' },
+  { label: 'Completed', value: 'completed' },
   { label: 'In progress', value: 'in-progress' },
-  { label: 'Published', value: 'published' },
+  { label: 'Paused', value: 'paused' },
+  { label: 'Archived', value: 'archived' },
 ];
 
 const ICON_ITEMS = [
   { label: 'github', value: 'github' },
   { label: 'globe', value: 'globe' },
+  { label: 'external-link', value: 'external-link' },
 ];
 
 export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
@@ -93,11 +95,14 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
 
   // --- Locale-independent fields (step 1) ---
   const [slug, setSlug] = useState(initialData?.meta.slug ?? '');
-  const [status, setStatus] = useState<'draft' | 'in-progress' | 'published'>(
-    initialData?.meta.status ?? 'draft',
-  );
+  const [status, setStatus] = useState<
+    'completed' | 'in-progress' | 'paused' | 'archived'
+  >(initialData?.meta.status ?? 'in-progress');
   const [startYear, setStartYear] = useState(
-    initialData?.meta.start_year?.toString() ?? '',
+    initialData?.meta.end_year?.toString() ?? '',
+  );
+  const [endYear, setEndYear] = useState(
+    initialData?.meta.end_year?.toString() ?? '',
   );
   const [seriesId, setSeriesId] = useState<string>(
     initialData?.meta.series_id ?? '',
@@ -182,6 +187,7 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
         slug,
         status,
         start_year: startYear ? Number(startYear) : undefined,
+        end_year: endYear ? Number(endYear) : undefined,
         series_id: sanitizedSeriesId,
         part_number: partNumber ? Number(partNumber) : undefined,
         tags: tagsInput
@@ -231,6 +237,8 @@ export function ProjectForm({ seriesOptions, initialData }: ProjectFormProps) {
           setStatus={setStatus}
           startYear={startYear}
           setStartYear={setStartYear}
+          endYear={endYear}
+          setEndYear={setEndYear}
           seriesId={seriesId}
           setSeriesId={setSeriesId}
           partNumber={partNumber}
@@ -365,6 +373,8 @@ function BasicInfoStep({
   setStatus,
   startYear,
   setStartYear,
+  endYear,
+  setEndYear,
   seriesId,
   setSeriesId,
   partNumber,
@@ -381,10 +391,12 @@ function BasicInfoStep({
 }: {
   slug: string;
   setSlug: (v: string) => void;
-  status: 'draft' | 'in-progress' | 'published';
-  setStatus: (v: 'draft' | 'in-progress' | 'published') => void;
+  status: 'completed' | 'in-progress' | 'paused' | 'archived';
+  setStatus: (v: 'completed' | 'in-progress' | 'paused' | 'archived') => void;
   startYear: string;
   setStartYear: (v: string) => void;
+  endYear: string;
+  setEndYear: (v: string) => void;
   seriesId: string;
   setSeriesId: (v: string) => void;
   partNumber: string;
@@ -432,9 +444,12 @@ function BasicInfoStep({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="in-progress">In progress</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
+              <SelectContent>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="in-progress">In progress</SelectItem>
+                <SelectItem value="paused">Paused</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
             </SelectContent>
           </Select>
         </div>
@@ -447,6 +462,19 @@ function BasicInfoStep({
             value={startYear}
             onChange={(e) => setStartYear(e.target.value)}
             placeholder="2025"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="end_year">
+            End year (optional, leave empty if ongoing)
+          </Label>
+          <Input
+            id="end_year"
+            type="number"
+            value={endYear}
+            onChange={(e) => setEndYear(e.target.value)}
+            placeholder="2026"
           />
         </div>
 
@@ -526,6 +554,7 @@ function BasicInfoStep({
                 <SelectContent>
                   <SelectItem value="github">github</SelectItem>
                   <SelectItem value="globe">globe</SelectItem>
+                  <SelectItem value="external-link">external-link</SelectItem>
                 </SelectContent>
               </Select>
               <Button

@@ -4,7 +4,7 @@ export type ProjectLink = {
   label: string;
   url: string;
   icon?: 'github' | 'external-link' | 'globe';
-}
+};
 
 export type ProjectMeta = {
   slug: string;

@@ -9,9 +9,10 @@ export const projectMetaSchema = z.object({
       /^[a-z0-9]+(-[a-z0-9]+)*$/,
       'Use lowercase kebab-case, e.g. my-project',
     ),
-  status: z.enum(['draft', 'in-progress', 'published']),
+  status: z.enum(['completed', 'in-progress', 'paused', 'archived']),
   start_year: z.coerce.number().int().min(1990).max(2100).optional(),
-  series_id: z.string().uuid().optional().or(z.literal('')),
+  end_year: z.coerce.number().int().min(1990).max(2100).optional(),
+  series_id: z.uuid().optional().or(z.literal('')),
   part_number: z.coerce.number().int().min(1).optional(),
   // Comma-separated in the UI, split into an array before validation.
   tags: z.array(z.string()).default([]),
