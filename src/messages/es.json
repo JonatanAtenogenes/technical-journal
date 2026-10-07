@@ -15,8 +15,18 @@
   "projectCard": {
     "readCaseStudy": "Leer caso de estudio"
   },
+  "series": {
+    "sectionTitle": "Series"
+  },
+  "seriesCard": {
+    "partsCount": "{count, plural, one {# parte} other {# partes}}",
+    "viewSeries": "Ver serie"
+  },
   "caseStudyHeader": {
     "caseStudies": "Casos de Estudio"
+  },
+  "seriesDetail": {
+    "partLabel": "Parte {number}"
   },
   "tableOfContents": {
     "title": "Contenido",
