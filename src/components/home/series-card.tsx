@@ -2,7 +2,7 @@ import { Series } from '@/lib/types/project';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon, LayersIcon } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 export default function SeriesCard({ series }: { series: Series }) {
