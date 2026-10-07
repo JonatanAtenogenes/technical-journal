@@ -4,6 +4,7 @@ import {
   ProjectStatus,
   Series,
   SeriesDetail,
+  SeriesProjectEntry,
 } from '@/lib/types/project';
 import { Locale } from 'next-intl';
 import { getImagePublicUrl } from '@/lib/supabase/storage';
@@ -299,11 +300,8 @@ export async function getSeriesBySlug(
 
       return { project, partNumber: row.part_number };
     })
-    .filter(
-      (p): p is { project: Project; partNumber: number | null } => p !== null,
-    )
-    .sort((a, b) => (a.partNumber ?? 0) - (b.partNumber ?? 0))
-    .map((p) => p.project);
+    .filter((p): p is SeriesProjectEntry => p !== null)
+    .sort((a, b) => (a.partNumber ?? 0) - (b.partNumber ?? 0));
 
   return {
     slug: data.slug,
@@ -312,4 +310,17 @@ export async function getSeriesBySlug(
     description: i18n.description,
     projects,
   };
+}
+
+// Used by generateStaticParams on the series detail route — only
+// pre-renders series that actually exist and aren't hidden.
+export async function getSeriesSlugsFromDb(
+  supabase: SupabaseClient,
+): Promise<string[]> {
+  const { data } = await supabase
+    .from('series')
+    .select('slug')
+    .is('deleted_at', null);
+
+  return (data ?? []).map((row) => row.slug);
 }

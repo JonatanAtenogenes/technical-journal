@@ -22,6 +22,9 @@
     "partsCount": "{count, plural, one {# part} other {# parts}}",
     "viewSeries": "View series"
   },
+  "seriesDetail": {
+    "partLabel": "Part {number}"
+  },
   "caseStudyHeader": {
     "caseStudies": "Case Studies"
   },

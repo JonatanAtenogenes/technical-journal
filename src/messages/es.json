@@ -25,6 +25,9 @@
   "caseStudyHeader": {
     "caseStudies": "Casos de Estudio"
   },
+  "seriesDetail": {
+    "partLabel": "Parte {number}"
+  },
   "tableOfContents": {
     "title": "Contenido",
     "ariaLabel": "Tabla de contenidos"

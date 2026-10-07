@@ -38,5 +38,10 @@ export type SeriesDetail = {
   tags: string[];
   title: string;
   description: string;
-  projects: Project[];
+  projects: SeriesProjectEntry[];
+};
+
+export type SeriesProjectEntry = {
+  project: Project;
+  partNumber: number | null;
 };
