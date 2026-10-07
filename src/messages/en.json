@@ -12,8 +12,15 @@
   "projects": {
     "sectionTitle": "Projects"
   },
-   "projectCard": {
+  "projectCard": {
     "readCaseStudy": "Read Case Study"
+  },
+  "series": {
+    "sectionTitle": "Series"
+  },
+  "seriesCard": {
+    "partsCount": "{count, plural, one {# part} other {# parts}}",
+    "viewSeries": "View series"
   },
   "caseStudyHeader": {
     "caseStudies": "Case Studies"

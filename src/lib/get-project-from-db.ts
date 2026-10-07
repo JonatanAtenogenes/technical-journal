@@ -1,6 +1,11 @@
-import { Project, ProjectLink, ProjectStatus } from '@/lib/types/project';
+import {
+  Project,
+  ProjectLink,
+  ProjectStatus,
+  Series,
+  SeriesDetail,
+} from '@/lib/types/project';
 import { Locale } from 'next-intl';
-import { createClient } from '@/lib/supabase/server';
 import { getImagePublicUrl } from '@/lib/supabase/storage';
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -121,6 +126,7 @@ export async function getProjectsFromDb(
       `,
     )
     .is('deleted_at', null)
+    .is('series_id', null)
     .order('start_year', { ascending: false });
 
   if (error || !data) {
@@ -160,4 +166,150 @@ export async function getProjectsFromDb(
       return project;
     })
     .filter((p): p is Project => p !== null);
+}
+
+// Fetches all visible series for the home page, each annotated with how
+// many active parts it has and the start_year of part 1 — the anchor
+// Jonatan chose for ordering series among themselves, since series.start_year
+// doesn't exist (start_year lives on projects, per the schema).
+export async function getSeriesFromDb(
+  supabase: SupabaseClient,
+  locale: Locale,
+): Promise<Series[]> {
+  const { data, error } = await supabase
+    .from('series')
+    .select(
+      `
+      slug,
+      tags,
+      series_i18n ( locale, title, description ),
+      projects ( part_number, start_year, deleted_at )
+    `,
+    )
+    .is('deleted_at', null);
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data
+    .map((row) => {
+      const i18n = row.series_i18n.find((r) => r.locale === locale);
+
+      if (!i18n) {
+        return null;
+      }
+
+      const activeProjects = (row.projects ?? []).filter(
+        (p) => p.deleted_at === null,
+      );
+
+      // Anchor is part 1's start_year. If part 1 happens to be
+      // individually hidden, fall back to the earliest start_year still
+      // active, rather than letting the series vanish from ordering.
+      const partOne = activeProjects.find((p) => p.part_number === 1);
+      const fallbackYear = activeProjects.length
+        ? Math.min(...activeProjects.map((p) => p.start_year ?? Infinity))
+        : new Date().getFullYear();
+      const startYear = partOne?.start_year ?? fallbackYear;
+
+      const series: Series = {
+        slug: row.slug,
+        tags: row.tags ?? [],
+        title: i18n.title,
+        description: i18n.description,
+        partCount: activeProjects.length,
+        startYear,
+      };
+
+      return series;
+    })
+    .filter((s): s is Series => s !== null)
+    .sort((a, b) => b.startYear - a.startYear);
+}
+
+// Fetches one series by slug plus its active projects, ordered by
+// part_number — reuses the same Project shape as getProjectFromDb so
+// ProjectCard works unchanged inside the series detail page.
+export async function getSeriesBySlug(
+  supabase: SupabaseClient,
+  locale: Locale,
+  slug: string,
+): Promise<SeriesDetail | null> {
+  const { data, error } = await supabase
+    .from('series')
+    .select(
+      `
+      slug,
+      tags,
+      series_i18n ( locale, title, description ),
+      projects (
+        slug,
+        status,
+        start_year,
+        end_year,
+        tags,
+        links,
+        part_number,
+        deleted_at,
+        cover:cover_image_id ( storage_path ),
+        project_i18n ( locale, title, description, category )
+      )
+    `,
+    )
+    .eq('slug', slug)
+    .is('deleted_at', null)
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  const i18n = data.series_i18n.find((r) => r.locale === locale);
+
+  if (!i18n) {
+    return null;
+  }
+
+  const projects = (data.projects ?? [])
+    .filter((row) => row.deleted_at === null)
+    .map((row) => {
+      const projectI18n = row.project_i18n.find((r) => r.locale === locale);
+
+      if (!projectI18n) {
+        return null;
+      }
+
+      const cover = Array.isArray(row.cover)
+        ? (row.cover[0] ?? null)
+        : (row.cover ?? null);
+
+      const project: Project = {
+        slug: row.slug,
+        cover: cover ? getImagePublicUrl(cover.storage_path) : '',
+        tags: row.tags ?? [],
+        status: row.status as ProjectStatus,
+        startYear: row.start_year ?? new Date().getFullYear(),
+        endYear: row.end_year ?? undefined,
+        links: (row.links ?? []) as ProjectLink[],
+        title: projectI18n.title ?? '',
+        category: projectI18n.category ?? '',
+        description: projectI18n.description,
+      };
+
+      return { project, partNumber: row.part_number };
+    })
+    .filter(
+      (p): p is { project: Project; partNumber: number | null } => p !== null,
+    )
+    .sort((a, b) => (a.partNumber ?? 0) - (b.partNumber ?? 0))
+    .map((p) => p.project);
+
+  return {
+    slug: data.slug,
+    tags: data.tags ?? [],
+    title: i18n.title,
+    description: i18n.description,
+    projects,
+  };
 }

@@ -23,3 +23,20 @@ export type ProjectTranslation = {
 };
 
 export type Project = ProjectMeta & ProjectTranslation;
+
+export type Series = {
+  slug: string;
+  tags: string[];
+  title: string;
+  description: string;
+  partCount: number;
+  startYear: number;
+};
+
+export type SeriesDetail = {
+  slug: string;
+  tags: string[];
+  title: string;
+  description: string;
+  projects: Project[];
+};
