@@ -2,8 +2,8 @@ import { Project } from '@/lib/types/project';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRightIcon } from 'lucide-react';
-import Link from 'next/link';
+import { ArrowRightIcon, ImageOffIcon } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
@@ -17,14 +17,22 @@ export default function ProjectCard({ project }: { project: Project }) {
           ratio={16 / 9}
           className="overflow-hidden rounded-lg bg-muted"
         >
-          <Image
-            src={project.cover}
-            alt={project.title}
-            fill
-            preload
-            sizes="(min-width: 768px) 256px, 100vw"
-            className="object-cover"
-          />
+          {project.cover ? (
+            <Image
+              src={project.cover}
+              alt={project.title}
+              fill
+              preload
+              sizes="(min-width: 768px) 256px, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            // No cover set for this project yet — render a placeholder
+            // instead of passing an empty src to next/image.
+            <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+              <ImageOffIcon className="size-8" />
+            </div>
+          )}
         </AspectRatio>
       </div>
 

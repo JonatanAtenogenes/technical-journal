@@ -1,11 +1,14 @@
-import { getProjects } from '@/lib/projects';
 import ProjectCard from '@/components/home/project-card';
-import { useTranslations, useLocale } from 'next-intl';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { createStaticClient } from '@/lib/supabase/static';
+import { getProjectsFromDb } from '@/lib/get-project-from-db';
 
-export default function Projects() {
-  const locale = useLocale();
-  const t = useTranslations('projects');
-  const projects = getProjects(locale);
+export default async function Projects() {
+  const locale = await getLocale();
+  const t = await getTranslations('projects');
+
+  const supabase = createStaticClient();
+  const projects = await getProjectsFromDb(supabase, locale);
 
   return (
     <section className="container mx-auto px-4 py-16">
