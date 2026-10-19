@@ -8,7 +8,7 @@ import {
   ContentImage,
   createMdxComponents,
 } from '@/components/mdx/project-image';
-import { createClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/supabase/require-admin';
 
 type PreviewResult =
   | { content: ReactNode; error?: undefined }
@@ -36,6 +36,14 @@ export async function renderMdxPreview(
   projectId?: string,
   locale: 'en' | 'es' = 'en',
 ): Promise<PreviewResult> {
+  // Compiling MDX can execute code on the server, so verify the caller
+  // before doing any work
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
+
   if (!mdxContent.trim()) {
     return { content: null };
   }
@@ -44,7 +52,6 @@ export async function renderMdxPreview(
     let images: ContentImage[] = [];
 
     if (projectId) {
-      const supabase = await createClient();
       const { data } = await supabase
         .from('images')
         .select('slot_key, storage_path, width, height, alt, caption')
