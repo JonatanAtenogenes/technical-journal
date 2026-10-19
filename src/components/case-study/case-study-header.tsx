@@ -1,5 +1,5 @@
 import { ArrowLeftIcon } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import ThemeToggle from '@/components/shared/theme-toggle';
 import { useTranslations } from 'next-intl';
 import LocaleSwitcher from '@/components/shared/locale-switcher';

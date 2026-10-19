@@ -5,6 +5,15 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.100.213'],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'rswiujpwevbtztfhpzip.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);
