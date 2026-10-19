@@ -1,9 +1,9 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
 import { IMAGE_BUCKET } from '@/lib/supabase/storage';
 import sizeOf from 'image-size';
 import { revalidatePath } from 'next/cache';
+import { requireAdmin } from '@/lib/supabase/require-admin';
 
 type UploadImageInput = {
   file: File;
@@ -45,7 +45,11 @@ export async function uploadImage(
     };
   }
 
-  const supabase = await createClient();
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
   const buffer = Buffer.from(await input.file.arrayBuffer());
 
   // width/height are nullable in the schema — used only to reserve
@@ -111,7 +115,11 @@ export async function uploadImage(
 }
 
 export async function deleteImage(imageId: string, storagePath: string) {
-  const supabase = await createClient();
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
 
   const { error: storageError } = await supabase.storage
     .from(IMAGE_BUCKET)
@@ -154,7 +162,11 @@ export async function uploadCoverImage(
   altEn: string,
   altEs?: string,
 ): Promise<CoverActionResult> {
-  const supabase = await createClient();
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
 
   // Find the current cover (if any) so it can be cleaned up after the
   // new one is successfully linked — avoids orphaning the old file/row.
@@ -189,9 +201,15 @@ export async function uploadCoverImage(
   }
 
   // Clean up the previous cover now that the new one is safely linked.
+  // Without generated DB types, Supabase may type this to-one embed as
+  // an array, so normalize both shapes (same as the public adapters).
   const previousCoverId = project?.cover_image_id;
-  const previousCoverPath = (project?.images as { storage_path: string } | null)
-    ?.storage_path;
+  const embeddedCover = project?.images as
+    { storage_path: string } | { storage_path: string }[] | null | undefined;
+  const previousCover = Array.isArray(embeddedCover)
+    ? embeddedCover[0]
+    : embeddedCover;
+  const previousCoverPath = previousCover?.storage_path;
   if (previousCoverId && previousCoverPath) {
     await deleteImage(previousCoverId, previousCoverPath);
   }
@@ -204,6 +222,11 @@ export async function removeCoverImage(
   imageId: string,
   storagePath: string,
 ): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+
   // Deleting the images row auto-nulls projects.cover_image_id via the
   // FK's ON DELETE SET NULL — no separate projects update needed.
   const result = await deleteImage(imageId, storagePath);
