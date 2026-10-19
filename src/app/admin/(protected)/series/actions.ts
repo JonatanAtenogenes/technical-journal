@@ -1,14 +1,20 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { createSeriesSchema, type CreateSeriesInput } from './schema';
+import { requireAdmin } from '@/lib/supabase/require-admin';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
 export async function createSeries(
   input: CreateSeriesInput,
 ): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
+
   const parsed = createSeriesSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -20,7 +26,6 @@ export async function createSeries(
   }
 
   const { meta, en, es } = parsed.data;
-  const supabase = await createClient();
 
   const { data: series, error: seriesError } = await supabase
     .from('series')
@@ -57,6 +62,12 @@ export async function updateSeries(
   seriesId: string,
   input: CreateSeriesInput,
 ): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
+
   const parsed = createSeriesSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -68,7 +79,6 @@ export async function updateSeries(
   }
 
   const { meta, en, es } = parsed.data;
-  const supabase = await createClient();
 
   const { error: seriesError } = await supabase
     .from('series')
@@ -103,7 +113,11 @@ export async function updateSeries(
 export async function softDeleteSeries(
   seriesId: string,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
 
   const { error } = await supabase
     .from('series')

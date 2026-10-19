@@ -1,14 +1,20 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { createProjectSchema, type CreateProjectInput } from './schema';
+import { requireAdmin } from '@/lib/supabase/require-admin';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
 export async function createProject(
   input: CreateProjectInput,
 ): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
+
   const parsed = createProjectSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -20,12 +26,9 @@ export async function createProject(
   }
 
   const { meta, en, es } = parsed.data;
-  const supabase = await createClient();
 
-  // NOTE: RLS is not enabled yet on this schema (see Database Schema doc,
-  // "Open items"), so this write goes through unrestricted regardless of
-  // which key/session performs it. Revisit once RLS + auth.uid() write
-  // policies are in place.
+  // RLS is enabled: this insert only succeeds for the admin session
+  // (see public.is_admin()), on top of the requireAdmin() check above.
   const { data: project, error: projectError } = await supabase
     .from('projects')
     .insert({
@@ -72,6 +75,12 @@ export async function updateProject(
   projectId: string,
   input: CreateProjectInput,
 ): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
+
   const parsed = createProjectSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -83,7 +92,6 @@ export async function updateProject(
   }
 
   const { meta, en, es } = parsed.data;
-  const supabase = await createClient();
 
   const { error: projectError } = await supabase
     .from('projects')
@@ -132,7 +140,11 @@ export async function updateProject(
 export async function softDeleteProject(
   projectId: string,
 ): Promise<ActionResult> {
-  const supabase = await createClient();
+  const auth = await requireAdmin();
+  if (!auth) {
+    return { success: false, error: 'Not authorized.' };
+  }
+  const { supabase } = auth;
 
   const { error } = await supabase
     .from('projects')
